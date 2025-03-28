@@ -38,6 +38,7 @@ int main()
 	window.setFramerateLimit(60);
 
 	ImGui::SFML::Init(window);
+
 	sf::Clock deltaClock;
 
 	ImGui::GetStyle().ScaleAllSizes(2.0f);

@@ -48,8 +48,8 @@ int main()
 
 	float circleRadius = 100;
 	int circleSegments = 32;
-	float circlespeedX = 1.0f;
-	float circlespeedY = 0.5f;
+
+	sf::Vector2f circleSpeed{1.0f, 0.5f};
 	bool drawCircle = true;
 	bool drawText = true;
 
@@ -80,9 +80,8 @@ int main()
 			if (event->is<sf::Event::Closed>())
 				window.close();
 
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X)) {
-				circlespeedX *= -1.0f;
-			}
+
+
 		}
 
 		std::vector <sf::Vector2u> points {{1920, 1080}, {1366, 768}};
@@ -119,11 +118,6 @@ int main()
 			ImGui::EndTabBar();
 		}
 
-
-
-
-
-
 		ImGui::End();
 
 		circle.setPointCount(circleSegments);
@@ -131,8 +125,8 @@ int main()
 
 		circle.setFillColor(sf::Color(c[0] *255.0f, c[1] *255.0f, c[2] *255.0f));
 
-		circle.setPosition({circle.getPosition().x + circlespeedX, circle.getPosition().y + circlespeedY});
-		text.setPosition({circle.getLocalBounds().getCenter().x , circle.getLocalBounds().getCenter().y});
+		circle.move(circleSpeed);
+		text.setPosition({circle.getGlobalBounds().getCenter() - text.getGlobalBounds().size});
 
 		std::cout << "\nCicle Radius: " << circleRadius
 					<< "\ngetRadius(): " << circle.getRadius();

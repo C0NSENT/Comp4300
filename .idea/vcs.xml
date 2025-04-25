@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/imgui-sfml-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/imgui-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/sfml-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external_libs/build/_deps/imgui-sfml-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external_libs/build/_deps/imgui-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external_libs/build/_deps/sfml-src" vcs="Git" />
+  </component>
+</project>

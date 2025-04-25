@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 set(CMAKE_CXX_STANDARD  23)
 
 add_subdirectory(
-        "D:/Open this folder only if you are listening Skinny Puppy rn/C++/Comp4300/external_libs"
+        "../Comp4300/external_libs"
         "${CMAKE_BINARY_DIR}/external_libs"
 )
 

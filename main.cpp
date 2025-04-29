@@ -11,13 +11,18 @@
 #include "imgui-SFML.h"
 
 //В тхт файле бачит разрешения экрана, если не находит использует стандартное
-sf::Vector2u InitScreenSize(const std::ifstream& fs)
+sf::Vector2u InitScreenSize(std::ifstream& fs)
 {
 	sf::Vector2u screenSize{1280, 720};
-	if (!fs >> screenSize.x >> screenSize.y) {
-		std::cerr << "Error reading screen size\n"
-			"Using default size: " << std::endl;
+	if (!fs) {
+		std::cerr << "Error reading screen size\n";
+		std::cout <<"Using default size: " << std::endl;
 	}
+	fs >> screenSize.x >> screenSize.y;
+
+	std::cout << "Using config defined resolution: "
+		<< screenSize.x << "x" << screenSize.y << std::endl;
+
 	return screenSize;
 }
 

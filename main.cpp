@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <memory>
 #include <fstream>
 #include <regex>
 
@@ -11,9 +10,15 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
-void InitScreenSize(std::ifstream& fs, sf::Vector2u& screenSize)
+//В тхт файле бачит разрешения экрана, если не находит использует стандартное
+sf::Vector2u InitScreenSize(const std::ifstream& fs)
 {
-	fs>> screenSize.x >> screenSize.y;
+	sf::Vector2u screenSize{1280, 720};
+	if (!fs >> screenSize.x >> screenSize.y) {
+		std::cerr << "Error reading screen size\n"
+			"Using default size: " << std::endl;
+	}
+	return screenSize;
 }
 
 
@@ -27,16 +32,12 @@ int main()
 		return 1;
 	}
 
-
-	sf::Vector2u screenSize;
-
-	InitScreenSize(fConfig, screenSize);
+	sf::Vector2u screenSize{InitScreenSize(fConfig)};
 
 	fConfig.close();
 
 	sf::RenderWindow window(sf::VideoMode(screenSize), "MEH Engine");
 	window.setFramerateLimit(60);
-
 	ImGui::SFML::Init(window);
 
 	sf::Clock deltaClock;
@@ -80,11 +81,7 @@ int main()
 			if (event->is<sf::Event::Closed>())
 				window.close();
 
-
-
 		}
-
-		std::vector <sf::Vector2u> points {{1920, 1080}, {1366, 768}};
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
@@ -127,9 +124,6 @@ int main()
 
 		circle.move(circleSpeed);
 		text.setPosition({circle.getGlobalBounds().getCenter() - text.getGlobalBounds().size});
-
-		std::cout << "\nCicle Radius: " << circleRadius
-					<< "\ngetRadius(): " << circle.getRadius();
 
 		window.clear();
 

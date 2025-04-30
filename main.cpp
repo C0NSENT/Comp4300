@@ -10,8 +10,9 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
+
 //В тхт файле бачит разрешения экрана, если не находит использует стандартное
-sf::Vector2u InitScreenSize(std::ifstream& fs)
+constexpr sf::Vector2u getScreenResolution(std::ifstream& fs)
 {
 	sf::Vector2u screenSize{1280, 720};
 	if (!fs) {
@@ -26,7 +27,19 @@ sf::Vector2u InitScreenSize(std::ifstream& fs)
 	return screenSize;
 }
 
+/*
+constexpr sf::Font initFont(const std::string& fontName)
+{
+	sf::Font font;
 
+	if (!font.openFromFile(fontName)) {
+		throw std::runtime_error("Failed to load font");
+	}
+
+	std::cout << "Loaded font: " << fontName << std::endl;
+
+	return font;
+}*/
 
 int main()
 {
@@ -37,8 +50,7 @@ int main()
 		return 1;
 	}
 
-	sf::Vector2u screenSize{InitScreenSize(fConfig)};
-
+	sf::Vector2u screenSize{getScreenResolution(fConfig)};
 	fConfig.close();
 
 	sf::RenderWindow window(sf::VideoMode(screenSize), "MEH Engine");
@@ -62,30 +74,21 @@ int main()
 	sf::CircleShape circle(circleRadius, circleSegments);
 	circle.setPosition({10.0f, 10.0f});
 
-	sf::Font font;
-
-	if (!font.openFromFile("../../Comp4300/stuff/font.ttf")) {
-		std::cerr << "Failed to load font" << std::endl;
-		return -1;
-	}
+	const sf::Font font("../../Comp4300/stuff/font.ttf");
 
 	sf::Text text(font);
 	text.setString("Text");
 	text.setCharacterSize(24);
 
-	//text.setPosition({0, wHeight - static_cast<float> (text.getCharacterSize())});
-
 	char displayString[255] = "Text";
 
 	while (window.isOpen()) {
-
 		while (const std::optional event = window.pollEvent()) {
 
 			ImGui::SFML::ProcessEvent(window, *event);
 
 			if (event->is<sf::Event::Closed>())
 				window.close();
-
 		}
 
 		ImGui::SFML::Update(window, deltaClock.restart());
@@ -141,6 +144,5 @@ int main()
 		ImGui::SFML::Render(window);
 		window.display();
 	}
-
 	return 0;
 }

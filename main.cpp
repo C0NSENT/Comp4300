@@ -53,7 +53,7 @@ int main()
 	sf::Vector2u screenSize{getScreenResolution(fConfig)};
 	fConfig.close();
 
-	sf::RenderWindow window(sf::VideoMode(screenSize), "MEH Engine");
+	sf::RenderWindow window(sf::VideoMode(screenSize), "Werden Engine");
 	window.setFramerateLimit(60);
 	ImGui::SFML::Init(window);
 
@@ -72,7 +72,7 @@ int main()
 	bool drawText = true;
 
 	sf::CircleShape circle(circleRadius, circleSegments);
-	circle.setPosition({10.0f, 10.0f});
+	circle.setPosition({screenSize.x / 2.f, screenSize.y / 2.f});
 
 	const sf::Font font("../../Comp4300/stuff/font.ttf");
 
@@ -89,6 +89,25 @@ int main()
 
 			if (event->is<sf::Event::Closed>())
 				window.close();
+		}
+
+		std::cout << circle.getPosition().x << ", " << circle.getPosition().y << std::endl;
+
+
+		if (circle.getGlobalBounds().position.x <= 0) {
+			circleSpeed.x = -circleSpeed.x;
+			std::cerr << "БОРТ";
+		} else if (circle.getGlobalBounds().position.x + circleRadius * 2 >= screenSize.x) {
+			circleSpeed.x = -circleSpeed.x;
+			std::cerr << "БОРТ";
+		}
+
+		if (circle.getGlobalBounds().position.y <= 0) {
+			circleSpeed.y = -circleSpeed.y;
+			std::cerr << "БОРТ";
+		} else if (circle.getGlobalBounds().position.y + circleRadius * 2 >= screenSize.y) {
+			circleSpeed.y = -circleSpeed.y;
+			std::cerr << "БОРТ";
 		}
 
 		ImGui::SFML::Update(window, deltaClock.restart());
@@ -131,7 +150,8 @@ int main()
 		circle.setFillColor(sf::Color(c[0] *255.0f, c[1] *255.0f, c[2] *255.0f));
 
 		circle.move(circleSpeed);
-		text.setPosition({circle.getGlobalBounds().getCenter() - text.getGlobalBounds().size});
+		//text.setPosition({circle.getGlobalBounds().getCenter() - text.getGlobalBounds().size});
+		//std::cout << "getOrigin:" << circle.getOrigin().x << " " << circle.getOrigin().y << std::endl;
 
 		window.clear();
 

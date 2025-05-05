@@ -41,6 +41,47 @@ constexpr sf::Font initFont(const std::string& fontName)
 	return font;
 }*/
 
+struct CircleProperties
+{
+	float radius;
+	int points;
+	bool is_drawn;
+
+	sf::Vector2f velocity;
+
+	explicit CircleProperties(
+		const float radius = 100,
+		const int points = 32,
+		bool is_drawn = true,
+		const sf::Vector2f& velocity = {1.0f, 0.5f}
+		)
+			: radius(radius)
+			, points(points)
+			, is_drawn(true)
+			, velocity(std::move(velocity)){}
+};
+
+void screenBorderCollision(const sf::CircleShape& circle,
+	CircleProperties& properties,
+	const sf::Vector2u& screenSize)
+{
+	if (circle.getGlobalBounds().getCenter().x - circle.getRadius() < 0) {
+		properties.velocity.x = -properties.velocity.x;
+		std::cerr << "БОРТ\n";
+	} else if (circle.getGlobalBounds().getCenter().x + circle.getRadius() > screenSize.x) {
+		properties.velocity.x = -properties.velocity.x;
+		std::cerr << "БОРТ\n";
+	}
+
+	if (circle.getGlobalBounds().getCenter().y - circle.getRadius() < 0) {
+		properties.velocity.y = -properties.velocity.y;
+		std::cerr << "БОРТ\n";
+	} else if (circle.getGlobalBounds().getCenter().y + circle.getRadius() > screenSize.y) {
+		properties.velocity.y = -properties.velocity.y;
+		std::cerr << "БОРТ\n";
+	}
+}
+
 int main()
 {
 	std::ifstream fConfig("config.txt");
@@ -53,7 +94,7 @@ int main()
 	sf::Vector2u screenSize{getScreenResolution(fConfig)};
 	fConfig.close();
 
-	sf::RenderWindow window(sf::VideoMode(screenSize), "Werden Engine");
+	sf::RenderWindow window(sf::VideoMode(screenSize), "Mother, do you think they'll try to break my balls?");
 	window.setFramerateLimit(60);
 	ImGui::SFML::Init(window);
 
@@ -64,14 +105,11 @@ int main()
 
 	float c[3] = {0.0f, 1.0f, 1.0f};
 
-	float circleRadius = 100;
-	int circleSegments = 32;
-
-	sf::Vector2f circleSpeed{1.0f, 0.5f};
-	bool drawCircle = true;
 	bool drawText = true;
 
-	sf::CircleShape circle(circleRadius, circleSegments);
+	CircleProperties properties;
+
+	sf::CircleShape circle(properties.radius, properties.points);
 	circle.setPosition({screenSize.x / 2.f, screenSize.y / 2.f});
 
 	const sf::Font font("../../Comp4300/stuff/font.ttf");
@@ -93,35 +131,19 @@ int main()
 
 		std::cout << circle.getPosition().x << ", " << circle.getPosition().y << std::endl;
 
-
-		if (circle.getGlobalBounds().position.x <= 0) {
-			circleSpeed.x = -circleSpeed.x;
-			std::cerr << "БОРТ";
-		} else if (circle.getGlobalBounds().position.x + circleRadius * 2 >= screenSize.x) {
-			circleSpeed.x = -circleSpeed.x;
-			std::cerr << "БОРТ";
-		}
-
-		if (circle.getGlobalBounds().position.y <= 0) {
-			circleSpeed.y = -circleSpeed.y;
-			std::cerr << "БОРТ";
-		} else if (circle.getGlobalBounds().position.y + circleRadius * 2 >= screenSize.y) {
-			circleSpeed.y = -circleSpeed.y;
-			std::cerr << "БОРТ";
-		}
+		screenBorderCollision(circle, properties, screenSize);
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
 		ImGui::Begin("MEH Engine");
-
 		if (ImGui::BeginTabBar("MEH Engine")) {
 			if (ImGui::BeginTabItem("Shapes")) {
-				ImGui::Checkbox("Draw circle", &drawCircle);
+				ImGui::Checkbox("Draw circle", &properties.is_drawn);
 
 				ImGui::SameLine();
 				ImGui::Checkbox("Draw text", &drawText);
-				ImGui::SliderFloat("Radius", &circleRadius, 0.0f, 300.0f);
-				ImGui::SliderInt("Sides", &circleSegments, 3, 64);
+				ImGui::SliderFloat("Radius", &properties.radius, 0.0f, 300.0f);
+				ImGui::SliderInt("Points", &properties.points, 3, 64);
 				ImGui::ColorEdit3("Display Color", c);
 				ImGui::NewLine();
 				ImGui::InputText("Text", displayString, 255);if (ImGui::Button("Set Text")) {
@@ -141,21 +163,20 @@ int main()
 			}
 			ImGui::EndTabBar();
 		}
-
 		ImGui::End();
 
-		circle.setPointCount(circleSegments);
-		circle.setRadius(circleRadius);
+		circle.setPointCount(properties.points);
+		circle.setRadius(properties.radius);
 
 		circle.setFillColor(sf::Color(c[0] *255.0f, c[1] *255.0f, c[2] *255.0f));
 
-		circle.move(circleSpeed);
+		circle.move(properties.velocity);
 		//text.setPosition({circle.getGlobalBounds().getCenter() - text.getGlobalBounds().size});
 		//std::cout << "getOrigin:" << circle.getOrigin().x << " " << circle.getOrigin().y << std::endl;
 
 		window.clear();
 
-		if (drawCircle) {
+		if (properties.is_drawn) {
 			window.draw(circle);
 		}
 		if (drawText) {

@@ -10,7 +10,6 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
-
 //В тхт файле бачит разрешения экрана, если не находит использует стандартное
 constexpr sf::Vector2u getScreenResolution(std::ifstream& fs)
 {
@@ -110,13 +109,17 @@ int main()
 	CircleProperties properties;
 
 	sf::CircleShape circle(properties.radius, properties.points);
-	circle.setPosition({screenSize.x / 2.f, screenSize.y / 2.f});
+	circle.setPosition({screenSize.x / 2.f - properties.radius, screenSize.y / 2.f - properties.radius });
 
 	const sf::Font font("../../Comp4300/stuff/font.ttf");
 
 	sf::Text text(font);
 	text.setString("Text");
 	text.setCharacterSize(24);
+	sf::Vector2f textCenter = text.getGlobalBounds().getCenter();
+
+
+	std::cout << circle.getGeometricCenter().x << " " << circle.getGeometricCenter().y << std::endl;
 
 	char displayString[255] = "Text";
 
@@ -129,7 +132,7 @@ int main()
 				window.close();
 		}
 
-		std::cout << circle.getPosition().x << ", " << circle.getPosition().y << std::endl;
+		//std::cout << circle.getPosition().x << ", " << circle.getPosition().y << std::endl;
 
 		screenBorderCollision(circle, properties, screenSize);
 
@@ -170,9 +173,15 @@ int main()
 
 		circle.setFillColor(sf::Color(c[0] *255.0f, c[1] *255.0f, c[2] *255.0f));
 
+
+
 		circle.move(properties.velocity);
 		//text.setPosition({circle.getGlobalBounds().getCenter() - text.getGlobalBounds().size});
 		//std::cout << "getOrigin:" << circle.getOrigin().x << " " << circle.getOrigin().y << std::endl;
+		//text.setPosition({circle.getGlobalBounds().getCenter() - text.getCharacterSize()});
+		text.setPosition(circle.getGlobalBounds().getCenter() - textCenter);
+		//std::cout << text.getPosition().x << ", " << text.getPosition().y << std::endl;
+		std::cout << "getCenter: " << text.getGlobalBounds().getCenter().x << " " << text.getGlobalBounds().getCenter().y << std::endl;
 
 		window.clear();
 

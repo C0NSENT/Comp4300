@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.31)
 project(external_libs LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -37,7 +37,6 @@ FetchContent_MakeAvailable(ImGui-SFML)
 # Создание библиотеки
 add_library(${PROJECT_NAME} STATIC
         main.cpp
-        # Добавьте сюда другие исходные файлы
 )
 
 # Публичные зависимости

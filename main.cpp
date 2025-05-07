@@ -64,18 +64,18 @@ void screenBorderCollision(const sf::CircleShape& circle,
 	CircleProperties& properties,
 	const sf::Vector2u& screenSize)
 {
-	if (circle.getGlobalBounds().getCenter().x - circle.getRadius() < 0) {
+	if (circle.getGlobalBounds().getCenter().x - circle.getRadius() == 0) {
 		properties.velocity.x = -properties.velocity.x;
 		std::cerr << "БОРТ\n";
-	} else if (circle.getGlobalBounds().getCenter().x + circle.getRadius() > screenSize.x) {
+	} else if (circle.getGlobalBounds().getCenter().x + circle.getRadius() == screenSize.x) {
 		properties.velocity.x = -properties.velocity.x;
 		std::cerr << "БОРТ\n";
 	}
 
-	if (circle.getGlobalBounds().getCenter().y - circle.getRadius() < 0) {
+	if (circle.getGlobalBounds().getCenter().y - circle.getRadius() == 0) {
 		properties.velocity.y = -properties.velocity.y;
 		std::cerr << "БОРТ\n";
-	} else if (circle.getGlobalBounds().getCenter().y + circle.getRadius() > screenSize.y) {
+	} else if (circle.getGlobalBounds().getCenter().y + circle.getRadius() == screenSize.y) {
 		properties.velocity.y = -properties.velocity.y;
 		std::cerr << "БОРТ\n";
 	}
@@ -132,8 +132,6 @@ int main()
 				window.close();
 		}
 
-		//std::cout << circle.getPosition().x << ", " << circle.getPosition().y << std::endl;
-
 		screenBorderCollision(circle, properties, screenSize);
 
 		ImGui::SFML::Update(window, deltaClock.restart());
@@ -176,11 +174,9 @@ int main()
 
 
 		circle.move(properties.velocity);
-		//text.setPosition({circle.getGlobalBounds().getCenter() - text.getGlobalBounds().size});
-		//std::cout << "getOrigin:" << circle.getOrigin().x << " " << circle.getOrigin().y << std::endl;
-		//text.setPosition({circle.getGlobalBounds().getCenter() - text.getCharacterSize()});
+
 		text.setPosition(circle.getGlobalBounds().getCenter() - textCenter);
-		//std::cout << text.getPosition().x << ", " << text.getPosition().y << std::endl;
+
 		std::cout << "getCenter: " << text.getGlobalBounds().getCenter().x << " " << text.getGlobalBounds().getCenter().y << std::endl;
 
 		window.clear();

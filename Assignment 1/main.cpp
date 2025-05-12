@@ -15,13 +15,14 @@ constexpr sf::Vector2u getScreenResolution(std::ifstream& fs)
 {
 	sf::Vector2u screenSize{1280, 720};
 	if (!fs) {
-		std::cerr << "Error reading screen size\n";
-		std::cout <<"Using default size: " << std::endl;
-	}
+		std::cerr << "Error reading screen size" << std::endl;
+		std::cout <<"Using default size: \n";
+	} else
+		std::cout << "Using config defined resolution: \n";
+
 	fs >> screenSize.x >> screenSize.y;
 
-	std::cout << "Using config defined resolution: "
-		<< screenSize.x << "x" << screenSize.y << std::endl;
+	std::cout << screenSize.x << "x" << screenSize.y << std::endl;
 
 	return screenSize;
 }
@@ -83,12 +84,7 @@ void screenBorderCollision(const sf::CircleShape& circle,
 
 int main()
 {
-	std::ifstream fConfig("config.txt");
-
-	if (!fConfig.is_open()) {
-		std::cerr << "Error opening config file" << std::endl;
-		return 1;
-	}
+	std::ifstream fConfig("../Comp4300/stuff/config.txt");
 
 	sf::Vector2u screenSize{getScreenResolution(fConfig)};
 	fConfig.close();
@@ -111,7 +107,7 @@ int main()
 	sf::CircleShape circle(properties.radius, properties.points);
 	circle.setPosition({screenSize.x / 2.f - properties.radius, screenSize.y / 2.f - properties.radius });
 
-	const sf::Font font("../../Comp4300/stuff/font.ttf");
+	const sf::Font font("../../../Comp4300/stuff/font.ttf");
 
 	sf::Text text(font);
 	text.setString("Text");
@@ -170,7 +166,6 @@ int main()
 		circle.setRadius(properties.radius);
 
 		circle.setFillColor(sf::Color(c[0] *255.0f, c[1] *255.0f, c[2] *255.0f));
-
 
 
 		circle.move(properties.velocity);

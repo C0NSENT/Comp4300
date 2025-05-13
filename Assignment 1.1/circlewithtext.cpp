@@ -4,8 +4,9 @@
 
 #include "circlewithtext.h"
 
-#include <cstdint>
+#include <cmath>
 #include <ranges>
+
 
 
 
@@ -31,26 +32,30 @@ sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 4> &ArrI
 	);
 }
 
-circleWithText::circleWithText(const float radius,
-	const std::size_t pointCount,
-	const sf::Font &font,
-	const std::string &s_text
-)
-	: circle(radius, pointCount)
+circleWithText::circleWithText(
+	const sf::Font& font,
+	const std::string& s_text,
+	float radius,
+	std::size_t pointCount,
+	const sf::Vector2f& velocity
+	)
+	: circle{radius, pointCount}
 	, text(font, s_text, 24)
 {
 	isCircleDrawn = isTextDrawn = true;
+
 	centeringText();
 }
 
-void circleWithText::setColor(const std::array<float, 3> &ImGuiColor)
+void circleWithText::setColor(const std::array<float, 4> &ImGuiColor)
 {
+	circle.setFillColor(ImGuiColorToSFMLColor(ImGuiColor));
 }
 
 void circleWithText::setPosition(const sf::Vector2f &position)
 {
 	circle.setPosition(position);
-	centeringText();
+	text.setPosition(textCenter);
 }
 
 void circleWithText::centeringText()

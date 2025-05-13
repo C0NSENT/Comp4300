@@ -7,8 +7,13 @@
 #include <cmath>
 #include <ranges>
 
+void circleWithText::centeringText()
+{
+	this->textCenter = circle.getGlobalBounds().getCenter()
+		- text.getGlobalBounds().getCenter();
 
-
+	text.setPosition(circle.getPosition() + text.getGlobalBounds().getCenter());
+}
 
 sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 4> &ArrImGuiColor)
 {
@@ -47,7 +52,7 @@ circleWithText::circleWithText(
 	centeringText();
 }
 
-void circleWithText::setColor(const std::array<float, 4> &ImGuiColor)
+void circleWithText::setFillColor(const std::array<float, 4> &ImGuiColor)
 {
 	circle.setFillColor(ImGuiColorToSFMLColor(ImGuiColor));
 }
@@ -55,15 +60,26 @@ void circleWithText::setColor(const std::array<float, 4> &ImGuiColor)
 void circleWithText::setPosition(const sf::Vector2f &position)
 {
 	circle.setPosition(position);
-	text.setPosition(textCenter);
+	text.setPosition(position + textCenter);
 }
 
-void circleWithText::centeringText()
+void circleWithText::setRadius(float radius)
 {
-	this->textCenter = circle.getGlobalBounds().getCenter()
-		- text.getGlobalBounds().getCenter();
+	circle.setRadius(radius);
+	centeringText();
 }
 
+void circleWithText::move()
+{
+	circle.move(this->velocity);
+	text.setPosition(circle.getPosition() + textCenter);
+}
+
+void circleWithText::move(const sf::Vector2f &velocity)
+{
+	circle.move(velocity);
+	text.setPosition(circle.getPosition() + textCenter);
+}
 
 
 

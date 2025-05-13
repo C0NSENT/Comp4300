@@ -168,7 +168,7 @@ int main()
 		circle.setFillColor(sf::Color(c[0] *255.0f, c[1] *255.0f, c[2] *255.0f));
 
 
-		circle.move(properties.velocity);
+			circle.move(properties.velocity);
 
 		text.setPosition(circle.getGlobalBounds().getCenter() - textCenter);
 

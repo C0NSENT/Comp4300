@@ -25,13 +25,16 @@ public:
 		const std::string& s_text,
 		float radius = 50,
 		std::size_t pointCount = 32,
-		const sf::Vector2f& velocity
+		const sf::Vector2f& velocity = {1.5f, 0.5f}
 		);
 
-	void setColor(const std::array<float, 4>& ImGuiColor);
-
+	void setFillColor(const std::array<float, 4>& ImGuiColor);
 	void setPosition(const sf::Vector2f& position);
-	void move(const sf::Vector2f& position{this->velocity});
+	void setRadius(float radius);
+
+	void move();
+	void move(const sf::Vector2f& velocity);
+
 
 	sf::CircleShape circle;
 	sf::Text text;
@@ -41,7 +44,6 @@ public:
 
 	bool isCircleDrawn;
 	bool isTextDrawn;
-
 };
 
 

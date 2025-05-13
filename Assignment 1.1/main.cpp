@@ -34,8 +34,8 @@ void screenBorderCollisionHandler(
 {
 	//Почему я сразу до этого не догадался и код менее громоздким кажется
 	//Да и геттеры по двести раз не вызываются
-	const sf::Vector2f circleCenter{circleWithText.circle.getGlobalBounds().getCenter()};
-	const float circleRadius = circleWithText.circle.getRadius();
+	const sf::Vector2f circleCenter = {circleWithText.circle.getGlobalBounds().getCenter()};
+	const float circleRadius = {circleWithText.circle.getRadius()};
 
 	if (circleCenter.x - circleRadius == 0) {
 		circleWithText.velocity.x *= -1;
@@ -44,9 +44,9 @@ void screenBorderCollisionHandler(
 	}
 
 	if (circleCenter.y - circleRadius == 0) {
-		circleWithText.velocity.x *= -1;
+		circleWithText.velocity.y *= -1;
 	} else if (circleCenter.y + circleRadius ==  screenSize.y) {
-		circleWithText.velocity.x *= -1;
+		circleWithText.velocity.y *= -1;
 	}
 }
 
@@ -54,21 +54,22 @@ int main()
 {
 
 	constexpr sf::Vector2u screenSize{1280, 720};
-	constexpr std::string windowTitle{"Podnimayemsya s Kolen"};
+	const std::string windowTitle{"Podnimayemsya s Kolen"};
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
 	window.setFramerateLimit(60);
 	ImGui::SFML::Init(window);
 
 	sf::Clock deltaClock;
 
-	ImGui::GetStyle().ScaleAllSizes(1.5f);
-	ImGui::GetIO().FontGlobalScale(1.5f);
+	ImGui::GetStyle().ScaleAllSizes(2.0f);
+	ImGui::GetIO().FontGlobalScale = 2.0f;
 
 	std::array ImGuiCgolor{0.0f, 1.0f, 0.0f, 1.0f};
 
 	sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
 	circleWithText shape{font, "Aboba"};
+	shape.setPosition({screenSize.x/2, screenSize.y/2});
 
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
@@ -78,7 +79,9 @@ int main()
 				window.close();
 		}
 
-		screenBorderCollisionHandler(
+
+		screenBorderCollisionHandler(shape, screenSize);
+		/*screenBorderCollisionHandler(
 			shape.circle.getGlobalBounds().getCenter().x,
 			shape.circle.getRadius(),
 			shape.velocity.x,
@@ -90,9 +93,12 @@ int main()
 			shape.circle.getRadius(),
 			shape.velocity.y,
 			screenSize.y
-		);
+		);*/
 
 		ImGui::SFML::Update(window, deltaClock.restart());
+
+		float radius;
+		int points;
 
 
 		ImGui::Begin("Settings");
@@ -103,13 +109,29 @@ int main()
 				ImGui::SameLine();
 				ImGui::Checkbox("Draw text", &shape.isTextDrawn);
 
-				//shape.circle.setRadius(ImGui::SliderFloat("Radius"))
+				ImGui::SliderFloat("Radius", &radius, 0.0f, 200.0f);
+				ImGui::SliderInt("Points", &points, 3, 64);
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
 		}
 		ImGui::End();
 
-		shape.circle.move(velocity);
+		shape.setRadius(radius);
+		shape.circle.setPointCount(points);
+		shape.move();
+
+		window.clear();
+
+		if (shape.isCircleDrawn) {
+			window.draw(shape.circle);
+		}
+		if (shape.isTextDrawn) {
+			window.draw(shape.text);
+		}
+
+		ImGui::SFML::Render(window);
+		window.display();
 	}
+	return 0;
 }

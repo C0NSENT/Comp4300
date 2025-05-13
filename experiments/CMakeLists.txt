@@ -11,3 +11,7 @@ add_subdirectory(
 
 add_executable(${PROJECT_NAME} text_centering.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE external_libs)
+
+project(staticRandom LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)
+add_executable(${PROJECT_NAME} staticRandom.cpp)

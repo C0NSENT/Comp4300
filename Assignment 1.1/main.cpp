@@ -12,17 +12,19 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
+//TODO: синглттон логгер
+
 //Наконец этого урода превратил во что-то адекватное
 void screenBorderCollisionHandler(
-	float circlePos,
+	float circleCenterPos,
 	float circleRadius,
 	float& velocity,
 	unsigned int screenBorder
 )
 {
-	if (circlePos - circleRadius <= 0.f) {
+	if (circleCenterPos - circleRadius <= 0.f) {
 		velocity *= -1;
-	} else if (circlePos + circleRadius >= screenBorder) {
+	} else if (circleCenterPos + circleRadius >= screenBorder) {
 		velocity *= -1;
 	}
 }
@@ -37,7 +39,7 @@ void screenBorderCollisionHandler(
 	const sf::Vector2f circleCenter = {circleWithText.circle.getGlobalBounds().getCenter()};
 	const float circleRadius = {circleWithText.circle.getRadius()};
 
-	if (circleCenter.x - circleRadius == 0) {
+	/*if (circleCenter.x - circleRadius == 0) {
 		circleWithText.velocity.x *= -1;
 	} else if (circleCenter.x + circleRadius ==  screenSize.x) {
 		circleWithText.velocity.x *= -1;
@@ -47,7 +49,21 @@ void screenBorderCollisionHandler(
 		circleWithText.velocity.y *= -1;
 	} else if (circleCenter.y + circleRadius ==  screenSize.y) {
 		circleWithText.velocity.y *= -1;
-	}
+	}*/
+
+	screenBorderCollisionHandler(
+		circleCenter.x,
+		circleRadius,
+		circleWithText.velocity.x,
+		screenSize.x
+	);
+
+	screenBorderCollisionHandler(
+		circleCenter.y,
+		circleRadius,
+		circleWithText.velocity.y,
+		screenSize.y
+	);
 }
 
 int main()
@@ -56,7 +72,7 @@ int main()
 	constexpr sf::Vector2u screenSize{1280, 720};
 	const std::string windowTitle{"Podnimayemsya s Kolen"};
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
-	window.setFramerateLimit(60);
+	window.setFramerateLimit(1);
 	ImGui::SFML::Init(window);
 
 	sf::Clock deltaClock;
@@ -66,10 +82,10 @@ int main()
 
 	std::array ImGuiCgolor{0.0f, 1.0f, 0.0f, 1.0f};
 
-	sf::Font font{"../../../Comp4300/stuff/font.ttf"};
+	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
 	circleWithText shape{font, "Aboba"};
-	shape.setPosition({screenSize.x/2, screenSize.y/2});
+	shape.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
 
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
@@ -97,9 +113,8 @@ int main()
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		float radius;
-		int points;
-
+		float radius{shape.circle.getRadius()};
+		int points{static_cast<int>(shape.circle.getPointCount())};
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings")) {

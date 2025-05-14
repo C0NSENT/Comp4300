@@ -4,15 +4,16 @@
 
 #include "circlewithtext.h"
 
+#include <iostream>
 #include <cmath>
 #include <ranges>
 
 void circleWithText::centeringText()
 {
-	this->textCenter = circle.getGlobalBounds().getCenter()
-		- text.getGlobalBounds().getCenter();
-
-	text.setPosition(circle.getPosition() + text.getGlobalBounds().getCenter());
+	std::cout << "circleWithText::centeringText()" << std::endl;
+	std::cout << text.getGlobalBounds().getCenter().x << " " << text.getGlobalBounds().getCenter().y << std::endl;
+	this->textCenter = circle.getGlobalBounds().getCenter() - text.getGlobalBounds().getCenter();
+	std::cout << textCenter.x << " " << textCenter.y << std::endl;
 }
 
 sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 4> &ArrImGuiColor)
@@ -42,44 +43,62 @@ circleWithText::circleWithText(
 	const std::string& s_text,
 	float radius,
 	std::size_t pointCount,
+	const sf::Vector2f& position,
 	const sf::Vector2f& velocity
 	)
 	: circle{radius, pointCount}
 	, text(font, s_text, 24)
+	, velocity(std::move(velocity))
 {
+	std::cout << "circleWithText::circleWithText()" << std::endl;
+	centeringText();
+	this->setPosition(position);
 	isCircleDrawn = isTextDrawn = true;
 
-	centeringText();
+	//TODO: Сделать систему инвертирования цвета букв относительно самой фигуры
+	//Временно
+	circle.setFillColor(sf::Color::Red);
 }
 
 void circleWithText::setFillColor(const std::array<float, 4> &ImGuiColor)
 {
+	std::cout << "circleWithText::setFillColor()" << std::endl;
 	circle.setFillColor(ImGuiColorToSFMLColor(ImGuiColor));
 }
 
 void circleWithText::setPosition(const sf::Vector2f &position)
 {
+	std::cout << "circleWithText::setPosition()" << std::endl;
 	circle.setPosition(position);
 	text.setPosition(position + textCenter);
 }
 
 void circleWithText::setRadius(float radius)
 {
-	circle.setRadius(radius);
+	try {
+		std::cout << "circleWithText::setRadius()" << std::endl;
+		circle.setRadius(radius);
+	} catch (const std::bad_alloc& e) {
+		std::cerr << "Это гнида вызывает этот прикол " << e.what() << std::endl;
+	}
+
 	centeringText();
 }
 
 void circleWithText::move()
 {
-	circle.move(this->velocity);
-	text.setPosition(circle.getPosition() + textCenter);
+	std::cout << "circleWithText::move()" << std::endl;
+	this->setPosition(this->circle.getPosition() + velocity);
 }
 
-void circleWithText::move(const sf::Vector2f &velocity)
+/*void circleWithText::move(const sf::Vector2f &velocity)
 {
-	circle.move(velocity);
-	text.setPosition(circle.getPosition() + textCenter);
-}
+	std::cout << "circleWithText::move(const sf::Vector2f&)" << std::endl;
+
+
+	/*circle.move(velocity);
+	text.setPosition(circle.getPosition() + textCenter);#1#
+}*/
 
 
 

@@ -25,6 +25,7 @@ public:
 		const std::string& s_text,
 		float radius = 50,
 		std::size_t pointCount = 32,
+		const sf::Vector2f& position = {0.f, 0.f},
 		const sf::Vector2f& velocity = {1.5f, 0.5f}
 		);
 
@@ -33,7 +34,7 @@ public:
 	void setRadius(float radius);
 
 	void move();
-	void move(const sf::Vector2f& velocity);
+	//void move(const sf::Vector2f& velocity);
 
 
 	sf::CircleShape circle;

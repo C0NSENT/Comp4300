@@ -8,12 +8,10 @@
 #include <cmath>
 #include <ranges>
 
-void circleWithText::centeringText()
+template<typename VectorType, typename DivisorType>
+sf::Vector2<VectorType> circleWithText::vectorDivider(const sf::Vector2<VectorType> &v, DivisorType divisor)
 {
-	std::cout << "circleWithText::centeringText()" << std::endl;
-	std::cout << text.getGlobalBounds().getCenter().x << " " << text.getGlobalBounds().getCenter().y << std::endl;
-	this->textCenter = circle.getGlobalBounds().getCenter() - text.getGlobalBounds().getCenter();
-	std::cout << textCenter.x << " " << textCenter.y << std::endl;
+	return std::move(sf::Vector2<VectorType> {v.x / divisor, v.y / divisor});
 }
 
 sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 4> &ArrImGuiColor)
@@ -37,6 +35,17 @@ sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 4> &ArrI
 		ArrImGuiColor[3]
 	);
 }
+
+void circleWithText::centeringText()
+{
+	std::cout << "circleWithText::centeringText()" << std::endl;
+	this->textCenter = circle.getLocalBounds().getCenter() - text.getLocalBounds().getCenter();
+	/*auto test =  vectorDivider(text.getGlobalBounds().position, 2.0f);
+	std::cout << test.x << " " << test.y << std::endl;
+	std::cout << text.getGlobalBounds().position.x << " " << text.getGlobalBounds().position.y << std::endl;*/
+
+}
+
 
 circleWithText::circleWithText(
 	const sf::Font& font,

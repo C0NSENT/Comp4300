@@ -4,7 +4,7 @@
 
 #include "circlewithtext.h"
 
-
+#include <iostream>
 #include <string>
 #include <random>
 #include <vector>
@@ -16,10 +16,10 @@
 
 //Наконец этого урода превратил во что-то адекватное
 void screenBorderCollisionHandler(
-	float circleCenterPos,
-	float circleRadius,
+	const float circleCenterPos,
+	const float circleRadius,
 	float& velocity,
-	unsigned int screenBorder
+	const unsigned int screenBorder
 )
 {
 	if (circleCenterPos - circleRadius <= 0.f) {
@@ -66,13 +66,33 @@ void screenBorderCollisionHandler(
 	);
 }
 
+template<typename T>
+void outputSfVector(const std::string& label, const sf::Vector2<T> & vector)
+{
+	std::cout << label << ": " << vector.x << ", " << vector.y << std::endl;
+}
+
+void outputSfVector(const std::string& label, const sf::FloatRect& vector)
+{
+	std::cout << label << ": " << vector.position.x << ", " << vector.position.y << std::endl;
+}
+
+void textDebug(const sf::Text& text)
+{
+	outputSfVector("getPosition", text.getPosition());
+	outputSfVector("getGlobalBounds", text.getGlobalBounds());
+	outputSfVector("getLocalBounds", text.getLocalBounds());
+	outputSfVector("getCenter", text.getGlobalBounds().getCenter());
+	outputSfVector("getLocalCenter", text.getLocalBounds().getCenter());
+}
+
 int main()
 {
 
 	constexpr sf::Vector2u screenSize{1280, 720};
 	const std::string windowTitle{"Podnimayemsya s Kolen"};
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
-	window.setFramerateLimit(1);
+	window.setFramerateLimit(30);
 	ImGui::SFML::Init(window);
 
 	sf::Clock deltaClock;
@@ -86,6 +106,15 @@ int main()
 
 	circleWithText shape{font, "Aboba"};
 	shape.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
+
+	/*
+	sf::Text text(font, "a");
+	text.setPosition({screenSize.x / 2.f, screenSize.y / 2.f});*/
+	//textDebug(text);
+
+	/*std::cout << std::string{text.getString()} << std::endl;
+	std::cout << text.getGlobalBounds().position.x << " " << text.getGlobalBounds().position.y << std::endl;
+	std::cout << "getPosition(): " <<text.getPosition().x << " " << text.getPosition().y << std::endl;*/
 
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
@@ -132,7 +161,9 @@ int main()
 		}
 		ImGui::End();
 
+
 		shape.setRadius(radius);
+
 		shape.circle.setPointCount(points);
 		shape.move();
 
@@ -145,6 +176,7 @@ int main()
 			window.draw(shape.text);
 		}
 
+		//window.draw(text);
 		ImGui::SFML::Render(window);
 		window.display();
 	}

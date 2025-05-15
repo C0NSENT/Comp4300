@@ -6,7 +6,7 @@
 
 #include<iostream>
 #include <random>
-#include <vector>
+#include <list>
 #include <algorithm>
 
 #include "imgui.h"
@@ -92,7 +92,7 @@ int main()
 	constexpr sf::Vector2u screenSize{1280, 720};
 	const std::string windowTitle{"Podnimayemsya s Kolen"};
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
-	window.setFramerateLimit(30);
+	window.setFramerateLimit(1);
 	static_cast<void>(ImGui::SFML::Init(window));
 
 	sf::Clock deltaClock;
@@ -103,8 +103,12 @@ int main()
 
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
+	std::list<circleWithText> ShapesList;
+
 	circleWithText shape{font, "Aboba"};
 	shape.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
+	shape.setCircleFillColor(sf::Color{128, 32, 94});
+
 
 	/*
 	sf::Text text(font, "a");
@@ -117,10 +121,10 @@ int main()
 
 	float radius{};
 	int points{};
-	float ImGuiColor[4];
+	std::array<float, 3> ImGuiColor{};
 	//std::copy(std::begin(shape.getImGuiFillColor()), std::end(shape.getImGuiFillColor()), std::begin(ImGuiColor));
 
-
+	std::array<float, 3> arr{1, 3, 4};
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
 			ImGui::SFML::ProcessEvent(window, *event);
@@ -149,8 +153,7 @@ int main()
 
 		radius = shape.circle.getRadius();
 		points = shape.circle.getPointCount();
-		std::copy(std::begin(shape.getImGuiFillColor()),std::end(shape.getImGuiFillColor()),
-			std::begin(ImGuiColor));
+		ImGuiColor = shape.getImGuiFillColor();
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings")) {
@@ -162,7 +165,8 @@ int main()
 
 				ImGui::SliderFloat("Radius", &radius, 0.0f, 200.0f);
 				ImGui::SliderInt("Points", &points, 3, 64);
-				ImGui::ColorEdit3("Display Color", ImGuiColor);
+				std::cout << ImGuiColor[0] << " " << ImGuiColor[1] <<  " " << ImGuiColor[2] << std::endl;
+				ImGui::ColorEdit3("Display Color", &arr[0]);
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
@@ -174,6 +178,7 @@ int main()
 
 		shape.circle.setPointCount(points);
 		shape.move();
+		shape.setCircleFillColor(ImGuiColor);
 
 		window.clear();
 

@@ -11,7 +11,6 @@
 #include <array>
 
 
-
 class circleWithText {
 
 	/*int randomIntNumber(int min, int max);
@@ -20,9 +19,8 @@ class circleWithText {
 	template<typename VectorType, typename DivisorType>
 	static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
 	//Сишный массив ебобанный ты козел нахуй
-	static sf::Color ImGuiColorToSFMLColor(const float* ImGuiColor);
-	static std::array<float, 4> SFMLColorToImGui(const sf::Color& color);
-
+	static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
+	static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
 
 	void centeringText();
 
@@ -36,27 +34,26 @@ public:
 		const sf::Vector2f& velocity = {1.5f, 0.5f}
 		);
 
-	void setFillColor(const float (&ImGuiColor)[4]);
+	void setCircleFillColor(const std::array<float, 3>& ImGuiColor);
+	void setCircleFillColor(const sf::Color& color);
 	void setPosition(const sf::Vector2f& position);
 	void setRadius(float radius);
 
 
 
-	std::array<float, 4> getImGuiFillColor() const;
+	std::array<float, 3> getImGuiFillColor() const;
 
 	void move();
 	//void move(const sf::Vector2f& velocity);
 
-	void draw();
+	//void draw();
 
 
 
 	sf::CircleShape circle;
 	sf::Text text;
-
 	sf::Vector2f velocity;
 	sf::Vector2f textCenter;
-
 	bool isCircleDrawn;
 	bool isTextDrawn;
 };

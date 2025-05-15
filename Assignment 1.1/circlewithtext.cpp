@@ -15,31 +15,29 @@ sf::Vector2<VectorType> circleWithText::vectorDivider(const sf::Vector2<VectorTy
 	return std::move(sf::Vector2<VectorType> {v.x / divisor, v.y / divisor});
 }
 
-sf::Color circleWithText::ImGuiColorToSFMLColor(const float* ImGuiColor)
+sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor)
 {
-	auto convert = []( float ImGuiColorChannel) -> std::uint8_t
+	auto convert = [](const float ImGuiColorChannel) -> std::uint8_t
 	{
-		if (ImGuiColorChannel <= 1.0f && ImGuiColorChannel >= 0.0f) {
-			return std::round(ImGuiColorChannel) * 255;
-		} else
-			throw std::invalid_argument("Invalid ImGuiColor");
+		if (ImGuiColorChannel <= 1.0f && ImGuiColorChannel >= 0.0f)
+			return static_cast<std::uint8_t>(std::round(ImGuiColorChannel * 255.f));
+
+		throw std::invalid_argument("Invalid ImGuiColor");
 	};
 
-	return sf::Color(
+	return sf::Color{
 		convert(ImGuiColor[0]),
 		convert(ImGuiColor[1]),
 		convert(ImGuiColor[2]),
-		convert(ImGuiColor[3])
-	);
+	};
 }
 
-std::array<float, 4> circleWithText::SFMLColorToImGui(const sf::Color& color)
+std::array<float, 3> circleWithText::SFMLColorToImGui(const sf::Color& color)
 {
 	return std::array{
 		static_cast<float>(color.r) / 255.f,
 		static_cast<float>(color.g) / 255.f,
 		static_cast<float>(color.b) / 255.f,
-		static_cast<float>(color.a) / 255.f
 	};
 }
 
@@ -64,7 +62,7 @@ circleWithText::circleWithText(
 	)
 	: circle{radius, pointCount}
 	, text(font, s_text, 24)
-	, velocity(std::move(velocity))
+	, velocity(velocity)
 {
 	std::cout << "circleWithText::circleWithText()" << std::endl;
 	centeringText();
@@ -72,14 +70,18 @@ circleWithText::circleWithText(
 	isCircleDrawn = isTextDrawn = true;
 
 	//TODO: Сделать систему инвертирования цвета букв относительно самой фигуры
-	//Временно
-	circle.setFillColor(sf::Color::Red);
+
 }
 
-void circleWithText::setFillColor(const float (&ImGuiColor)[4])
+void circleWithText::setCircleFillColor(const std::array<float, 3>& ImGuiColor)
 {
 	std::cout << "circleWithText::setFillColor()" << std::endl;
-	circle.setFillColor(ImGuiColorToSFMLColor(ImGuiColor));
+	setCircleFillColor(ImGuiColorToSFMLColor(ImGuiColor));
+}
+
+void circleWithText::setCircleFillColor(const sf::Color& color)
+{
+	this->circle.setFillColor(color);
 }
 
 void circleWithText::setPosition(const sf::Vector2f &position)
@@ -102,20 +104,16 @@ void circleWithText::setRadius(float radius)
 }
 
 
-std::array<float, 4> circleWithText::getImGuiFillColor() const
+std::array<float, 3> circleWithText::getImGuiFillColor() const
 {
-	return std::array{SFMLColorToImGui(this->circle.getFillColor())};
+	return SFMLColorToImGui(this->circle.getFillColor());
 }
-
-
 
 void circleWithText::move()
 {
 	std::cout << "circleWithText::move()" << std::endl;
 	this->setPosition(this->circle.getPosition() + velocity);
 }
-
-
 
 /*void circleWithText::move(const sf::Vector2f &velocity)
 {

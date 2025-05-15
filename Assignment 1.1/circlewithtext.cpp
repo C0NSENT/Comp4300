@@ -8,32 +8,39 @@
 #include <cmath>
 #include <ranges>
 
+
 template<typename VectorType, typename DivisorType>
 sf::Vector2<VectorType> circleWithText::vectorDivider(const sf::Vector2<VectorType> &v, DivisorType divisor)
 {
 	return std::move(sf::Vector2<VectorType> {v.x / divisor, v.y / divisor});
 }
 
-sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 4> &ArrImGuiColor)
+sf::Color circleWithText::ImGuiColorToSFMLColor(const float* ImGuiColor)
 {
 	auto convert = []( float ImGuiColorChannel) -> std::uint8_t
 	{
 		if (ImGuiColorChannel <= 1.0f && ImGuiColorChannel >= 0.0f) {
-			return std::round(ImGuiColorChannel);
+			return std::round(ImGuiColorChannel) * 255;
 		} else
 			throw std::invalid_argument("Invalid ImGuiColor");
 	};
 
-	for (float num : ArrImGuiColor) {
-		convert(num);
-	}
-
 	return sf::Color(
-		ArrImGuiColor[0],
-		ArrImGuiColor[1],
-		ArrImGuiColor[2],
-		ArrImGuiColor[3]
+		convert(ImGuiColor[0]),
+		convert(ImGuiColor[1]),
+		convert(ImGuiColor[2]),
+		convert(ImGuiColor[3])
 	);
+}
+
+std::array<float, 4> circleWithText::SFMLColorToImGui(const sf::Color& color)
+{
+	return std::array{
+		static_cast<float>(color.r) / 255.f,
+		static_cast<float>(color.g) / 255.f,
+		static_cast<float>(color.b) / 255.f,
+		static_cast<float>(color.a) / 255.f
+	};
 }
 
 void circleWithText::centeringText()
@@ -69,7 +76,7 @@ circleWithText::circleWithText(
 	circle.setFillColor(sf::Color::Red);
 }
 
-void circleWithText::setFillColor(const std::array<float, 4> &ImGuiColor)
+void circleWithText::setFillColor(const float (&ImGuiColor)[4])
 {
 	std::cout << "circleWithText::setFillColor()" << std::endl;
 	circle.setFillColor(ImGuiColorToSFMLColor(ImGuiColor));
@@ -94,18 +101,28 @@ void circleWithText::setRadius(float radius)
 	centeringText();
 }
 
+
+std::array<float, 4> circleWithText::getImGuiFillColor() const
+{
+	return std::array{SFMLColorToImGui(this->circle.getFillColor())};
+}
+
+
+
 void circleWithText::move()
 {
 	std::cout << "circleWithText::move()" << std::endl;
 	this->setPosition(this->circle.getPosition() + velocity);
 }
 
+
+
 /*void circleWithText::move(const sf::Vector2f &velocity)
 {
 	std::cout << "circleWithText::move(const sf::Vector2f&)" << std::endl;
 
 
-	/*circle.move(velocity);
+	circle.move(velocity);
 	text.setPosition(circle.getPosition() + textCenter);#1#
 }*/
 

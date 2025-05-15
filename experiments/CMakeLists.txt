@@ -15,3 +15,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE external_libs)
 project(staticRandom LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 add_executable(${PROJECT_NAME} staticRandom.cpp)
+
+project(passingArray LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)
+add_executable(${PROJECT_NAME} passingArray.cpp)
+
+project(CompilerOptimizations LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)
+add_executable(${PROJECT_NAME} CompilerOptimizations.cpp)

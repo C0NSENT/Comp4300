@@ -4,10 +4,10 @@
 
 #include "circlewithtext.h"
 
-#include <iostream>
-#include <string>
+#include<iostream>
 #include <random>
 #include <vector>
+#include <algorithm>
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -93,14 +93,13 @@ int main()
 	const std::string windowTitle{"Podnimayemsya s Kolen"};
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
 	window.setFramerateLimit(30);
-	ImGui::SFML::Init(window);
+	static_cast<void>(ImGui::SFML::Init(window));
 
 	sf::Clock deltaClock;
 
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
-	std::array ImGuiCgolor{0.0f, 1.0f, 0.0f, 1.0f};
 
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
@@ -115,6 +114,12 @@ int main()
 	/*std::cout << std::string{text.getString()} << std::endl;
 	std::cout << text.getGlobalBounds().position.x << " " << text.getGlobalBounds().position.y << std::endl;
 	std::cout << "getPosition(): " <<text.getPosition().x << " " << text.getPosition().y << std::endl;*/
+
+	float radius{};
+	int points{};
+	float ImGuiColor[4];
+	//std::copy(std::begin(shape.getImGuiFillColor()), std::end(shape.getImGuiFillColor()), std::begin(ImGuiColor));
+
 
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
@@ -142,8 +147,10 @@ int main()
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		float radius{shape.circle.getRadius()};
-		int points{static_cast<int>(shape.circle.getPointCount())};
+		radius = shape.circle.getRadius();
+		points = shape.circle.getPointCount();
+		std::copy(std::begin(shape.getImGuiFillColor()),std::end(shape.getImGuiFillColor()),
+			std::begin(ImGuiColor));
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings")) {
@@ -155,6 +162,7 @@ int main()
 
 				ImGui::SliderFloat("Radius", &radius, 0.0f, 200.0f);
 				ImGui::SliderInt("Points", &points, 3, 64);
+				ImGui::ColorEdit3("Display Color", ImGuiColor);
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();

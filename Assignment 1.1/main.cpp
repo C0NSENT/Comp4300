@@ -15,25 +15,28 @@
 
 //TODO: синглттон логгер
 
+
+
 template<typename T>
-void outputSfVector(const std::string& label, const sf::Vector2<T> & vector)
-{
+void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
 	std::cout << label << ": " << vector.x << ", " << vector.y << std::endl;
 }
 
-void outputSfVector(const std::string& label, const sf::FloatRect& vector)
-{
-	std::cout << label << ": " << vector.position.x << ", " << vector.position.y << std::endl;
+void outputSfVector(const std::string& label, const sf::FloatRect& vector) {
+	std::cout << label << ": " << vector.position.x
+		<< ", " << vector.position.y << std::endl;
 }
 
-void textDebug(const sf::Text& text)
+/*
+void textDebug(const sf::Text& textString)
 {
-	outputSfVector("getPosition", text.getPosition());
-	outputSfVector("getGlobalBounds", text.getGlobalBounds());
-	outputSfVector("getLocalBounds", text.getLocalBounds());
-	outputSfVector("getCenter", text.getGlobalBounds().getCenter());
-	outputSfVector("getLocalCenter", text.getLocalBounds().getCenter());
+	outputSfVector("getPosition", textString.getPosition());
+	outputSfVector("getGlobalBounds", textString.getGlobalBounds());
+	outputSfVector("getLocalBounds", textString.getLocalBounds());
+	outputSfVector("getCenter", textString.getGlobalBounds().getCenter());
+	outputSfVector("getLocalCenter", textString.getLocalBounds().getCenter());
 }
+*/
 
 int main()
 {
@@ -47,21 +50,16 @@ int main()
 
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
-
-
+	
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
-	std::list<CircleWithText> ShapesList;
+	std::list<cwt::CircleWithText> ShapesList;
 
-	CircleWithText shape{font, "Aboba"};
+	cwt::CircleWithText shape{font, "Aboba"};
 	shape.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
 	shape.setCircleFillColor(sf::Color{128, 32, 94});
 
-	float radius{};
-	int points{};
-	std::array<float, 3> ImGuiColor{};
-	sf::Vector2f velocity;
-	std::string textContent;
+	cwt::ImGuiLoopHandler loopHandler;
 
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
@@ -75,11 +73,13 @@ int main()
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		radius = shape.getRadius();
+		/*radius = shape.getRadius();
 		points = static_cast<int>(shape.getPointCount());
 		ImGuiColor = shape.getImGuiFillColor();
 		velocity = shape.getVelocity();
-		textContent = shape.text.getString();
+		textContent = shape.textString.getString();*/
+
+		loopHandler = shape;
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings"))
@@ -88,27 +88,30 @@ int main()
 			{
 				ImGui::Checkbox("Draw circle", &shape.isCircleDrawn);
 				ImGui::SameLine();
-				ImGui::Checkbox("Draw text", &shape.isTextDrawn);
-				ImGui::SliderFloat("Radius", &radius, 0.0f, 200.0f);
-				ImGui::SliderInt("Points", &points, 3, 64);
+				ImGui::Checkbox("Draw textString", &shape.isTextDrawn);
+				ImGui::SliderFloat("Radius", &loopHandler.radius, 0.0f, 200.0f);
+				ImGui::SliderInt("Points", &loopHandler.pointCount, 3, 64);
 				//std::cout << ImGuiColor[0] << " " << ImGuiColor[1] <<  " " << ImGuiColor[2] << std::endl;
-				ImGui::ColorEdit3("Display Color", ImGuiColor.data());
+				ImGui::ColorEdit3("Display Color", loopHandler.ImGuiColor.data());
 				//TODO: Сделать враппер над velocity чтобы скорость отображалась без минуса
-				//Да можно передавать классы и стуктуры
-				ImGui::SliderFloat2("Velocity", &velocity.x, -10.f, 10.f);
-				ImGui::InputText("Text", &textContent);
+				//Да можно передавать классы и стуктуры,
+				//Правда в доках написано что это не очень безопасно, но пох
+				ImGui::SliderFloat2("Velocity", &loopHandler.velocity.x, -10.f, 10.f);
+				ImGui::InputText("Text", &loopHandler.textString);
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
 		}
 		ImGui::End();
 
-		shape.setRadius(radius);
+		loopHandler.UpdateCWT(shape);
+
+		/*shape.setRadius(radius);
 		shape.setPointCount(points);
 		shape.move();
 		shape.setCircleFillColor(ImGuiColor);
 		shape.setVelocity(velocity);
-		shape.text.setString(textContent);
+		shape.textString.setString(textContent);*/
 
 		window.clear();
 

@@ -10,60 +10,98 @@
 #include <string>
 #include <array>
 
+//TODO: Сделать перенос строки для текста в круге
 
-class CircleWithText {
+namespace cwt
+{
+	class CircleWithText {
+		template<typename VectorType, typename DivisorType>
+		static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
 
-	template<typename VectorType, typename DivisorType>
-	static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
+		// Конвертация цветов между форматами ImGui и SFML
+		static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
+		static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
 
-	// Конвертация цветов между форматами ImGui и SFML
-	static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
-	static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
+		static void processAxisCollision(const float CenterPos, const float Radius, float& velocity,  float axis );
 
-	static void processAxisCollision(const float CenterPos, const float Radius, float& velocity,  float axis );
+		void centeringText();
 
-	void centeringText();
+	public:
 
-public:
-	CircleWithText(
-		const sf::Font& font,
-		const std::string& s_text,
-		float radius = 50,
-		std::size_t pointCount = 32,
-		const sf::Vector2f& position = {0.f, 0.f},
-		const sf::Vector2f& velocity = {1.5f, 0.5f}
-		);
+		///////////////////////////////////////////////////
+		////	КОНСТУКТОР
+		//////////////////////////////////////////////////
+		CircleWithText(
+			const sf::Font& font,
+			const std::string& s_text,
+			float radius = 50,
+			std::size_t pointCount = 32,
+			const sf::Vector2f& position = {0.f, 0.f},
+			const sf::Vector2f& velocity = {1.5f, 0.5f}
+			);
 
-	void setCircleFillColor(const std::array<float, 3>& ImGuiColor);
-	void setCircleFillColor(const sf::Color& color);
-	void setPosition(const sf::Vector2f& position);
-	void setRadius(float radius);
-	void setPointCount(const std::size_t& pointCount);
-	void setVelocity(const sf::Vector2f& velocity);
-	void setVelocity(const std::array<float, 2>& velocity);
+		///////////////////////////////////////////////////
+		////	СЕТТЕРЫ
+		//////////////////////////////////////////////////
 
-	[[nodiscard]]std::array<float, 3> getImGuiFillColor() const;
-	[[nodiscard]]std::array<float, 2> getImGuiVelocity() const;
-	[[nodiscard]]sf::Vector2f getPosition() const;
-	[[nodiscard]]float getRadius() const;
-	[[nodiscard]]std::size_t getPointCount() const;
-	[[nodiscard]]sf::Vector2f getVelocity() const;
+		void setCircleFillColor(const std::array<float, 3>& ImGuiColor);
+		void setCircleFillColor(const sf::Color& color);
+		void setPosition(const sf::Vector2f& position);
+		void setRadius(float radius);
+		void setPointCount(const std::size_t& pointCount);
+		void setVelocity(const sf::Vector2f& velocity);
+		void setVelocity(const std::array<float, 2>& velocity);
+		void setString(const std::string& text);
 
-	void move();
-	void draw(sf::RenderWindow& window) const;
-	void processScreenCollision(const sf::Vector2u& windowSize);
+		///////////////////////////////////////////////////
+		////	ГЕТТЕРЫ
+		//////////////////////////////////////////////////
 
-	sf::CircleShape circle;
-	sf::Text text;
+		[[nodiscard]]std::array<float, 3> getImGuiFillColor() const;
+		[[nodiscard]]std::array<float, 2> getImGuiVelocity() const;
+		[[nodiscard]]sf::Vector2f getPosition() const;
+		[[nodiscard]]float getRadius() const;
+		[[nodiscard]]std::size_t getPointCount() const;
+		[[nodiscard]]sf::Vector2f getVelocity() const;
+		[[nodiscard]]std::string getString() const;
 
-	bool isCircleDrawn;
-	bool isTextDrawn;
+		void move();
+		void draw(sf::RenderWindow& window) const;
+		void processScreenCollision(const sf::Vector2u& windowSize);
 
-private:
+		///////////////////////////////////////////////////
+		////	СВОЙСТВА
+		//////////////////////////////////////////////////
 
-	sf::Vector2f velocity;
-	sf::Vector2f textCenter;
-};
+		sf::CircleShape circle;
+		sf::Text text;
 
+		//TODO: НАРОД ТРЕБУЕТ БИТСЕТ
+		bool isCircleDrawn;
+		bool isTextDrawn;
 
-#endif //CIRCLEWITHTEXT_H
+	private:
+
+		sf::Vector2f velocity;
+		sf::Vector2f textCenter;
+	};
+
+	struct ImGuiLoopHandler
+	{
+		ImGuiLoopHandler() = default;
+		ImGuiLoopHandler& operator=(const CircleWithText& circle);
+		void UpdateCWT(CircleWithText &circle);
+
+		float radius;
+		int pointCount;
+		sf::Vector2f position;
+		sf::Vector2f velocity;
+		std::string textString;
+		std::array<float, 3> ImGuiColor;
+		//sf::Color textFillColor;
+		//sf::Color textOutlineColor;
+		//float textOutlineThickness;
+	};
+}
+
+#endif

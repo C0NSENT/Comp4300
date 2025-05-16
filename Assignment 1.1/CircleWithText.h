@@ -13,14 +13,14 @@
 
 class CircleWithText {
 
-	/*int randomIntNumber(int min, int max);
-	float randomFloatNumber(float min, float max);*/
-
 	template<typename VectorType, typename DivisorType>
 	static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
-	//Сишный массив ебобанный ты козел нахуй
+
+	// Конвертация цветов между форматами ImGui и SFML
 	static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
 	static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
+
+	static void processAxisCollision(const float CenterPos, const float Radius, float& velocity,  float axis );
 
 	void centeringText();
 
@@ -38,26 +38,31 @@ public:
 	void setCircleFillColor(const sf::Color& color);
 	void setPosition(const sf::Vector2f& position);
 	void setRadius(float radius);
+	void setPointCount(const std::size_t& pointCount);
 	void setVelocity(const sf::Vector2f& velocity);
 	void setVelocity(const std::array<float, 2>& velocity);
 
-	std::array<float, 3> getImGuiFillColor() const;
-	std::array<float, 2> getImGuiVelocity() const;
+	[[nodiscard]]std::array<float, 3> getImGuiFillColor() const;
+	[[nodiscard]]std::array<float, 2> getImGuiVelocity() const;
+	[[nodiscard]]sf::Vector2f getPosition() const;
+	[[nodiscard]]float getRadius() const;
+	[[nodiscard]]std::size_t getPointCount() const;
+	[[nodiscard]]sf::Vector2f getVelocity() const;
 
 	void move();
-	//void move(const sf::Vector2f& velocity);
-
 	void draw(sf::RenderWindow& window) const;
-
-
+	void processScreenCollision(const sf::Vector2u& windowSize);
 
 	sf::CircleShape circle;
 	sf::Text text;
-	sf::Vector2f velocity;
-	sf::Vector2f textCenter;
 
 	bool isCircleDrawn;
 	bool isTextDrawn;
+
+private:
+
+	sf::Vector2f velocity;
+	sf::Vector2f textCenter;
 };
 
 

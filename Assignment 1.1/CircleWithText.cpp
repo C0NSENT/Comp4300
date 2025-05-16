@@ -41,6 +41,12 @@ std::array<float, 3> CircleWithText::SFMLColorToImGui(const sf::Color& color)
 	};
 }
 
+void CircleWithText::processAxisCollision(const float CenterPos, const float Radius, float &velocity, float axis)
+{
+	if (CenterPos - Radius <= 0.f || CenterPos + Radius >= axis)
+		velocity *= -1;
+}
+
 void CircleWithText::centeringText()
 {
 	std::cout << "CircleWithText::centeringText()" << std::endl;
@@ -50,6 +56,9 @@ void CircleWithText::centeringText()
 	std::cout << text.getGlobalBounds().position.x << " " << text.getGlobalBounds().position.y << std::endl;*/
 
 }
+
+
+
 
 
 CircleWithText::CircleWithText(
@@ -103,6 +112,11 @@ void CircleWithText::setRadius(float radius)
 	centeringText();
 }
 
+void CircleWithText::setPointCount(const std::size_t& pointCount)
+{
+	return circle.setPointCount(pointCount);
+}
+
 void CircleWithText::setVelocity(const sf::Vector2f &velocity)
 {
 	this->velocity = velocity;
@@ -124,20 +138,31 @@ std::array<float, 2> CircleWithText::getImGuiVelocity() const
 	return {velocity.x, velocity.y};
 }
 
+sf::Vector2f CircleWithText::getPosition() const
+{
+	return circle.getPosition();
+}
+
+float CircleWithText::getRadius() const
+{
+	return circle.getRadius();
+}
+
+sf::Vector2f CircleWithText::getVelocity() const
+{
+	return velocity;
+}
+
+std::size_t CircleWithText::getPointCount() const
+{
+	return circle.getPointCount();
+}
+
 void CircleWithText::move()
 {
 	std::cout << "CircleWithText::move()" << std::endl;
 	this->setPosition(this->circle.getPosition() + velocity);
 }
-
-/*void CircleWithText::move(const sf::Vector2f &velocity)
-{
-	std::cout << "CircleWithText::move(const sf::Vector2f&)" << std::endl;
-
-
-	circle.move(velocity);
-	text.setPosition(circle.getPosition() + textCenter);#1#
-}*/
 
 void CircleWithText::draw(sf::RenderWindow& window) const
 {
@@ -145,4 +170,19 @@ void CircleWithText::draw(sf::RenderWindow& window) const
 	if (isTextDrawn) {window.draw(text);}
 }
 
+void CircleWithText::processScreenCollision(const sf::Vector2u &windowSize)
+{
+	processAxisCollision(
+		circle.getGlobalBounds().getCenter().x,
+		circle.getRadius(),
+		velocity.x,
+		windowSize.x
+	);
 
+	processAxisCollision(
+		circle.getGlobalBounds().getCenter().y,
+		circle.getRadius(),
+		velocity.y,
+		windowSize.y
+	);
+}

@@ -11,7 +11,7 @@
 #include <array>
 
 
-class circleWithText {
+class CircleWithText {
 
 	/*int randomIntNumber(int min, int max);
 	float randomFloatNumber(float min, float max);*/
@@ -25,7 +25,7 @@ class circleWithText {
 	void centeringText();
 
 public:
-	circleWithText(
+	CircleWithText(
 		const sf::Font& font,
 		const std::string& s_text,
 		float radius = 50,

@@ -2,7 +2,7 @@
 // Created by consent_ on 07/05/25.
 //
 
-#include "circlewithtext.h"
+#include "CircleWithText.h"
 
 #include<iostream>
 #include <random>
@@ -30,7 +30,7 @@ void screenBorderCollisionHandler(
 }
 
 void screenBorderCollisionHandler(
-	circleWithText& circleWithText,
+	CircleWithText& circleWithText,
 	const sf::Vector2u& screenSize
 )
 {
@@ -40,15 +40,15 @@ void screenBorderCollisionHandler(
 	const float circleRadius = {circleWithText.circle.getRadius()};
 
 	/*if (circleCenter.x - circleRadius == 0) {
-		circleWithText.velocity.x *= -1;
+		CircleWithText.velocity.x *= -1;
 	} else if (circleCenter.x + circleRadius ==  screenSize.x) {
-		circleWithText.velocity.x *= -1;
+		CircleWithText.velocity.x *= -1;
 	}
 
 	if (circleCenter.y - circleRadius == 0) {
-		circleWithText.velocity.y *= -1;
+		CircleWithText.velocity.y *= -1;
 	} else if (circleCenter.y + circleRadius ==  screenSize.y) {
-		circleWithText.velocity.y *= -1;
+		CircleWithText.velocity.y *= -1;
 	}*/
 
 	screenBorderCollisionHandler(
@@ -103,9 +103,9 @@ int main()
 
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
-	std::list<circleWithText> ShapesList;
+	std::list<CircleWithText> ShapesList;
 
-	circleWithText shape{font, "Aboba"};
+	CircleWithText shape{font, "Aboba"};
 	shape.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
 	shape.setCircleFillColor(sf::Color{128, 32, 94});
 
@@ -124,7 +124,6 @@ int main()
 	std::array<float, 3> ImGuiColor{};
 	//std::copy(std::begin(shape.getImGuiFillColor()), std::end(shape.getImGuiFillColor()), std::begin(ImGuiColor));
 
-	std::array<float, 3> arr{1, 3, 4};
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
 			ImGui::SFML::ProcessEvent(window, *event);
@@ -166,7 +165,7 @@ int main()
 				ImGui::SliderFloat("Radius", &radius, 0.0f, 200.0f);
 				ImGui::SliderInt("Points", &points, 3, 64);
 				std::cout << ImGuiColor[0] << " " << ImGuiColor[1] <<  " " << ImGuiColor[2] << std::endl;
-				ImGui::ColorEdit3("Display Color", &arr[0]);
+				ImGui::ColorEdit3("Display Color", &ImGuiColor[0]);
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();

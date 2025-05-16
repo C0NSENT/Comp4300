@@ -7,8 +7,8 @@ add_subdirectory(
         ${CMAKE_BINARY_DIR}/external_libs
 )
 add_executable(${PROJECT_NAME}
-        circlewithtext.h
-        circlewithtext.cpp
+        CircleWithText.h
+        CircleWithText.cpp
         main.cpp
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE external_libs)

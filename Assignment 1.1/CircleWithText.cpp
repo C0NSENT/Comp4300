@@ -2,7 +2,7 @@
 // Created by consent_ on 07/05/25.
 //
 
-#include "circlewithtext.h"
+#include "CircleWithText.h"
 
 #include <iostream>
 #include <cmath>
@@ -10,12 +10,12 @@
 
 
 template<typename VectorType, typename DivisorType>
-sf::Vector2<VectorType> circleWithText::vectorDivider(const sf::Vector2<VectorType> &v, DivisorType divisor)
+sf::Vector2<VectorType> CircleWithText::vectorDivider(const sf::Vector2<VectorType> &v, DivisorType divisor)
 {
 	return std::move(sf::Vector2<VectorType> {v.x / divisor, v.y / divisor});
 }
 
-sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor)
+sf::Color CircleWithText::ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor)
 {
 	auto convert = [](const float ImGuiColorChannel) -> std::uint8_t
 	{
@@ -32,7 +32,7 @@ sf::Color circleWithText::ImGuiColorToSFMLColor(const std::array<float, 3>& ImGu
 	};
 }
 
-std::array<float, 3> circleWithText::SFMLColorToImGui(const sf::Color& color)
+std::array<float, 3> CircleWithText::SFMLColorToImGui(const sf::Color& color)
 {
 	return std::array{
 		static_cast<float>(color.r) / 255.f,
@@ -41,9 +41,9 @@ std::array<float, 3> circleWithText::SFMLColorToImGui(const sf::Color& color)
 	};
 }
 
-void circleWithText::centeringText()
+void CircleWithText::centeringText()
 {
-	std::cout << "circleWithText::centeringText()" << std::endl;
+	std::cout << "CircleWithText::centeringText()" << std::endl;
 	this->textCenter = circle.getLocalBounds().getCenter() - text.getLocalBounds().getCenter();
 	/*auto test =  vectorDivider(text.getGlobalBounds().position, 2.0f);
 	std::cout << test.x << " " << test.y << std::endl;
@@ -52,7 +52,7 @@ void circleWithText::centeringText()
 }
 
 
-circleWithText::circleWithText(
+CircleWithText::CircleWithText(
 	const sf::Font& font,
 	const std::string& s_text,
 	float radius,
@@ -64,7 +64,7 @@ circleWithText::circleWithText(
 	, text(font, s_text, 24)
 	, velocity(velocity)
 {
-	std::cout << "circleWithText::circleWithText()" << std::endl;
+	std::cout << "CircleWithText::CircleWithText()" << std::endl;
 	centeringText();
 	this->setPosition(position);
 	isCircleDrawn = isTextDrawn = true;
@@ -73,28 +73,28 @@ circleWithText::circleWithText(
 
 }
 
-void circleWithText::setCircleFillColor(const std::array<float, 3>& ImGuiColor)
+void CircleWithText::setCircleFillColor(const std::array<float, 3>& ImGuiColor)
 {
-	std::cout << "circleWithText::setFillColor()" << std::endl;
+	std::cout << "CircleWithText::setFillColor()" << std::endl;
 	setCircleFillColor(ImGuiColorToSFMLColor(ImGuiColor));
 }
 
-void circleWithText::setCircleFillColor(const sf::Color& color)
+void CircleWithText::setCircleFillColor(const sf::Color& color)
 {
 	this->circle.setFillColor(color);
 }
 
-void circleWithText::setPosition(const sf::Vector2f &position)
+void CircleWithText::setPosition(const sf::Vector2f &position)
 {
-	std::cout << "circleWithText::setPosition()" << std::endl;
+	std::cout << "CircleWithText::setPosition()" << std::endl;
 	circle.setPosition(position);
 	text.setPosition(position + textCenter);
 }
 
-void circleWithText::setRadius(float radius)
+void CircleWithText::setRadius(float radius)
 {
 	try {
-		std::cout << "circleWithText::setRadius()" << std::endl;
+		std::cout << "CircleWithText::setRadius()" << std::endl;
 		circle.setRadius(radius);
 	} catch (const std::bad_alloc& e) {
 		std::cerr << "Это гнида вызывает этот прикол " << e.what() << std::endl;
@@ -104,20 +104,20 @@ void circleWithText::setRadius(float radius)
 }
 
 
-std::array<float, 3> circleWithText::getImGuiFillColor() const
+std::array<float, 3> CircleWithText::getImGuiFillColor() const
 {
 	return SFMLColorToImGui(this->circle.getFillColor());
 }
 
-void circleWithText::move()
+void CircleWithText::move()
 {
-	std::cout << "circleWithText::move()" << std::endl;
+	std::cout << "CircleWithText::move()" << std::endl;
 	this->setPosition(this->circle.getPosition() + velocity);
 }
 
-/*void circleWithText::move(const sf::Vector2f &velocity)
+/*void CircleWithText::move(const sf::Vector2f &velocity)
 {
-	std::cout << "circleWithText::move(const sf::Vector2f&)" << std::endl;
+	std::cout << "CircleWithText::move(const sf::Vector2f&)" << std::endl;
 
 
 	circle.move(velocity);

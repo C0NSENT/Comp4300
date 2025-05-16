@@ -38,15 +38,16 @@ public:
 	void setCircleFillColor(const sf::Color& color);
 	void setPosition(const sf::Vector2f& position);
 	void setRadius(float radius);
-
-
+	void setVelocity(const sf::Vector2f& velocity);
+	void setVelocity(const std::array<float, 2>& velocity);
 
 	std::array<float, 3> getImGuiFillColor() const;
+	std::array<float, 2> getImGuiVelocity() const;
 
 	void move();
 	//void move(const sf::Vector2f& velocity);
 
-	//void draw();
+	void draw(sf::RenderWindow& window) const;
 
 
 
@@ -54,6 +55,7 @@ public:
 	sf::Text text;
 	sf::Vector2f velocity;
 	sf::Vector2f textCenter;
+
 	bool isCircleDrawn;
 	bool isTextDrawn;
 };

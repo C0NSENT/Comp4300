@@ -103,10 +103,25 @@ void CircleWithText::setRadius(float radius)
 	centeringText();
 }
 
+void CircleWithText::setVelocity(const sf::Vector2f &velocity)
+{
+	this->velocity = velocity;
+}
+
+void CircleWithText::setVelocity(const std::array<float, 2> &velocity)
+{
+	setVelocity(sf::Vector2f{velocity[0], velocity[1]});
+}
+
 
 std::array<float, 3> CircleWithText::getImGuiFillColor() const
 {
 	return SFMLColorToImGui(this->circle.getFillColor());
+}
+
+std::array<float, 2> CircleWithText::getImGuiVelocity() const
+{
+	return {velocity.x, velocity.y};
 }
 
 void CircleWithText::move()
@@ -124,5 +139,10 @@ void CircleWithText::move()
 	text.setPosition(circle.getPosition() + textCenter);#1#
 }*/
 
+void CircleWithText::draw(sf::RenderWindow& window) const
+{
+	if (isCircleDrawn) {window.draw(circle);}
+	if (isTextDrawn) {window.draw(text);}
+}
 
 

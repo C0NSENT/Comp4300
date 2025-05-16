@@ -11,6 +11,7 @@
 
 #include "imgui.h"
 #include "imgui-SFML.h"
+#include <misc/cpp/imgui_stdlib.h> //Враппер для плюсов чтобы с сишным калом не возиться
 
 //TODO: синглттон логгер
 
@@ -19,7 +20,7 @@ void screenBorderCollisionHandler(
 	const float circleCenterPos,
 	const float circleRadius,
 	float& velocity,
-	const unsigned int screenBorder
+	const unsigned screenBorder
 )
 {
 	if (circleCenterPos - circleRadius <= 0.f) {
@@ -86,13 +87,15 @@ void textDebug(const sf::Text& text)
 	outputSfVector("getLocalCenter", text.getLocalBounds().getCenter());
 }
 
+
+
 int main()
 {
 
 	constexpr sf::Vector2u screenSize{1280, 720};
 	const std::string windowTitle{"Podnimayemsya s Kolen"};
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
-	window.setFramerateLimit(1);
+	window.setFramerateLimit(30);
 	static_cast<void>(ImGui::SFML::Init(window));
 
 	sf::Clock deltaClock;
@@ -122,7 +125,12 @@ int main()
 	float radius{};
 	int points{};
 	std::array<float, 3> ImGuiColor{};
+	//std::array<float, 2> velocity{};
+	sf::Vector2f velocity;
+	std::string textContent;
 	//std::copy(std::begin(shape.getImGuiFillColor()), std::end(shape.getImGuiFillColor()), std::begin(ImGuiColor));
+
+
 
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
@@ -151,8 +159,12 @@ int main()
 		ImGui::SFML::Update(window, deltaClock.restart());
 
 		radius = shape.circle.getRadius();
-		points = shape.circle.getPointCount();
+		points = static_cast<int>(shape.circle.getPointCount());
 		ImGuiColor = shape.getImGuiFillColor();
+		//velocity = shape.getImGuiVelocity();
+		velocity = shape.velocity;
+		textContent = shape.text.getString();
+
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings")) {
@@ -164,8 +176,12 @@ int main()
 
 				ImGui::SliderFloat("Radius", &radius, 0.0f, 200.0f);
 				ImGui::SliderInt("Points", &points, 3, 64);
-				std::cout << ImGuiColor[0] << " " << ImGuiColor[1] <<  " " << ImGuiColor[2] << std::endl;
-				ImGui::ColorEdit3("Display Color", &ImGuiColor[0]);
+				//std::cout << ImGuiColor[0] << " " << ImGuiColor[1] <<  " " << ImGuiColor[2] << std::endl;
+				ImGui::ColorEdit3("Display Color", ImGuiColor.data());
+				//TODO: Сделать враппер над velocity чтобы скорость отображалась без минуса
+				//Да можно передавать классы и стуктуры
+				ImGui::SliderFloat2("Velocity", &velocity.x, -10.f, 10.f);
+				ImGui::InputText(" ", &textContent);
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
@@ -178,15 +194,13 @@ int main()
 		shape.circle.setPointCount(points);
 		shape.move();
 		shape.setCircleFillColor(ImGuiColor);
+		shape.setVelocity(velocity);
+		shape.text.setString(textContent);
 
 		window.clear();
 
-		if (shape.isCircleDrawn) {
-			window.draw(shape.circle);
-		}
-		if (shape.isTextDrawn) {
-			window.draw(shape.text);
-		}
+		shape.draw(window);
+
 
 		//window.draw(text);
 		ImGui::SFML::Render(window);

@@ -90,7 +90,11 @@ namespace cwt
 	{
 		ImGuiLoopHandler() = default;
 		ImGuiLoopHandler& operator=(const CircleWithText& circle);
-		void UpdateCWT(CircleWithText &circle);
+
+		static void pushData(unsigned id, const CircleWithText &circle);
+		void UpdateCWT(unsigned id, CircleWithText &circle) const;
+
+		unsigned currentID;
 
 		float radius;
 		int pointCount;
@@ -98,6 +102,8 @@ namespace cwt
 		sf::Vector2f velocity;
 		std::string textString;
 		std::array<float, 3> ImGuiColor;
+
+
 		//sf::Color textFillColor;
 		//sf::Color textOutlineColor;
 		//float textOutlineThickness;

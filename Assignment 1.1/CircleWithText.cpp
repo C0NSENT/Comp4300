@@ -9,6 +9,8 @@
 #include <cmath>
 #include <ranges>
 
+#include "SFML/Audio/Listener.hpp"
+
 template<typename VectorType, typename DivisorType>
 sf::Vector2<VectorType> cwt::CircleWithText::vectorDivider(const sf::Vector2<VectorType> &v, DivisorType divisor)
 {
@@ -203,14 +205,27 @@ cwt::ImGuiLoopHandler & cwt::ImGuiLoopHandler::operator=(const CircleWithText &c
 	return *this;
 }
 
-void cwt::ImGuiLoopHandler::UpdateCWT(CircleWithText &circle)
+void cwt::ImGuiLoopHandler::pushData(unsigned id, const CircleWithText &circle)
+	: currentID(id)
+	, radius(circle.getRadius())
+	, pointCount(circle.getPointCount())
+	, position(circle.getPosition())
+	, velocity(circle.getVelocity())
+	, textString(circle.getString())
+	, ImGuiColor(circle.getImGuiFillColor())
 {
-	if (circle.getRadius() != radius) circle.setRadius(radius);
-	if (circle.getPointCount() != pointCount) circle.setPointCount(pointCount);
-	if (circle.getPosition() != position) circle.setPosition(position);
-	if (circle.getVelocity() != velocity) circle.setVelocity(velocity);
-	if (circle.getString() != textString) circle.setString(textString);
-	if (circle.getImGuiFillColor() != ImGuiColor) circle.setCircleFillColor(ImGuiColor);
 
-	circle.move();
+}
+
+void cwt::ImGuiLoopHandler::UpdateCWT(unsigned id, CircleWithText &circle) const
+{
+	if (currentID == id) {
+		if (circle.getRadius() != radius) circle.setRadius(radius);
+		if (circle.getPointCount() != pointCount) circle.setPointCount(pointCount);
+		if (circle.getPosition() != position) circle.setPosition(position);
+		if (circle.getVelocity() != velocity) circle.setVelocity(velocity);
+		if (circle.getString() != textString) circle.setString(textString);
+		if (circle.getImGuiFillColor() != ImGuiColor) circle.setCircleFillColor(ImGuiColor);
+	}
+	//circle.move();
 }

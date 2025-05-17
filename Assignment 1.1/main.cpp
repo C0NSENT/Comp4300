@@ -9,13 +9,37 @@
 #include <misc/cpp/imgui_stdlib.h> //Враппер для плюсов, чтобы с сишным калом не возиться
 
 #include<iostream>
-#include <random>
-#include <list>
-#include <algorithm>
 
+#include <list>
+#include <iterator>
+#include <vector>
+
+#include <algorithm>
+#include <random>
 //TODO: синглттон логгер
 
+std::vector<std::string> getShapesString(const std::list<cwt::CircleWithText>& lShapes)
+{
+	std::vector<std::string> shapesString;
+	for (const auto& shape : lShapes) {
+		shapesString.push_back(shape.getString());
+	}
+	return shapesString;
+}
 
+
+cwt::CircleWithText findElement(const std::list<cwt::CircleWithText>& list, unsigned index)
+{
+	if (list.size() > index) {
+		auto it = list.begin();
+		std::advance(it, index);
+		return *it;
+	}
+
+	std::cerr << "List is out of range:" << list.size() << "<" << index << std::endl ;
+	throw std::out_of_range("List out of range") ;
+
+}
 
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
@@ -26,6 +50,7 @@ void outputSfVector(const std::string& label, const sf::FloatRect& vector) {
 	std::cout << label << ": " << vector.position.x
 		<< ", " << vector.position.y << std::endl;
 }
+
 
 /*
 void textDebug(const sf::Text& textString)
@@ -53,13 +78,22 @@ int main()
 	
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
-	std::list<cwt::CircleWithText> ShapesList;
+	std::list<cwt::CircleWithText> lsShapes;
+
 
 	cwt::CircleWithText shape{font, "Aboba"};
 	shape.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
 	shape.setCircleFillColor(sf::Color{128, 32, 94});
 
+	lsShapes.push_back(shape);
+	lsShapes.push_back(shape);
+	lsShapes.push_back(shape);
+
 	cwt::ImGuiLoopHandler loopHandler;
+	std::vector vShapeStrings{getShapesString(lsShapes)};
+	//std::list<cwt::CircleWithText>::iterator it;
+
+	int selectedIndex = 0;
 
 	while (window.isOpen()) {
 		while (const std::optional event = window.pollEvent()) {
@@ -73,19 +107,30 @@ int main()
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		/*radius = shape.getRadius();
-		points = static_cast<int>(shape.getPointCount());
-		ImGuiColor = shape.getImGuiFillColor();
-		velocity = shape.getVelocity();
-		textContent = shape.textString.getString();*/
 
-		loopHandler = shape;
+		loopHandler = findElement(lsShapes, selectedIndex);
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings"))
 		{
 			if (ImGui::BeginTabItem("Shape"))
 			{
+				static int currentItem = 0;
+
+				if (ImGui::BeginCombo("aboba", vShapeStrings.at(currentItem).c_str())) {
+					for (int i = 0; i < vShapeStrings.size(); i++) {
+						const bool isSelected = (selectedIndex == i);
+						if (ImGui::Selectable(vShapeStrings[i].c_str(), isSelected)) {
+							selectedIndex = i;
+						}
+						if (isSelected) {
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				ImGui::Spacing();
 				ImGui::Checkbox("Draw circle", &shape.isCircleDrawn);
 				ImGui::SameLine();
 				ImGui::Checkbox("Draw textString", &shape.isTextDrawn);
@@ -105,13 +150,6 @@ int main()
 		ImGui::End();
 
 		loopHandler.UpdateCWT(shape);
-
-		/*shape.setRadius(radius);
-		shape.setPointCount(points);
-		shape.move();
-		shape.setCircleFillColor(ImGuiColor);
-		shape.setVelocity(velocity);
-		shape.textString.setString(textContent);*/
 
 		window.clear();
 

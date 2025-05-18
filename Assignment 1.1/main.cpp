@@ -2,7 +2,7 @@
 // Created by consent_ on 07/05/25.
 //
 
-#include "CircleWithText.h"
+#include "NamedCircle.h"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -12,33 +12,8 @@
 #include <vector>
 
 #include <random>
-#include <memory>
+
 //TODO: синглттон логгер
-
-int randomInt(std::mt19937& generator, int min, int max) {
-	std::uniform_int_distribution distribution(min, max);
-	return distribution(generator);
-}
-
-float randomFloat(std::mt19937& generator, float min, float max) {
-	std::uniform_real_distribution distribution(min, max);
-	return distribution(generator);
-}
-
-void initRandomCircle(const sf::Font& font, const std::string& text, cwt::CircleWithText& circle, std::mt19937& generator, const sf::Vector2u& screenSize)
-{
-	circle.setCircleFillColor( sf::Color{
-		static_cast<std::uint8_t>(randomInt(generator, 0, 255)),
-		static_cast<std::uint8_t>(randomInt(generator, 0, 255)),
-				static_cast<std::uint8_t>(randomInt(generator, 0, 255)),
-}
-	);
-	circle.setRadius(randomFloat(generator, 10.f, 100.f));
-	circle.setPointCount(randomInt(generator, 3, 64));
-	circle.setPosition({randomFloat(generator, 0.f, screenSize.x), randomFloat(generator, 0.f, screenSize.y)});
-	circle.setVelocity(sf::Vector2f{randomFloat(generator, -5.f, 5.f), randomFloat(generator, -5.f, 5.f)});
-	circle.setString(text);
-}
 
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
@@ -49,18 +24,6 @@ void outputSfVector(const std::string& label, const sf::FloatRect& vector) {
 	std::cout << label << ": " << vector.position.x
 		<< ", " << vector.position.y << std::endl;
 }
-
-
-/*
-void textDebug(const sf::Text& textString)
-{
-	outputSfVector("getPosition", textString.getPosition());
-	outputSfVector("getGlobalBounds", textString.getGlobalBounds());
-	outputSfVector("getLocalBounds", textString.getLocalBounds());
-	outputSfVector("getCenter", textString.getGlobalBounds().getCenter());
-	outputSfVector("getLocalCenter", textString.getLocalBounds().getCenter());
-}
-*/
 
 int main()
 {
@@ -80,12 +43,12 @@ int main()
 	
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
-	std::list<cwt::CircleWithText> lsCircles;
-	lsCircles.push_back(cwt::CircleWithText(generator, font, std::string{"Aboba"}, screenSize));
-	lsCircles.push_back(cwt::CircleWithText(generator, font, std::string{"Armen"}, screenSize));
-	lsCircles.push_back(cwt::CircleWithText(generator, font, std::string{"Van"}, screenSize));
+	std::list<nc::NamedCircle> lsCircles;
+	lsCircles.emplace_back(generator, font, std::string{"Aboba"}, screenSize);
+	lsCircles.emplace_back(generator, font, std::string{"Armen"}, screenSize);
+	lsCircles.emplace_back(generator, font, std::string{"Van"}, screenSize);
 
-	//cwt::CircleWithText VladimirPutinMolodets{font, "Aboba"};
+	//nc::NamedCircle VladimirPutinMolodets{font, "Aboba"};
 	/*VladimirPutinMolodets.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
 	VladimirPutinMolodets.setCircleFillColor(sf::Color{128, 32, 94});
 
@@ -95,7 +58,7 @@ int main()
 	VladimirPutinMolodets.setString("Van");
 	lsCircles.push_back(VladimirPutinMolodets);*/
 
-	//cwt::ImGuiLoopHandler loopHandler;
+	//nc::ImGuiLoopHandler loopHandler;
 
 	int selectedIndex = 0;
 
@@ -116,7 +79,7 @@ int main()
 		for (auto& circle : lsCircles) {
 			vShapeStrings.push_back(circle.getString());
 		}
-		cwt::ImGuiLoopHandler loopHandler(selectedIndex, lsCircles);
+		nc::ImGuiLoopHandler loopHandler(selectedIndex, lsCircles);
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings"))
@@ -157,7 +120,7 @@ int main()
 		}
 		ImGui::End();
 
-		loopHandler.UpdateCWT(selectedIndex, lsCircles);
+		loopHandler.UpdateNC(selectedIndex, lsCircles, screenSize);
 
 		window.clear();
 

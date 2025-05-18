@@ -14,29 +14,31 @@
 
 //TODO: Сделать перенос строки для текста в круге
 
-namespace cwt
+namespace nc
 {
-	class CircleWithText {
+	class NamedCircle {
 		template<typename VectorType, typename DivisorType>
 		static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
 
 		// Конвертация цветов между форматами ImGui и SFML
 		static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
 		static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
-		static int randomInt(std::mt19937_64& gen, const int min, const int max);
-		static float randomFloat(std::mt19937_64& gen, const float min, const float max);
 		static sf::Color invertColor(const sf::Color& color);
 
-		static void processAxisCollision(const float CenterPos, const float Radius, float& velocity,  float axis );
+		static int randomInt(std::mt19937_64& gen, int min, int max);
+		static float randomFloat(std::mt19937_64& gen, float min, float max);
+
+		static void processAxisCollision(float centerPos, float radius, float& velocity,  float axis );
+		//static void processCircleSizeChangeCollision(float CenterPos, float Radius, )
 
 		void centeringText();
 
 	public:
 
 		///////////////////////////////////////////////////
-		////	КОНСТУКТОР
+		////	КОНСТУКТОРЫ
 		//////////////////////////////////////////////////
-		CircleWithText(
+		NamedCircle(
 			const sf::Font& font,
 			const std::string& textString,
 			float radius = 50,
@@ -45,7 +47,7 @@ namespace cwt
 			const sf::Vector2f& velocity = {1.5f, 0.5f}
 		);
 
-		CircleWithText(
+		NamedCircle(
 			std::mt19937_64& gen,
 			const sf::Font& font,
 			const std::string& textString,
@@ -57,8 +59,11 @@ namespace cwt
 
 		void setCircleFillColor(const std::array<float, 3>& ImGuiColor);
 		void setCircleFillColor(const sf::Color& color);
+		void setColor(const sf::Color& color);
+		void setColor(const std::array<float, 3>& ImGuiColor);
 		void setPosition(const sf::Vector2f& position);
-		void setRadius(float radius);
+		//void setPosition(const sf::Vector2f& position, const sf::Vector2u& screenSize);
+		void setRadius(float radius, const sf::Vector2u& screenSize);
 		void setPointCount(const std::size_t& pointCount);
 		void setVelocity(const sf::Vector2f& velocity);
 		void setVelocity(const std::array<float, 2>& velocity);
@@ -85,7 +90,7 @@ namespace cwt
 		//////////////////////////////////////////////////
 
 		sf::CircleShape circle;
-		sf::Text text;
+		sf::Text name;
 
 		//TODO: НАРОД ТРЕБУЕТ БИТСЕТ
 		bool isCircleDrawn;
@@ -97,23 +102,34 @@ namespace cwt
 		sf::Vector2f textCenter;
 	};
 
+
+
+	[[nodiscard]] NamedCircle getElement(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
+	[[nodiscard]] NamedCircle& getElementRef(unsigned selectedIndex, std::list<NamedCircle>& lsCircles);
+
 	///////////////////////////////////////////////////
 	////	ImGuiLoopHandler
 	//////////////////////////////////////////////////
 
-	[[nodiscard]] CircleWithText getElement(unsigned selectedIndex, const std::list<CircleWithText>& lsCircles);
-	[[nodiscard]] CircleWithText& getElementRef(unsigned selectedIndex, std::list<CircleWithText>& lsCircles);
-
 	struct ImGuiLoopHandler
 	{
-		ImGuiLoopHandler() = default;
-		ImGuiLoopHandler(unsigned selectedIndex, const CircleWithText& circle);
-		ImGuiLoopHandler(unsigned selectedIndex, const std::list<CircleWithText>& lsCircles);
-		ImGuiLoopHandler& operator=(const CircleWithText& circle);
+		///////////////////////////////////////////////////
+		////	КОНСТУКТОРЫ
+		//////////////////////////////////////////////////
 
-		void pushData(unsigned selectedIndex, const CircleWithText &circle);
-		void UpdateCWT(unsigned selectedIndex, CircleWithText &circle);
-		void UpdateCWT(unsigned selectedIndex, std::list<CircleWithText>& lsCircles);
+		ImGuiLoopHandler() = default;
+		ImGuiLoopHandler(unsigned selectedIndex, const NamedCircle& circle);
+		ImGuiLoopHandler(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
+
+		void UpdateNC(unsigned selectedIndex, NamedCircle &circle, const sf::Vector2u &screenSize) const;
+		void UpdateNC(unsigned selectedIndex, std::list<NamedCircle>& lsCircles,
+			const sf::Vector2u &screenSize) const;
+
+		ImGuiLoopHandler& operator=(const NamedCircle& circle);
+
+		///////////////////////////////////////////////////
+		////	СВОЙСТВА
+		//////////////////////////////////////////////////
 
 		unsigned currentIndex;
 

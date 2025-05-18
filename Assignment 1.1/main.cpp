@@ -18,17 +18,22 @@
 #include <random>
 //TODO: синглттон логгер
 
-std::vector<std::string> getShapesString(const std::list<cwt::CircleWithText>& lShapes)
+std::vector<std::string> getShapesString(const std::list<cwt::CircleWithText>& lsShapes)
 {
 	std::vector<std::string> shapesString;
-	for (const auto& shape : lShapes) {
+	for (const auto& shape : lsShapes) {
 		shapesString.push_back(shape.getString());
 	}
 	return shapesString;
 }
 
+void moveShapes(std::list<cwt::CircleWithText>& lsShapes)
+{
+	for (auto& shape : lsShapes)
+		shape.move();
+}
 
-cwt::CircleWithText findElement(const std::list<cwt::CircleWithText>& list, unsigned index)
+/*cwt::CircleWithText findElement(const std::list<cwt::CircleWithText>& list, unsigned index)
 {
 	if (list.size() > index) {
 		auto it = list.begin();
@@ -39,7 +44,7 @@ cwt::CircleWithText findElement(const std::list<cwt::CircleWithText>& list, unsi
 	std::cerr << "List is out of range:" << list.size() << "<" << index << std::endl ;
 	throw std::out_of_range("List out of range") ;
 
-}
+}*/
 
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
@@ -78,24 +83,27 @@ int main()
 	
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
-	std::list<cwt::CircleWithText> lsShapes;
+	std::list<cwt::CircleWithText> lsCircles;
 
 
-	cwt::CircleWithText shape{font, "Aboba"};
-	shape.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
-	shape.setCircleFillColor(sf::Color{128, 32, 94});
+	cwt::CircleWithText VladimirPutinMolodets{font, "Aboba"};
+	VladimirPutinMolodets.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
+	VladimirPutinMolodets.setCircleFillColor(sf::Color{128, 32, 94});
 
-	lsShapes.push_back(shape);
-	lsShapes.push_back(shape);
-	lsShapes.push_back(shape);
+	lsCircles.push_back(VladimirPutinMolodets);
+	VladimirPutinMolodets.setString("Armen");
+	lsCircles.push_back(VladimirPutinMolodets);
+	VladimirPutinMolodets.setString("Van");
+	lsCircles.push_back(VladimirPutinMolodets);
 
-	cwt::ImGuiLoopHandler loopHandler;
-	std::vector vShapeStrings{getShapesString(lsShapes)};
-	//std::list<cwt::CircleWithText>::iterator it;
+	//cwt::ImGuiLoopHandler loopHandler;
 
 	int selectedIndex = 0;
 
 	while (window.isOpen()) {
+		std::cout << "===========================================" << std::endl;
+		std::cout << "              NEW LOOP                     " << std::endl;
+		std::cout << "===========================================" << std::endl;
 		while (const std::optional event = window.pollEvent()) {
 			ImGui::SFML::ProcessEvent(window, *event);
 
@@ -103,12 +111,10 @@ int main()
 				window.close();
 		}
 
-		shape.processScreenCollision(screenSize);
-
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-
-		loopHandler = findElement(lsShapes, selectedIndex);
+		std::vector vShapeStrings{getShapesString(lsCircles)};
+		cwt::ImGuiLoopHandler loopHandler(selectedIndex, lsCircles);
 
 		ImGui::Begin("Settings");
 		if (ImGui::BeginTabBar("Shape Settings"))
@@ -119,7 +125,7 @@ int main()
 
 				if (ImGui::BeginCombo("aboba", vShapeStrings.at(currentItem).c_str())) {
 					for (int i = 0; i < vShapeStrings.size(); i++) {
-						const bool isSelected = (selectedIndex == i);
+						const bool isSelected{selectedIndex == i};
 						if (ImGui::Selectable(vShapeStrings[i].c_str(), isSelected)) {
 							selectedIndex = i;
 						}
@@ -131,13 +137,13 @@ int main()
 				}
 
 				ImGui::Spacing();
-				ImGui::Checkbox("Draw circle", &shape.isCircleDrawn);
+				ImGui::Checkbox("Draw circle", &loopHandler.isCircleDrawn);
 				ImGui::SameLine();
-				ImGui::Checkbox("Draw textString", &shape.isTextDrawn);
+				ImGui::Checkbox("Draw textString", &loopHandler.isTextDrawn);
 				ImGui::SliderFloat("Radius", &loopHandler.radius, 0.0f, 200.0f);
 				ImGui::SliderInt("Points", &loopHandler.pointCount, 3, 64);
 				//std::cout << ImGuiColor[0] << " " << ImGuiColor[1] <<  " " << ImGuiColor[2] << std::endl;
-				ImGui::ColorEdit3("Display Color", loopHandler.ImGuiColor.data());
+				ImGui::ColorEdit3("Display Color", loopHandler.ImGuiCircleFillColor.data());
 				//TODO: Сделать враппер над velocity чтобы скорость отображалась без минуса
 				//Да можно передавать классы и стуктуры,
 				//Правда в доках написано что это не очень безопасно, но пох
@@ -149,11 +155,16 @@ int main()
 		}
 		ImGui::End();
 
-		loopHandler.UpdateCWT(shape);
+		loopHandler.UpdateCWT(selectedIndex, lsCircles);
 
 		window.clear();
 
-		shape.draw(window);
+		for (auto& shape : lsCircles) {
+			std::cout << "Shape: " << shape.getString() << std::endl;
+			shape.processScreenCollision(screenSize);
+			shape.move();
+			shape.draw(window);
+		}
 
 		ImGui::SFML::Render(window);
 		window.display();

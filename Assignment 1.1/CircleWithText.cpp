@@ -9,7 +9,6 @@
 #include <cmath>
 #include <ranges>
 
-#include "SFML/Audio/Listener.hpp"
 
 template<typename VectorType, typename DivisorType>
 sf::Vector2<VectorType> cwt::CircleWithText::vectorDivider(const sf::Vector2<VectorType> &v, DivisorType divisor)
@@ -103,15 +102,9 @@ void cwt::CircleWithText::setPosition(const sf::Vector2f &position) {
 	text.setPosition(position + textCenter);
 }
 
-void cwt::CircleWithText::setRadius(float radius)
-{
-	try {
-		std::cout << "CircleWithText::setRadius()" << std::endl;
-		circle.setRadius(radius);
-	} catch (const std::bad_alloc& e) {
-		std::cerr << "Это гнида вызывает этот прикол " << e.what() << std::endl;
-	}
-
+void cwt::CircleWithText::setRadius(float radius) {
+	std::cout << "CircleWithText::setRadius()" << std::endl;
+	circle.setRadius(radius);
 	centeringText();
 }
 
@@ -193,39 +186,88 @@ void cwt::CircleWithText::processScreenCollision(const sf::Vector2u &windowSize)
 	);
 }
 
+///////////////////////////////////////////////////
+////	ImGuiLoopHandler
+//////////////////////////////////////////////////
+
+cwt::CircleWithText cwt::getElement(unsigned selectedIndex, const std::list<CircleWithText> &lsCircles)
+{
+	if (selectedIndex < lsCircles.size()) {
+		auto it = lsCircles.begin();
+		std::advance(it, selectedIndex);
+		return *it;
+	}
+	std::cerr << "List is out of range:" << lsCircles.size() << "<" << selectedIndex << std::endl;
+	throw std::out_of_range("List out of range");
+}
+
+cwt::CircleWithText& cwt::getElementRef(unsigned selectedIndex, std::list<CircleWithText> &lsCircles)
+{
+	auto it = lsCircles.begin();
+	if (selectedIndex < lsCircles.size()) {
+		std::advance(it, selectedIndex);
+	}
+	return *it;
+}
+
+cwt::ImGuiLoopHandler::ImGuiLoopHandler(unsigned selectedIndex, const CircleWithText &circle)
+	: currentIndex(selectedIndex)
+	, radius(circle.getRadius())
+	, pointCount(circle.getPointCount())
+	, velocity(circle.getVelocity())
+	, textString(circle.getString())
+	, ImGuiCircleFillColor(circle.getImGuiFillColor())
+	, isCircleDrawn(circle.isCircleDrawn)
+	, isTextDrawn(circle.isTextDrawn)
+{
+}
+
+cwt::ImGuiLoopHandler::ImGuiLoopHandler(unsigned selectedIndex, const std::list<CircleWithText> &lsCircles)
+	: ImGuiLoopHandler(selectedIndex, getElement(selectedIndex, lsCircles)) {}
+
 cwt::ImGuiLoopHandler & cwt::ImGuiLoopHandler::operator=(const CircleWithText &circle)
 {
 	radius = circle.getRadius();
 	pointCount = circle.getPointCount();
-	position = circle.getPosition();
+	//position = circle.getPosition();
 	velocity = circle.getVelocity();
 	textString = circle.text.getString();
-	ImGuiColor = circle.getImGuiFillColor();
+	ImGuiCircleFillColor = circle.getImGuiFillColor();
+	isCircleDrawn = circle.isCircleDrawn;
+	isTextDrawn = circle.isTextDrawn;
 
 	return *this;
 }
 
-void cwt::ImGuiLoopHandler::pushData(unsigned id, const CircleWithText &circle)
-	: currentID(id)
-	, radius(circle.getRadius())
-	, pointCount(circle.getPointCount())
-	, position(circle.getPosition())
-	, velocity(circle.getVelocity())
-	, textString(circle.getString())
-	, ImGuiColor(circle.getImGuiFillColor())
+void cwt::ImGuiLoopHandler::pushData(unsigned selectedIndex, const CircleWithText &circle)
 {
-
+	currentIndex = selectedIndex;
+	radius = circle.getRadius();
+	pointCount = circle.getPointCount();
+	//position = circle.getPosition();
+	velocity = circle.getVelocity();
+	textString = circle.getString();
+	ImGuiCircleFillColor = circle.getImGuiFillColor();
 }
 
-void cwt::ImGuiLoopHandler::UpdateCWT(unsigned id, CircleWithText &circle) const
+void cwt::ImGuiLoopHandler::UpdateCWT(unsigned selectedIndex, CircleWithText &circle)
 {
-	if (currentID == id) {
-		if (circle.getRadius() != radius) circle.setRadius(radius);
+	if (currentIndex == selectedIndex) {
+		std::cout << "Updating circle with selectedIndex " << selectedIndex << std::endl;
+		circle.setRadius(radius);
 		if (circle.getPointCount() != pointCount) circle.setPointCount(pointCount);
-		if (circle.getPosition() != position) circle.setPosition(position);
+		//if (circle.getPosition() != position) circle.setPosition(position);
 		if (circle.getVelocity() != velocity) circle.setVelocity(velocity);
 		if (circle.getString() != textString) circle.setString(textString);
-		if (circle.getImGuiFillColor() != ImGuiColor) circle.setCircleFillColor(ImGuiColor);
+		if (circle.getImGuiFillColor() != ImGuiCircleFillColor) circle.setCircleFillColor(ImGuiCircleFillColor);
+		circle.isCircleDrawn = isCircleDrawn;
+		circle.isTextDrawn = isTextDrawn;
 	}
 	//circle.move();
+}
+
+void cwt::ImGuiLoopHandler::UpdateCWT(unsigned selectedIndex, std::list<CircleWithText> &lsCircles)
+{
+	auto temp = getElementRef(selectedIndex, lsCircles);
+	UpdateCWT(selectedIndex, getElementRef(selectedIndex, lsCircles));
 }

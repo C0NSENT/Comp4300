@@ -9,6 +9,7 @@
 
 #include <string>
 #include <array>
+#include <list>
 
 //TODO: Сделать перенос строки для текста в круге
 
@@ -86,23 +87,34 @@ namespace cwt
 		sf::Vector2f textCenter;
 	};
 
+	///////////////////////////////////////////////////
+	////	ImGuiLoopHandler
+	//////////////////////////////////////////////////
+
+	[[nodiscard]] CircleWithText getElement(unsigned selectedIndex, const std::list<CircleWithText>& lsCircles);
+	[[nodiscard]] CircleWithText& getElementRef(unsigned selectedIndex, std::list<CircleWithText>& lsCircles);
+
 	struct ImGuiLoopHandler
 	{
 		ImGuiLoopHandler() = default;
+		ImGuiLoopHandler(unsigned selectedIndex, const CircleWithText& circle);
+		ImGuiLoopHandler(unsigned selectedIndex, const std::list<CircleWithText>& lsCircles);
 		ImGuiLoopHandler& operator=(const CircleWithText& circle);
 
-		static void pushData(unsigned id, const CircleWithText &circle);
-		void UpdateCWT(unsigned id, CircleWithText &circle) const;
+		void pushData(unsigned selectedIndex, const CircleWithText &circle);
+		void UpdateCWT(unsigned selectedIndex, CircleWithText &circle);
+		void UpdateCWT(unsigned selectedIndex, std::list<CircleWithText>& lsCircles);
 
-		unsigned currentID;
+		unsigned currentIndex;
 
 		float radius;
 		int pointCount;
-		sf::Vector2f position;
+		//sf::Vector2f position;
 		sf::Vector2f velocity;
 		std::string textString;
-		std::array<float, 3> ImGuiColor;
-
+		std::array<float, 3> ImGuiCircleFillColor;
+		bool isCircleDrawn;
+		bool isTextDrawn;
 
 		//sf::Color textFillColor;
 		//sf::Color textOutlineColor;

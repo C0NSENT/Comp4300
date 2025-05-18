@@ -3,12 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1.1/build/_deps/imgui-sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1.1/build/_deps/imgui-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Assignment 1.1/build/_deps/sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1/build/_deps/imgui-sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1/build/_deps/imgui-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1/build/_deps/sfml-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/experiments/build/_deps/imgui-sfml-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/experiments/build/_deps/imgui-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/experiments/build/_deps/sfml-src" vcs="Git" />

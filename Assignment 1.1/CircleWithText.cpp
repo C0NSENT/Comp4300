@@ -42,6 +42,26 @@ std::array<float, 3> cwt::CircleWithText::SFMLColorToImGui(const sf::Color& colo
 	};
 }
 
+int cwt::CircleWithText::randomInt(std::mt19937_64 &gen, const int min, const int max) {
+	std::uniform_int_distribution distribution(min, max);
+	return distribution(gen);
+}
+
+float cwt::CircleWithText::randomFloat(std::mt19937_64 &gen, const float min, const float max) {
+	std::uniform_real_distribution distribution(min, max);
+	return distribution(gen);
+}
+
+sf::Color cwt::CircleWithText::invertColor(const sf::Color &color)
+{
+	return sf::Color{
+		static_cast<std::uint8_t>(255 - color.r),
+		static_cast<std::uint8_t>(255 - color.g),
+		static_cast<std::uint8_t>(255 - color.b),
+		color.a
+	};
+}
+
 void cwt::CircleWithText::processAxisCollision(
 	const float CenterPos,
 	const float Radius,
@@ -64,14 +84,14 @@ void cwt::CircleWithText::centeringText() {
 
 cwt::CircleWithText::CircleWithText(
 	const sf::Font& font,
-	const std::string& s_text,
+	const std::string& textString,
 	float radius,
-	std::size_t pointCount,
+	int pointCount,
 	const sf::Vector2f& position,
 	const sf::Vector2f& velocity
 	)
-	: circle{radius, pointCount}
-	, text(font, s_text, 24)
+	: circle{radius, static_cast<std::size_t> (pointCount)}
+	, text(font, textString, 24)
 	, velocity(velocity)
 {
 	std::cout << "CircleWithText::CircleWithText()" << std::endl;
@@ -83,6 +103,26 @@ cwt::CircleWithText::CircleWithText(
 
 }
 
+cwt::CircleWithText::CircleWithText(
+	std::mt19937_64 &gen,
+	const sf::Font &font,
+	const std::string &textString,
+	const sf::Vector2u &screenSize
+)
+	: circle(randomFloat(gen, 30.f, 200.f), randomInt(gen, 32, 64))
+	, text(font, textString, 24)
+{
+std::cout << "CircleWithText::CircleWithText()" << std::endl;
+	centeringText();
+	this->setPosition({randomFloat(gen, 0.f, screenSize.x), randomFloat(gen, 0.f, screenSize.y)});
+	this->setVelocity(sf::Vector2f{randomFloat(gen, -5.f, 5.f), randomFloat(gen, -5.f, 5.f)});
+	this->setCircleFillColor(sf::Color{
+		static_cast<std::uint8_t>(randomInt(gen, 0, 255)),
+		static_cast<std::uint8_t>(randomInt(gen, 0, 255)),
+		static_cast<std::uint8_t>(randomInt(gen, 0, 255)),
+	});
+	isCircleDrawn = isTextDrawn = true;
+}
 ///////////////////////////////////////////////////
 ////	СЕТТЕРЫ
 //////////////////////////////////////////////////

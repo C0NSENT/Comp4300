@@ -9,42 +9,36 @@
 #include <misc/cpp/imgui_stdlib.h> //Враппер для плюсов, чтобы с сишным калом не возиться
 
 #include<iostream>
-
-#include <list>
-#include <iterator>
 #include <vector>
 
-#include <algorithm>
 #include <random>
+#include <memory>
 //TODO: синглттон логгер
 
-std::vector<std::string> getShapesString(const std::list<cwt::CircleWithText>& lsShapes)
-{
-	std::vector<std::string> shapesString;
-	for (const auto& shape : lsShapes) {
-		shapesString.push_back(shape.getString());
-	}
-	return shapesString;
+int randomInt(std::mt19937& generator, int min, int max) {
+	std::uniform_int_distribution distribution(min, max);
+	return distribution(generator);
 }
 
-void moveShapes(std::list<cwt::CircleWithText>& lsShapes)
-{
-	for (auto& shape : lsShapes)
-		shape.move();
+float randomFloat(std::mt19937& generator, float min, float max) {
+	std::uniform_real_distribution distribution(min, max);
+	return distribution(generator);
 }
 
-/*cwt::CircleWithText findElement(const std::list<cwt::CircleWithText>& list, unsigned index)
+void initRandomCircle(const sf::Font& font, const std::string& text, cwt::CircleWithText& circle, std::mt19937& generator, const sf::Vector2u& screenSize)
 {
-	if (list.size() > index) {
-		auto it = list.begin();
-		std::advance(it, index);
-		return *it;
-	}
-
-	std::cerr << "List is out of range:" << list.size() << "<" << index << std::endl ;
-	throw std::out_of_range("List out of range") ;
-
-}*/
+	circle.setCircleFillColor( sf::Color{
+		static_cast<std::uint8_t>(randomInt(generator, 0, 255)),
+		static_cast<std::uint8_t>(randomInt(generator, 0, 255)),
+				static_cast<std::uint8_t>(randomInt(generator, 0, 255)),
+}
+	);
+	circle.setRadius(randomFloat(generator, 10.f, 100.f));
+	circle.setPointCount(randomInt(generator, 3, 64));
+	circle.setPosition({randomFloat(generator, 0.f, screenSize.x), randomFloat(generator, 0.f, screenSize.y)});
+	circle.setVelocity(sf::Vector2f{randomFloat(generator, -5.f, 5.f), randomFloat(generator, -5.f, 5.f)});
+	circle.setString(text);
+}
 
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
@@ -80,21 +74,26 @@ int main()
 
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
+
+	std::random_device seed;
+	std::mt19937_64 generator(seed());
 	
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
 	std::list<cwt::CircleWithText> lsCircles;
+	lsCircles.push_back(cwt::CircleWithText(generator, font, std::string{"Aboba"}, screenSize));
+	lsCircles.push_back(cwt::CircleWithText(generator, font, std::string{"Armen"}, screenSize));
+	lsCircles.push_back(cwt::CircleWithText(generator, font, std::string{"Van"}, screenSize));
 
-
-	cwt::CircleWithText VladimirPutinMolodets{font, "Aboba"};
-	VladimirPutinMolodets.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
+	//cwt::CircleWithText VladimirPutinMolodets{font, "Aboba"};
+	/*VladimirPutinMolodets.setPosition({screenSize.x /2.f, screenSize.y / 2.f});
 	VladimirPutinMolodets.setCircleFillColor(sf::Color{128, 32, 94});
 
 	lsCircles.push_back(VladimirPutinMolodets);
 	VladimirPutinMolodets.setString("Armen");
 	lsCircles.push_back(VladimirPutinMolodets);
 	VladimirPutinMolodets.setString("Van");
-	lsCircles.push_back(VladimirPutinMolodets);
+	lsCircles.push_back(VladimirPutinMolodets);*/
 
 	//cwt::ImGuiLoopHandler loopHandler;
 
@@ -113,7 +112,10 @@ int main()
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		std::vector vShapeStrings{getShapesString(lsCircles)};
+		std::vector<std::string> vShapeStrings;
+		for (auto& circle : lsCircles) {
+			vShapeStrings.push_back(circle.getString());
+		}
 		cwt::ImGuiLoopHandler loopHandler(selectedIndex, lsCircles);
 
 		ImGui::Begin("Settings");

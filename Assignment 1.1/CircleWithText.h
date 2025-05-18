@@ -10,6 +10,7 @@
 #include <string>
 #include <array>
 #include <list>
+#include <random>
 
 //TODO: Сделать перенос строки для текста в круге
 
@@ -22,6 +23,9 @@ namespace cwt
 		// Конвертация цветов между форматами ImGui и SFML
 		static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
 		static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
+		static int randomInt(std::mt19937_64& gen, const int min, const int max);
+		static float randomFloat(std::mt19937_64& gen, const float min, const float max);
+		static sf::Color invertColor(const sf::Color& color);
 
 		static void processAxisCollision(const float CenterPos, const float Radius, float& velocity,  float axis );
 
@@ -34,13 +38,19 @@ namespace cwt
 		//////////////////////////////////////////////////
 		CircleWithText(
 			const sf::Font& font,
-			const std::string& s_text,
+			const std::string& textString,
 			float radius = 50,
-			std::size_t pointCount = 32,
+			int pointCount = 32,
 			const sf::Vector2f& position = {0.f, 0.f},
 			const sf::Vector2f& velocity = {1.5f, 0.5f}
-			);
+		);
 
+		CircleWithText(
+			std::mt19937_64& gen,
+			const sf::Font& font,
+			const std::string& textString,
+			const sf::Vector2u& screenSize
+		);
 		///////////////////////////////////////////////////
 		////	СЕТТЕРЫ
 		//////////////////////////////////////////////////

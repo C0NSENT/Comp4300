@@ -13,9 +13,9 @@ namespace nc
     }
 
     sf::Color NamedCircle::ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor) {
-        auto convert = [](float channel) -> std::uint8_t {
-            if (channel <= 1.0f && channel >= 0.0f)
-                return static_cast<std::uint8_t>(std::round(channel * 255.f));
+        auto convert = [](const float colorChannel) -> std::uint8_t {
+            if (colorChannel <= 1.0f && colorChannel >= 0.0f)
+                return static_cast<std::uint8_t>(std::round(colorChannel * 255.f));
 
             throw std::invalid_argument("Invalid ImGuiColor");
         };
@@ -35,23 +35,32 @@ namespace nc
         };
     }
 
+    sf::Color NamedCircle::invertColor(const sf::Color& color)
+    {
+
+        auto invert = [](const std::uint8_t colorChannel) -> std::uint8_t
+        {
+            std::uint8_t inverted = 255 - colorChannel;
+
+            //Чуть для большей контрастности
+            if (inverted < 122)
+                inverted = std::min(inverted+40, 255);
+            else
+                inverted = std::max(inverted-40, 0);
+
+            return inverted;
+        };
+        return {invert(color.r), invert(color.g), invert(color.b), color.a};
+    }
+
     int NamedCircle::randomInt(std::mt19937_64& gen, const int min, const int max) {
         std::uniform_int_distribution distribution(min, max);
         return distribution(gen);
     }
 
-    float NamedCircle::randomFloat(std::mt19937_64& gen, const float min, float max) {
+    float NamedCircle::randomFloat(std::mt19937_64& gen, const float min, const float max) {
         std::uniform_real_distribution distribution(min, max);
         return distribution(gen);
-    }
-
-    sf::Color NamedCircle::invertColor(const sf::Color& color) {
-        return sf::Color{
-            static_cast<std::uint8_t>(255 - color.r),
-            static_cast<std::uint8_t>(255 - color.g),
-            static_cast<std::uint8_t>(255 - color.b),
-            color.a
-        };
     }
 
     void NamedCircle::processAxisCollision(const float centerPos, const float radius, float& velocity, const float axis) {
@@ -70,14 +79,14 @@ namespace nc
 
     NamedCircle::NamedCircle(
         const sf::Font& font,
-        const std::string& textString,
+        const sf::String& name,
         const float radius,
         const int pointCount,
         const sf::Vector2f& position,
         const sf::Vector2f& velocity
     )
         : circle{radius, static_cast<std::size_t>(pointCount)}
-    , name(font, textString, 24)
+    , name(font, name, 24)
     , velocity(velocity)
     {
         std::cout << "NamedCircle::NamedCircle()" << std::endl;
@@ -89,11 +98,11 @@ namespace nc
     NamedCircle::NamedCircle(
         std::mt19937_64& gen,
         const sf::Font& font,
-        const std::string& textString,
+        const sf::String& name,
         const sf::Vector2u& screenSize
     )
         : circle(randomFloat(gen, 30.f, 200.f), randomInt(gen, 32, 64))
-        , name(font, textString, 24)
+        , name(font, name, 24)
     {
         std::cout << "NamedCircle::NamedCircle()" << std::endl;
         centeringText();
@@ -154,8 +163,8 @@ namespace nc
         setVelocity(sf::Vector2f{velocity[0], velocity[1]});
     }
 
-    void NamedCircle::setString(const std::string& text) {
-        this->name.setString(text);
+    void NamedCircle::setName(const std::string& name) {
+        this->name.setString(name);
         centeringText();
     }
 
@@ -163,32 +172,26 @@ namespace nc
     ////    ГЕТТЕРЫ
     ///////////////////////////////////////////////////
 
-    std::array<float, 3> NamedCircle::getImGuiFillColor() const {
-        return SFMLColorToImGui(this->circle.getFillColor());
-    }
-
-    std::array<float, 2> NamedCircle::getImGuiVelocity() const {
-        return {velocity.x, velocity.y};
-    }
-
-    sf::Vector2f NamedCircle::getPosition() const {
-        return circle.getPosition();
-    }
-
     float NamedCircle::getRadius() const {
         return circle.getRadius();
     }
-
-    sf::Vector2f NamedCircle::getVelocity() const {
-        return velocity;
-    }
-
     std::size_t NamedCircle::getPointCount() const {
         return circle.getPointCount();
     }
-
-    std::string NamedCircle::getString() const {
+    std::string NamedCircle::getName() const {
         return name.getString();
+    }
+    sf::Vector2f NamedCircle::getPosition() const {
+        return circle.getPosition();
+    }
+    sf::Vector2f NamedCircle::getVelocity() const {
+        return velocity;
+    }
+    std::array<float, 2> NamedCircle::getImGuiVelocity() const {
+        return {velocity.x, velocity.y};
+    }
+    std::array<float, 3> NamedCircle::getImGuiFillColor() const {
+        return SFMLColorToImGui(this->circle.getFillColor());
     }
 
     ///////////////////////////////////////////////////
@@ -220,10 +223,6 @@ namespace nc
         );
     }
 
-    ///////////////////////////////////////////////////
-    ////	ImGuiLoopHandler
-    //////////////////////////////////////////////////
-
     NamedCircle getElement(const unsigned selectedIndex, const std::list<NamedCircle> &lsCircles)
     {
 	    if (selectedIndex < lsCircles.size()) {
@@ -231,8 +230,8 @@ namespace nc
 		    std::advance(it, selectedIndex);
 		    return *it;
 	    }
-	    std::cerr << "List is out of range:" << lsCircles.size() << "<" << selectedIndex << std::endl;
-	    throw std::out_of_range("List out of range");
+	    throw std::out_of_range("List out of range: list size = " + std::to_string(lsCircles.size())
+	        + ", selectedIndex = " + std::to_string(selectedIndex));
     }
 
     NamedCircle& getElementRef(const unsigned selectedIndex, std::list<NamedCircle> &lsCircles)
@@ -244,15 +243,19 @@ namespace nc
 	    return *it;
     }
 
+    ///////////////////////////////////////////////////
+    ////	ImGuiLoopHandler
+    //////////////////////////////////////////////////
+
     ImGuiLoopHandler::ImGuiLoopHandler(const unsigned selectedIndex, const NamedCircle &circle)
 	    : currentIndex(selectedIndex)
 	    , radius(circle.getRadius())
 	    , pointCount(circle.getPointCount())
 	    , velocity(circle.getVelocity())
-	    , textString(circle.getString())
+	    , name(circle.getName())
 	    , ImGuiCircleFillColor(circle.getImGuiFillColor())
 	    , isCircleDrawn(circle.isCircleDrawn)
-	    , isTextDrawn(circle.isTextDrawn)
+	    , isNameDrawn(circle.isTextDrawn)
     {
     }
 
@@ -263,12 +266,11 @@ namespace nc
     {
 	    radius = circle.getRadius();
 	    pointCount = circle.getPointCount();
-	    //position = circle.getPosition();
 	    velocity = circle.getVelocity();
-	    textString = circle.getString();
+	    name = circle.getName();
 	    ImGuiCircleFillColor = circle.getImGuiFillColor();
 	    isCircleDrawn = circle.isCircleDrawn;
-	    isTextDrawn = circle.isTextDrawn;
+	    isNameDrawn = circle.isTextDrawn;
 
 	    return *this;
     }
@@ -279,20 +281,16 @@ namespace nc
 		    std::cout << "Updating circle with selectedIndex " << selectedIndex << std::endl;
 		    circle.setRadius(radius, screenSize);
 		    if (circle.getPointCount() != pointCount) circle.setPointCount(pointCount);
-		    //if (circle.getPosition() != position) circle.setPosition(position);
 		    if (circle.getVelocity() != velocity) circle.setVelocity(velocity);
-		    if (circle.getString() != textString) circle.setString(textString);
+		    if (circle.getName() != name) circle.setName(name);
 		    if (circle.getImGuiFillColor() != ImGuiCircleFillColor) circle.setCircleFillColor(ImGuiCircleFillColor);
 		    circle.isCircleDrawn = isCircleDrawn;
-		    circle.isTextDrawn = isTextDrawn;
+		    circle.isTextDrawn = isNameDrawn;
 	    }
-	    //circle.move();
     }
 
     void ImGuiLoopHandler::UpdateNC(const unsigned selectedIndex, std::list<NamedCircle> &lsCircles,
-        const sf::Vector2u& screenSize) const
-    {
-	    auto temp = getElementRef(selectedIndex, lsCircles);
+        const sf::Vector2u& screenSize) const {
 	    UpdateNC(selectedIndex, getElementRef(selectedIndex, lsCircles), screenSize);
     }
 }

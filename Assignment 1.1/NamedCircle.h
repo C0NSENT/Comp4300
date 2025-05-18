@@ -5,6 +5,8 @@
 #ifndef CIRCLEWITHTEXT_H
 #define CIRCLEWITHTEXT_H
 
+#include "FileStreams.cpp"
+
 #include <SFML/Graphics.hpp>
 
 #include <string>
@@ -40,7 +42,7 @@ namespace nc
 		//////////////////////////////////////////////////
 		NamedCircle(
 			const sf::Font& font,
-			const std::string& textString,
+			const sf::String& name,
 			float radius = 50,
 			int pointCount = 32,
 			const sf::Vector2f& position = {0.f, 0.f},
@@ -50,7 +52,7 @@ namespace nc
 		NamedCircle(
 			std::mt19937_64& gen,
 			const sf::Font& font,
-			const std::string& textString,
+			const sf::String& name,
 			const sf::Vector2u& screenSize
 		);
 		///////////////////////////////////////////////////
@@ -67,19 +69,23 @@ namespace nc
 		void setPointCount(const std::size_t& pointCount);
 		void setVelocity(const sf::Vector2f& velocity);
 		void setVelocity(const std::array<float, 2>& velocity);
-		void setString(const std::string& text);
+		void setName(const std::string& name);
 
 		///////////////////////////////////////////////////
 		////	ГЕТТЕРЫ
 		//////////////////////////////////////////////////
 
-		[[nodiscard]]std::array<float, 3> getImGuiFillColor() const;
-		[[nodiscard]]std::array<float, 2> getImGuiVelocity() const;
-		[[nodiscard]]sf::Vector2f getPosition() const;
-		[[nodiscard]]float getRadius() const;
-		[[nodiscard]]std::size_t getPointCount() const;
-		[[nodiscard]]sf::Vector2f getVelocity() const;
-		[[nodiscard]]std::string getString() const;
+		[[nodiscard]] float getRadius() const;
+		[[nodiscard]] std::size_t getPointCount() const;
+		[[nodiscard]] std::string getName() const;
+		[[nodiscard]] sf::Vector2f getPosition() const;
+		[[nodiscard]] sf::Vector2f getVelocity() const;
+		[[nodiscard]] std::array<float, 2> getImGuiVelocity() const;
+		[[nodiscard]] std::array<float, 3> getImGuiFillColor() const;
+
+		///////////////////////////////////////////////////
+		////    ДРУГИЕ МЕТОДЫ
+		///////////////////////////////////////////////////
 
 		void move();
 		void draw(sf::RenderWindow& window) const;
@@ -101,8 +107,6 @@ namespace nc
 		sf::Vector2f velocity;
 		sf::Vector2f textCenter;
 	};
-
-
 
 	[[nodiscard]] NamedCircle getElement(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
 	[[nodiscard]] NamedCircle& getElementRef(unsigned selectedIndex, std::list<NamedCircle>& lsCircles);
@@ -135,16 +139,11 @@ namespace nc
 
 		float radius;
 		int pointCount;
-		//sf::Vector2f position;
 		sf::Vector2f velocity;
-		std::string textString;
+		std::string name;
 		std::array<float, 3> ImGuiCircleFillColor;
 		bool isCircleDrawn;
-		bool isTextDrawn;
-
-		//sf::Color textFillColor;
-		//sf::Color textOutlineColor;
-		//float textOutlineThickness;
+		bool isNameDrawn;
 	};
 }
 

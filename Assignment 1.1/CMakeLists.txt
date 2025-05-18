@@ -9,6 +9,7 @@ add_subdirectory(
 add_executable(${PROJECT_NAME}
         NamedCircle.h
         NamedCircle.cpp
+        FileStreams.cpp
         main.cpp
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE external_libs)

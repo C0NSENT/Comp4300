@@ -17,7 +17,7 @@ namespace nc
             if (colorChannel <= 1.0f && colorChannel >= 0.0f)
                 return static_cast<std::uint8_t>(std::round(colorChannel * 255.f));
 
-            throw std::invalid_argument("Invalid ImGuiColor");
+            throw std::invalid_argument("Invalid ImGuiColor " + std::to_string(colorChannel) + " for sf::Color");
         };
 
         return sf::Color{
@@ -44,9 +44,9 @@ namespace nc
 
             //Чуть для большей контрастности
             if (inverted < 122)
-                inverted = std::min(inverted+40, 255);
+                inverted = std::min(inverted+50, 255);
             else
-                inverted = std::max(inverted-40, 0);
+                inverted = std::max(inverted-50, 0);
 
             return inverted;
         };
@@ -64,8 +64,31 @@ namespace nc
     }
 
     void NamedCircle::processAxisCollision(const float centerPos, const float radius, float& velocity, const float axis) {
-        if (centerPos - radius <= 0.f || centerPos + radius >= axis)
-            velocity *= -1;
+        /*if (centerPos - radius <= 0.f || centerPos + radius >= axis)
+            velocity *= -1;*/
+        /*if (centerPos - radius >= 0.f) {
+            velocity = velocity < 0.f ? -velocity : velocity;
+        }
+        else if (centerPos + radius >= axis) {
+            velocity = velocity > 0.f ? -velocity : velocity;
+        }*/
+        if (centerPos - radius <= 0.f) {
+            if (velocity < 0.f) velocity = -velocity; // Reverse negative velocity
+        }
+        // Check if the circle is colliding with the right/bottom boundary
+        else if (centerPos + radius >= axis) {
+            if (velocity > 0.f) velocity = -velocity; // Reverse positive velocity
+        }
+        //Ну да юзанул нейросеть, фаршмак знаю
+    }
+
+    void NamedCircle::processOtherCircleCollision(NamedCircle &otherCircle)
+    {
+        std::cout << "NamedCircle::processOtherCircleCollision()" << std::endl;
+        if (circle.getGlobalBounds().findIntersection(otherCircle.circle.getGlobalBounds())) {
+            this->velocity = {velocity.x * -1, velocity.y * -1};
+            otherCircle.velocity = {otherCircle.velocity.x * -1, otherCircle.velocity.y * -1};
+        }
     }
 
     void NamedCircle::centeringText() {
@@ -106,8 +129,8 @@ namespace nc
     {
         std::cout << "NamedCircle::NamedCircle()" << std::endl;
         centeringText();
-        this->setPosition({randomFloat(gen, 0.f, screenSize.x),
-            randomFloat(gen, 0.f, screenSize.y)});
+        this->setPosition({randomFloat(gen, 0.f, static_cast<float>(screenSize.x)),
+            randomFloat(gen, 0.f, static_cast<float>(screenSize.y))});
         this->setVelocity(sf::Vector2f{randomFloat(gen, -5.f, 5.f),
             randomFloat(gen, -5.f, 5.f)});
         this->setColor(sf::Color{
@@ -194,6 +217,23 @@ namespace nc
         return SFMLColorToImGui(this->circle.getFillColor());
     }
 
+    bool NamedCircle::operator==(const NamedCircle &other) const
+    {
+        if (circle.getPosition() == other.circle.getPosition()
+            && circle.getRadius() == other.circle.getRadius()
+            && circle.getPointCount() == other.circle.getPointCount()
+            && circle.getFillColor() == other.circle.getFillColor()
+            && name.getString() == other.name.getString()
+            && velocity == other.velocity
+            && textCenter == other.textCenter
+            && isCircleDrawn == other.isCircleDrawn
+            && isTextDrawn == other.isTextDrawn)
+            {
+            return true;
+        }
+        return false;
+    }
+
     ///////////////////////////////////////////////////
     ////    ДРУГИЕ МЕТОДЫ
     ///////////////////////////////////////////////////
@@ -207,40 +247,40 @@ namespace nc
         if (isTextDrawn) window.draw(name);
     }
 
-    void NamedCircle::processScreenCollision(const sf::Vector2u& windowSize) {
+    void NamedCircle::processScreenCollision(const sf::Vector2u& screenSize) {
         processAxisCollision(
             circle.getGlobalBounds().getCenter().x,
             circle.getRadius(),
             velocity.x,
-            windowSize.x
+            static_cast<float>(screenSize.x)
         );
 
         processAxisCollision(
             circle.getGlobalBounds().getCenter().y,
             circle.getRadius(),
             velocity.y,
-            windowSize.y
+            static_cast<float>(screenSize.y)
         );
     }
 
     NamedCircle getElement(const unsigned selectedIndex, const std::list<NamedCircle> &lsCircles)
     {
-	    if (selectedIndex < lsCircles.size()) {
-		    auto it = lsCircles.begin();
-		    std::advance(it, selectedIndex);
-		    return *it;
-	    }
-	    throw std::out_of_range("List out of range: list size = " + std::to_string(lsCircles.size())
-	        + ", selectedIndex = " + std::to_string(selectedIndex));
+        if (selectedIndex < lsCircles.size()) {
+            auto it = lsCircles.begin();
+            std::advance(it, selectedIndex);
+            return *it;
+        }
+        throw std::out_of_range("List out of range: list size = " + std::to_string(lsCircles.size())
+            + ", selectedIndex = " + std::to_string(selectedIndex));
     }
 
     NamedCircle& getElementRef(const unsigned selectedIndex, std::list<NamedCircle> &lsCircles)
     {
-	    auto it = lsCircles.begin();
-	    if (selectedIndex < lsCircles.size()) {
-		    std::advance(it, selectedIndex);
-	    }
-	    return *it;
+        auto it = lsCircles.begin();
+        if (selectedIndex < lsCircles.size()) {
+            std::advance(it, selectedIndex);
+        }
+        return *it;
     }
 
     ///////////////////////////////////////////////////
@@ -248,50 +288,49 @@ namespace nc
     //////////////////////////////////////////////////
 
     ImGuiLoopHandler::ImGuiLoopHandler(const unsigned selectedIndex, const NamedCircle &circle)
-	    : currentIndex(selectedIndex)
-	    , radius(circle.getRadius())
-	    , pointCount(circle.getPointCount())
-	    , velocity(circle.getVelocity())
-	    , name(circle.getName())
-	    , ImGuiCircleFillColor(circle.getImGuiFillColor())
-	    , isCircleDrawn(circle.isCircleDrawn)
-	    , isNameDrawn(circle.isTextDrawn)
-    {
-    }
+        : currentIndex(selectedIndex)
+        , radius(circle.getRadius())
+        , pointCount(static_cast<int>(circle.getPointCount()))
+        , velocity(circle.getVelocity())
+        , name(circle.getName())
+        , ImGuiCircleFillColor(circle.getImGuiFillColor())
+        , isCircleDrawn(circle.isCircleDrawn)
+        , isNameDrawn(circle.isTextDrawn)
+    {}
 
     ImGuiLoopHandler::ImGuiLoopHandler(const unsigned selectedIndex, const std::list<NamedCircle> &lsCircles)
-	    : ImGuiLoopHandler(selectedIndex, getElement(selectedIndex, lsCircles)) {}
+        : ImGuiLoopHandler(selectedIndex, getElement(selectedIndex, lsCircles)) {}
 
     ImGuiLoopHandler & ImGuiLoopHandler::operator=(const NamedCircle &circle)
     {
-	    radius = circle.getRadius();
-	    pointCount = circle.getPointCount();
-	    velocity = circle.getVelocity();
-	    name = circle.getName();
-	    ImGuiCircleFillColor = circle.getImGuiFillColor();
-	    isCircleDrawn = circle.isCircleDrawn;
-	    isNameDrawn = circle.isTextDrawn;
+        radius = circle.getRadius();
+        pointCount = static_cast<int>(circle.getPointCount());
+        velocity = circle.getVelocity();
+        name = circle.getName();
+        ImGuiCircleFillColor = circle.getImGuiFillColor();
+        isCircleDrawn = circle.isCircleDrawn;
+        isNameDrawn = circle.isTextDrawn;
 
-	    return *this;
+        return *this;
     }
 
     void ImGuiLoopHandler::UpdateNC(const unsigned selectedIndex, NamedCircle &circle, const sf::Vector2u& screenSize) const
     {
-	    if (currentIndex == selectedIndex) {
-		    std::cout << "Updating circle with selectedIndex " << selectedIndex << std::endl;
-		    circle.setRadius(radius, screenSize);
-		    if (circle.getPointCount() != pointCount) circle.setPointCount(pointCount);
-		    if (circle.getVelocity() != velocity) circle.setVelocity(velocity);
-		    if (circle.getName() != name) circle.setName(name);
-		    if (circle.getImGuiFillColor() != ImGuiCircleFillColor) circle.setCircleFillColor(ImGuiCircleFillColor);
-		    circle.isCircleDrawn = isCircleDrawn;
-		    circle.isTextDrawn = isNameDrawn;
-	    }
+        if (currentIndex == selectedIndex) {
+            std::cout << "Updating circle with selectedIndex " << selectedIndex << std::endl;
+            circle.setRadius(radius, screenSize);
+            if (circle.getPointCount() != pointCount) circle.setPointCount(pointCount);
+            if (circle.getVelocity() != velocity) circle.setVelocity(velocity);
+            if (circle.getName() != name) circle.setName(name);
+            if (circle.getImGuiFillColor() != ImGuiCircleFillColor) circle.setColor(ImGuiCircleFillColor);
+            circle.isCircleDrawn = isCircleDrawn;
+            circle.isTextDrawn = isNameDrawn;
+        }
     }
 
     void ImGuiLoopHandler::UpdateNC(const unsigned selectedIndex, std::list<NamedCircle> &lsCircles,
         const sf::Vector2u& screenSize) const {
-	    UpdateNC(selectedIndex, getElementRef(selectedIndex, lsCircles), screenSize);
+        UpdateNC(selectedIndex, getElementRef(selectedIndex, lsCircles), screenSize);
     }
 }
 

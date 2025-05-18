@@ -5,8 +5,6 @@
 #ifndef CIRCLEWITHTEXT_H
 #define CIRCLEWITHTEXT_H
 
-#include "FileStreams.cpp"
-
 #include <SFML/Graphics.hpp>
 
 #include <string>
@@ -31,7 +29,6 @@ namespace nc
 		static float randomFloat(std::mt19937_64& gen, float min, float max);
 
 		static void processAxisCollision(float centerPos, float radius, float& velocity,  float axis );
-		//static void processCircleSizeChangeCollision(float CenterPos, float Radius, )
 
 		void centeringText();
 
@@ -83,13 +80,16 @@ namespace nc
 		[[nodiscard]] std::array<float, 2> getImGuiVelocity() const;
 		[[nodiscard]] std::array<float, 3> getImGuiFillColor() const;
 
+		bool operator==(const NamedCircle& other) const;
+
 		///////////////////////////////////////////////////
 		////    ДРУГИЕ МЕТОДЫ
 		///////////////////////////////////////////////////
 
 		void move();
 		void draw(sf::RenderWindow& window) const;
-		void processScreenCollision(const sf::Vector2u& windowSize);
+		void processScreenCollision(const sf::Vector2u& screenSize);
+		void processOtherCircleCollision(NamedCircle& otherCircle);
 
 		///////////////////////////////////////////////////
 		////	СВОЙСТВА
@@ -98,7 +98,6 @@ namespace nc
 		sf::CircleShape circle;
 		sf::Text name;
 
-		//TODO: НАРОД ТРЕБУЕТ БИТСЕТ
 		bool isCircleDrawn;
 		bool isTextDrawn;
 
@@ -121,7 +120,7 @@ namespace nc
 		////	КОНСТУКТОРЫ
 		//////////////////////////////////////////////////
 
-		ImGuiLoopHandler() = default;
+		ImGuiLoopHandler() = delete;
 		ImGuiLoopHandler(unsigned selectedIndex, const NamedCircle& circle);
 		ImGuiLoopHandler(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
 

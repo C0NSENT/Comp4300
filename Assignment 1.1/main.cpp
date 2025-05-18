@@ -3,13 +3,13 @@
 //
 
 #include "NamedCircle.h"
+#include "FileStreams.cpp""
 
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include <misc/cpp/imgui_stdlib.h> //Враппер для плюсов, чтобы с сишным калом не возиться
 
 #include<iostream>
-#include <fstream>
 #include <vector>
 
 #include <random>
@@ -26,8 +26,53 @@ void outputSfVector(const std::string& label, const sf::FloatRect& vector) {
 		<< ", " << vector.position.y << std::endl;
 }
 
+/*void processCirclesCollision(const std::list<nc::NamedCircle>& lsCircles)
+{
+	auto temp = lsCircles;
+	auto itBegin = temp.begin();
+	auto itEnd = temp.end();
+	/*for (auto& circle : temp) {
+		for (auto& otherCircle : temp) {
+				if (circle.processOtherCircleCollision(otherCircle)) {
 
-
+			}
+		}
+	}#1#
+	while (itBegin != itEnd) {
+		if (itBegin->processOtherCircleCollision(*itEnd)) {
+			std::cout << "asfasdfasdfds" << std::endl;
+			temp.erase(itBegin);
+			temp.erase(itEnd);
+			itBegin = temp.begin();
+			itEnd = temp.end();
+		}
+		else {
+			++itBegin;
+			--itEnd;
+		}
+	}
+}*/
+void processCirclesCollision(std::list<nc::NamedCircle>& lsCircles)
+{
+	std::vector isProcessed(lsCircles.size(), false);
+	//std::cout << "asfasdfasdfds" << std::endl;
+	int it1Index = 0;
+	for (auto & circle : lsCircles) {
+		int it2Index = 0;
+		for (auto & otherCircle : lsCircles) {
+			if (not(isProcessed[it2Index] && isProcessed[it1Index])) {
+				if (circle.circle.getGlobalBounds().findIntersection(otherCircle.circle.getGlobalBounds())) {
+					circle.processOtherCircleCollision(otherCircle);
+					isProcessed[it2Index] = true;
+					isProcessed[it1Index] = true;
+				}
+			}
+			++it2Index;
+			++it1Index;
+		}
+	}
+	//std::cout << "asfasdfasdfds" << std::endl;
+}
 int main()
 {
 	constexpr sf::Vector2u screenSize{1280, 720};
@@ -43,7 +88,6 @@ int main()
 
 	std::random_device seed;
 	std::mt19937_64 gen(seed());
-
 
 	NamesParser fNames("../../../Comp4300/Assignment 1.1/names.txt");
 
@@ -123,12 +167,16 @@ int main()
 
 		window.clear();
 
+
+		processCirclesCollision(lsCircles);
+
 		for (auto& circle : lsCircles) {
 			std::cout << "Shape: " << circle.getName() << std::endl;
 			circle.processScreenCollision(screenSize);
 			circle.move();
 			circle.draw(window);
 		}
+
 
 		ImGui::SFML::Render(window);
 		window.display();

@@ -71,6 +71,7 @@ namespace nc
 		[[nodiscard]] constexpr std::size_t getPointCount() const;
 		[[nodiscard]] constexpr std::string getName() const;
 		[[nodiscard]] constexpr sf::Vector2f getPosition() const;
+		[[nodiscard]] constexpr sf::Vector2f getCircleCenter() const;
 		[[nodiscard]] constexpr sf::Vector2f getVelocity() const;
 		[[nodiscard]] constexpr std::array<float, 2> getImGuiVelocity() const;
 		[[nodiscard]] constexpr std::array<float, 3> getImGuiFillColor() const;
@@ -93,22 +94,26 @@ namespace nc
 		sf::CircleShape circle;
 		sf::Text name;
 
-		bool isCircleDrawn;
-		bool isTextDrawn;
-
-	private:
-
 		sf::Vector2f velocity;
 		sf::Vector2f textCenter;
+
+		bool isCircleDrawn;
+		bool isTextDrawn;
 	};
 
 	///////////////////////////////////////////////////
 	////	ФУНКЦИИ ДЛЯ СТОРОННИХ КЛАССОВ
 	//////////////////////////////////////////////////
 
-	// Можно если что удалить
-	template<typename VectorType, typename DivisorType>
-	static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
+	template<typename T>
+	void invertSignTo(const bool isPositive, T &num)
+	{
+		if (isPositive)
+			num = std::abs(num);
+		else
+			num = -std::abs(num);
+	}
+
 
 	static NamedCircle getElement(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
 	static NamedCircle& getElementRef(unsigned selectedIndex, std::list<NamedCircle>& lsCircles);

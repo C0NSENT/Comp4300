@@ -75,7 +75,7 @@ namespace nc
     constexpr void NamedCircle::centeringText() {
         std::cout << "NamedCircle::centeringText()" << std::endl;
 
-        this->textCenter = circle.getLocalBounds().getCenter()
+        this->textCenter = this->circle.getLocalBounds().getCenter()
             - name.getLocalBounds().getCenter();
     }
 
@@ -190,6 +190,11 @@ namespace nc
     constexpr sf::Vector2f NamedCircle::getPosition() const {
         return circle.getPosition();
     }
+
+    constexpr sf::Vector2f NamedCircle::getCircleCenter() const {
+        return circle.getGlobalBounds().getCenter();
+    }
+
     constexpr sf::Vector2f NamedCircle::getVelocity() const {
         return velocity;
     }
@@ -234,35 +239,24 @@ namespace nc
     void NamedCircle::processScreenCollision(const sf::Vector2u& screenSize)
     {
         processAxisCollision(
-            circle.getGlobalBounds().getCenter().x,
+            this->getCircleCenter().x,
             circle.getRadius(),
             velocity.x,
             static_cast<float>(screenSize.x)
         );
 
         processAxisCollision(
-            circle.getGlobalBounds().getCenter().y,
+            this->getCircleCenter().y,
             circle.getRadius(),
             velocity.y,
             static_cast<float>(screenSize.y)
         );
     }
 
-    /*
-    constexpr void NamedCircle::processOtherCircleCollision(NamedCircle &otherCircle)
-    {
-        std::cout << "NamedCircle::processOtherCircleCollision()" << std::endl;
-        if (circle.getGlobalBounds().findIntersection(otherCircle.circle.getGlobalBounds())) {
-            this->velocity = {velocity.x * -1, velocity.y * -1};
-            otherCircle.velocity = {otherCircle.velocity.x * -1, otherCircle.velocity.y * -1};
-        }
-    }
-    */
+    ///////////////////////////////////////////////////
+    ////	ФУНКЦИИ ДЛЯ СТОРОННИХ КЛАССОВ
+    //////////////////////////////////////////////////
 
-    template<typename VectorType, typename DivisorType>
-    auto vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor) -> sf::Vector2<VectorType> {
-        return sf::Vector2<VectorType>{v.x / divisor, v.y / divisor};
-    }
 
     NamedCircle getElement(const unsigned selectedIndex, const std::list<NamedCircle> &lsCircles)
     {

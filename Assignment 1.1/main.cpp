@@ -17,7 +17,6 @@
 //TODO: синглттон логгер
 //TODO: наконец по-человечески реализовать обработку коллизий кругов друг с другом
 
-
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
 	std::cout << label << ": " << vector.x << ", " << vector.y << std::endl;
@@ -57,7 +56,7 @@ int main()
 	constexpr auto windowTitle{"Podnimayemsya s Kolen"};
 
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
-	window.setFramerateLimit(120);
+	window.setFramerateLimit(60);
 	static_cast<void>(ImGui::SFML::Init(window));
 
 	sf::Clock deltaClock{};
@@ -73,7 +72,7 @@ int main()
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
 	std::list<nc::NamedCircle> lsCircles{};
-	for (short i = 0; i < 7; i++)
+	for (short i = 0; i < 3; i++)
 		lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
 
 	int selectedIndex{0};
@@ -135,8 +134,8 @@ int main()
 
 				if (ImGui::Button("Add Circle"))
 				{
-					for (short i = 0; i < 1000; i++)
-						lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
+					//for (short i = 0; i < 1000; i++)
+					lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
 				}
 				ImGui::EndTabItem();
 			}
@@ -148,7 +147,7 @@ int main()
 
 		loopHandler.UpdateNC(selectedIndex, lsCircles, screenSize);
 
-		//processCirclesCollision(lsCircles);
+		processCirclesCollision(lsCircles);
 
 		for (auto& circle : lsCircles) {
 			std::cout << "Shape: " << circle.getName() << std::endl;
@@ -164,8 +163,51 @@ int main()
 	return 0;
 }
 
+//ЭТО ПИЗДЕЦ
 void processCirclesCollision(std::list<nc::NamedCircle> &lsCircles)
 {
 	std::vector isProcessed(lsCircles.size(), false);
 
+	auto i{0};
+	for (auto it1 = lsCircles.begin(); it1 != lsCircles.end(); ++it1, i++)
+	{
+		auto j{0};
+		for (auto it2 = std::next(it1); it2 != lsCircles.end(); ++it2, j++)
+		{
+			const std::pair circle1{it1->getCircleCenter(),
+				it1->getRadius()};
+			const std::pair circle2{it2->getCircleCenter(),
+				it2->getRadius()};
+
+			//Отрезки
+			const sf::Vector2f lineSegments{ circle1.first.x - circle2.first.x,
+				circle1.first.y - circle2.first.y };
+
+			//Расстояние между двумя центрами кругов
+			float hypotenuse = std::sqrt(std::pow(lineSegments.x,2) + std::pow(lineSegments.y, 2));
+
+			if (hypotenuse <= (circle1.second + circle2.second)) {
+
+				if (circle1.first.x < circle2.first.x) {
+					nc::invertSignTo(false, it1->velocity.x);
+					nc::invertSignTo(true, it2->velocity.x);
+				}
+				else {
+					nc::invertSignTo(true, it1->velocity.x);
+					nc::invertSignTo(false, it2->velocity.x);
+				}
+
+				if (circle1.first.y < circle2.first.y) {
+					nc::invertSignTo(false, it1->velocity.y);
+					nc::invertSignTo(true, it2->velocity.y);
+				}
+				else {
+					nc::invertSignTo(true, it1->velocity.y);
+					nc::invertSignTo(false, it2->velocity.y);
+				}
+
+			}
+		}
+
+	}
 }

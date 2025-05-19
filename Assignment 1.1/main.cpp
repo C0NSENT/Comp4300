@@ -15,7 +15,7 @@
 #include <random>
 
 //TODO: синглттон логгер
-//TODO: наконец по-человечески реализовать обработку коллизий кругов друг с другом
+//TODO: Переделать добавление новых кругов, чтобы они друга на друга не накладывались
 
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
@@ -26,25 +26,6 @@ void outputSfVector(const std::string& label, const sf::FloatRect& vector) {
 	std::cout << label << ": " << vector.position.x
 		<< ", " << vector.position.y << std::endl;
 }
-/*void processCirclesCollision(std::list<nc::NamedCircle>& lsCircles)
-{
-	std::vector isProcessed(lsCircles.size(), false);
-	int it1Index = 0;
-	for (auto & circle : lsCircles) {
-		int it2Index = 0;
-		for (auto & otherCircle : lsCircles) {
-			if (not(isProcessed[it2Index] && isProcessed[it1Index])) {
-				if (circle.circle.getGlobalBounds().findIntersection(otherCircle.circle.getGlobalBounds())) {
-					circle.processOtherCircleCollision(otherCircle);
-					isProcessed[it2Index] = true;
-					isProcessed[it1Index] = true;
-				}
-			}
-			++it2Index;
-			++it1Index;
-		}
-	}
-}*/
 
 //TODO: Переделать рандом, а то кал какой-то
 void initCirclesList(NamesParser& fNames, std::list<nc::NamedCircle>& lsCircles, const sf::Vector2u& screenSize);

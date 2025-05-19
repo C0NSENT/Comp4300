@@ -18,14 +18,18 @@ namespace nc
 {
 	class NamedCircle {
 		// Конвертация цветов между форматами ImGui и SFML
-		constexpr static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
-		constexpr static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
+		constexpr static sf::Color ImGuiColorToSFMLColor(
+			const std::array<float, 3>& ImGuiColor);
+		constexpr static std::array<float, 3> SFMLColorToImGui(
+			const sf::Color& color);
 		constexpr static sf::Color invertColor(const sf::Color& color);
 
 		constexpr static int randomInt(std::mt19937_64& gen, int min, int max);
-		constexpr static float randomFloat(std::mt19937_64& gen, float min, float max);
+		constexpr static float randomFloat(std::mt19937_64& gen,
+			float min, float max);
 
-		constexpr static void processAxisCollision(float centerPos, float radius, float& velocity,  float axis );
+		constexpr static void processAxisCollision(float centerPos,
+			float radius, float& velocity,  float axis );
 		constexpr void centeringText();
 
 	public:
@@ -67,14 +71,31 @@ namespace nc
 		////	ГЕТТЕРЫ
 		//////////////////////////////////////////////////
 
-		[[nodiscard]] constexpr float getRadius() const;
-		[[nodiscard]] constexpr std::size_t getPointCount() const;
-		[[nodiscard]] constexpr std::string getName() const;
-		[[nodiscard]] constexpr sf::Vector2f getPosition() const;
-		[[nodiscard]] constexpr sf::Vector2f getCircleCenter() const;
-		[[nodiscard]] constexpr sf::Vector2f getVelocity() const;
-		[[nodiscard]] constexpr std::array<float, 2> getImGuiVelocity() const;
-		[[nodiscard]] constexpr std::array<float, 3> getImGuiFillColor() const;
+		//оказывается при объявлении функции constexpr она становится inline
+		[[nodiscard]] constexpr float getRadius() const {
+			return circle.getRadius();
+		}
+		[[nodiscard]] constexpr auto getPointCount() const -> std::size_t {
+			return circle.getPointCount();
+		}
+		[[nodiscard]] constexpr auto getName() const -> std::string {
+			return name.getString();
+		}
+		[[nodiscard]] constexpr auto getPosition() const -> sf::Vector2f{
+			return circle.getPosition();
+		}
+		[[nodiscard]] constexpr auto getCircleCenter() const -> sf::Vector2f {
+			return circle.getGlobalBounds().getCenter();
+		}
+		[[nodiscard]] constexpr auto getVelocity() const -> sf::Vector2f {
+			return velocity;
+		}
+		[[nodiscard]] constexpr auto getImGuiVelocity() const ->  std::array<float, 2> {
+			return {velocity.x, velocity.y};
+		}
+		[[nodiscard]] constexpr auto getImGuiFillColor() const -> std::array<float, 3> {
+			return SFMLColorToImGui(this->circle.getFillColor());
+		}
 
 		bool operator==(const NamedCircle& other) const;
 
@@ -85,7 +106,6 @@ namespace nc
 		void move();
 		void draw(sf::RenderWindow& window) const;
 		void processScreenCollision(const sf::Vector2u& screenSize);
-		//void processOtherCircleCollision(NamedCircle& otherCircle);
 
 		///////////////////////////////////////////////////
 		////	СВОЙСТВА
@@ -105,18 +125,17 @@ namespace nc
 	////	ФУНКЦИИ ДЛЯ СТОРОННИХ КЛАССОВ
 	//////////////////////////////////////////////////
 
+	//оказывается шаблонные функции должны быть определены
+	//в том же файле где были объвлены
 	template<typename T>
-	void invertSignTo(const bool isPositive, T &num)
-	{
-		if (isPositive)
-			num = std::abs(num);
-		else
-			num = -std::abs(num);
-	}
+	//я знал что так можно не знал как это сделать
+	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+	constexpr void invertSignTo(bool isPositive, T &num);
 
-
-	static NamedCircle getElement(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
-	static NamedCircle& getElementRef(unsigned selectedIndex, std::list<NamedCircle>& lsCircles);
+	static NamedCircle getElement(unsigned selectedIndex,
+		const std::list<NamedCircle>& lsCircles);
+	static NamedCircle& getElementRef(unsigned selectedIndex,
+		std::list<NamedCircle>& lsCircles);
 
 	///////////////////////////////////////////////////
 	////	ImGuiLoopHandler
@@ -129,12 +148,18 @@ namespace nc
 		//////////////////////////////////////////////////
 
 		ImGuiLoopHandler() = delete;
-		ImGuiLoopHandler(unsigned selectedIndex, const NamedCircle& circle);
-		ImGuiLoopHandler(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
+		ImGuiLoopHandler(unsigned selectedIndex,
+			const NamedCircle& circle);
+		ImGuiLoopHandler(unsigned selectedIndex,
+			const std::list<NamedCircle>& lsCircles);
 
-		void UpdateNC(unsigned selectedIndex, NamedCircle &circle, const sf::Vector2u &screenSize) const;
-		void UpdateNC(unsigned selectedIndex, std::list<NamedCircle>& lsCircles,
-			const sf::Vector2u &screenSize) const;
+		void UpdateNC(unsigned selectedIndex,
+			NamedCircle &circle, const sf::Vector2u &screenSize) const;
+		void UpdateNC(
+			unsigned selectedIndex,
+			std::list<NamedCircle>& lsCircles,
+			const sf::Vector2u &screenSize
+		) const;
 
 		ImGuiLoopHandler& operator=(const NamedCircle& circle);
 
@@ -152,6 +177,15 @@ namespace nc
 		bool isCircleDrawn;
 		bool isNameDrawn;
 	};
+
+	template<typename T>
+	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+	constexpr void invertSignTo(const bool isPositive, T &num) {
+		if (isPositive) num = std::abs(num);
+		else num = -std::abs(num);
+	}
 }
+
+
 
 #endif

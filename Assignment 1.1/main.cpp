@@ -3,7 +3,7 @@
 //
 
 #include "NamedCircle.h"
-#include "FileStreams.cpp""
+#include "FileStreams.cpp"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -15,6 +15,8 @@
 #include <random>
 
 //TODO: синглттон логгер
+//TODO: наконец по-человечески реализовать обработку коллизий кругов друг с другом
+
 
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {
@@ -25,37 +27,9 @@ void outputSfVector(const std::string& label, const sf::FloatRect& vector) {
 	std::cout << label << ": " << vector.position.x
 		<< ", " << vector.position.y << std::endl;
 }
-
-/*void processCirclesCollision(const std::list<nc::NamedCircle>& lsCircles)
-{
-	auto temp = lsCircles;
-	auto itBegin = temp.begin();
-	auto itEnd = temp.end();
-	/*for (auto& circle : temp) {
-		for (auto& otherCircle : temp) {
-				if (circle.processOtherCircleCollision(otherCircle)) {
-
-			}
-		}
-	}#1#
-	while (itBegin != itEnd) {
-		if (itBegin->processOtherCircleCollision(*itEnd)) {
-			std::cout << "asfasdfasdfds" << std::endl;
-			temp.erase(itBegin);
-			temp.erase(itEnd);
-			itBegin = temp.begin();
-			itEnd = temp.end();
-		}
-		else {
-			++itBegin;
-			--itEnd;
-		}
-	}
-}*/
-void processCirclesCollision(std::list<nc::NamedCircle>& lsCircles)
+/*void processCirclesCollision(std::list<nc::NamedCircle>& lsCircles)
 {
 	std::vector isProcessed(lsCircles.size(), false);
-	//std::cout << "asfasdfasdfds" << std::endl;
 	int it1Index = 0;
 	for (auto & circle : lsCircles) {
 		int it2Index = 0;
@@ -71,39 +45,45 @@ void processCirclesCollision(std::list<nc::NamedCircle>& lsCircles)
 			++it1Index;
 		}
 	}
-	//std::cout << "asfasdfasdfds" << std::endl;
-}
+}*/
+
+//TODO: Переделать рандом, а то кал какой-то
+void initCirclesList(NamesParser& fNames, std::list<nc::NamedCircle>& lsCircles, const sf::Vector2u& screenSize);
+void processCirclesCollision(std::list<nc::NamedCircle>& lsCircles);
+
 int main()
 {
 	constexpr sf::Vector2u screenSize{1280, 720};
 	constexpr auto windowTitle{"Podnimayemsya s Kolen"};
+
 	sf::RenderWindow window(sf::VideoMode(screenSize), windowTitle);
 	window.setFramerateLimit(120);
 	static_cast<void>(ImGui::SFML::Init(window));
 
-	sf::Clock deltaClock;
+	sf::Clock deltaClock{};
 
 	ImGui::GetStyle().ScaleAllSizes(2.0f);
 	ImGui::GetIO().FontGlobalScale = 2.0f;
 
-	std::random_device seed;
-	std::mt19937_64 gen(seed());
+	std::random_device seed{};
+	std::mt19937_64 gen{seed()};
 
-	NamesParser fNames("../../../Comp4300/Assignment 1.1/names.txt");
+	NamesParser fNames{"../../../Comp4300/Assignment 1.1/names.txt"};
 
 	const sf::Font font{"../../../Comp4300/stuff/font.ttf"};
 
-	std::list<nc::NamedCircle> lsCircles;
-	lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
-	lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
-	lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
+	std::list<nc::NamedCircle> lsCircles{};
+	for (short i = 0; i < 7; i++)
+		lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
 
-	int selectedIndex = 0;
+	int selectedIndex{0};
 
 	while (window.isOpen()) {
-		std::cout << "===========================================" << std::endl;
-		std::cout << "              NEW LOOP                     " << std::endl;
-		std::cout << "===========================================" << std::endl;
+		std::cout
+			<< "===========================================\n"
+			<< "              NEW LOOP                     \n"
+			<< "===========================================" << std::endl;
+
 		while (const std::optional event = window.pollEvent()) {
 			ImGui::SFML::ProcessEvent(window, *event);
 
@@ -155,7 +135,8 @@ int main()
 
 				if (ImGui::Button("Add Circle"))
 				{
-					lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
+					for (short i = 0; i < 1000; i++)
+						lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
 				}
 				ImGui::EndTabItem();
 			}
@@ -163,12 +144,11 @@ int main()
 		}
 		ImGui::End();
 
-		loopHandler.UpdateNC(selectedIndex, lsCircles, screenSize);
-
 		window.clear();
 
+		loopHandler.UpdateNC(selectedIndex, lsCircles, screenSize);
 
-		processCirclesCollision(lsCircles);
+		//processCirclesCollision(lsCircles);
 
 		for (auto& circle : lsCircles) {
 			std::cout << "Shape: " << circle.getName() << std::endl;
@@ -182,4 +162,10 @@ int main()
 		window.display();
 	}
 	return 0;
+}
+
+void processCirclesCollision(std::list<nc::NamedCircle> &lsCircles)
+{
+	std::vector isProcessed(lsCircles.size(), false);
+
 }

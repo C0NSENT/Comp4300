@@ -2,8 +2,8 @@
 // Created by consent_ on 07/05/25.
 //
 
-#ifndef CIRCLEWITHTEXT_H
-#define CIRCLEWITHTEXT_H
+#ifndef NAMEDCIRCLE_H
+#define NAMEDCIRCLE_H
 
 #include <SFML/Graphics.hpp>
 
@@ -17,27 +17,23 @@
 namespace nc
 {
 	class NamedCircle {
-		template<typename VectorType, typename DivisorType>
-		static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
-
 		// Конвертация цветов между форматами ImGui и SFML
-		static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
-		static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
-		static sf::Color invertColor(const sf::Color& color);
+		constexpr static sf::Color ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor);
+		constexpr static std::array<float, 3> SFMLColorToImGui(const sf::Color& color);
+		constexpr static sf::Color invertColor(const sf::Color& color);
 
-		static int randomInt(std::mt19937_64& gen, int min, int max);
-		static float randomFloat(std::mt19937_64& gen, float min, float max);
+		constexpr static int randomInt(std::mt19937_64& gen, int min, int max);
+		constexpr static float randomFloat(std::mt19937_64& gen, float min, float max);
 
-		static void processAxisCollision(float centerPos, float radius, float& velocity,  float axis );
-
-		void centeringText();
+		constexpr static void processAxisCollision(float centerPos, float radius, float& velocity,  float axis );
+		constexpr void centeringText();
 
 	public:
 
 		///////////////////////////////////////////////////
 		////	КОНСТУКТОРЫ
 		//////////////////////////////////////////////////
-		NamedCircle(
+		explicit NamedCircle(
 			const sf::Font& font,
 			const sf::String& name,
 			float radius = 50,
@@ -46,7 +42,7 @@ namespace nc
 			const sf::Vector2f& velocity = {1.5f, 0.5f}
 		);
 
-		NamedCircle(
+		explicit NamedCircle(
 			std::mt19937_64& gen,
 			const sf::Font& font,
 			const sf::String& name,
@@ -61,7 +57,6 @@ namespace nc
 		void setColor(const sf::Color& color);
 		void setColor(const std::array<float, 3>& ImGuiColor);
 		void setPosition(const sf::Vector2f& position);
-		//void setPosition(const sf::Vector2f& position, const sf::Vector2u& screenSize);
 		void setRadius(float radius, const sf::Vector2u& screenSize);
 		void setPointCount(const std::size_t& pointCount);
 		void setVelocity(const sf::Vector2f& velocity);
@@ -72,13 +67,13 @@ namespace nc
 		////	ГЕТТЕРЫ
 		//////////////////////////////////////////////////
 
-		[[nodiscard]] float getRadius() const;
-		[[nodiscard]] std::size_t getPointCount() const;
-		[[nodiscard]] std::string getName() const;
-		[[nodiscard]] sf::Vector2f getPosition() const;
-		[[nodiscard]] sf::Vector2f getVelocity() const;
-		[[nodiscard]] std::array<float, 2> getImGuiVelocity() const;
-		[[nodiscard]] std::array<float, 3> getImGuiFillColor() const;
+		[[nodiscard]] constexpr float getRadius() const;
+		[[nodiscard]] constexpr std::size_t getPointCount() const;
+		[[nodiscard]] constexpr std::string getName() const;
+		[[nodiscard]] constexpr sf::Vector2f getPosition() const;
+		[[nodiscard]] constexpr sf::Vector2f getVelocity() const;
+		[[nodiscard]] constexpr std::array<float, 2> getImGuiVelocity() const;
+		[[nodiscard]] constexpr std::array<float, 3> getImGuiFillColor() const;
 
 		bool operator==(const NamedCircle& other) const;
 
@@ -89,7 +84,7 @@ namespace nc
 		void move();
 		void draw(sf::RenderWindow& window) const;
 		void processScreenCollision(const sf::Vector2u& screenSize);
-		void processOtherCircleCollision(NamedCircle& otherCircle);
+		//void processOtherCircleCollision(NamedCircle& otherCircle);
 
 		///////////////////////////////////////////////////
 		////	СВОЙСТВА
@@ -107,8 +102,16 @@ namespace nc
 		sf::Vector2f textCenter;
 	};
 
-	[[nodiscard]] NamedCircle getElement(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
-	[[nodiscard]] NamedCircle& getElementRef(unsigned selectedIndex, std::list<NamedCircle>& lsCircles);
+	///////////////////////////////////////////////////
+	////	ФУНКЦИИ ДЛЯ СТОРОННИХ КЛАССОВ
+	//////////////////////////////////////////////////
+
+	// Можно если что удалить
+	template<typename VectorType, typename DivisorType>
+	static sf::Vector2<VectorType> vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor);
+
+	static NamedCircle getElement(unsigned selectedIndex, const std::list<NamedCircle>& lsCircles);
+	static NamedCircle& getElementRef(unsigned selectedIndex, std::list<NamedCircle>& lsCircles);
 
 	///////////////////////////////////////////////////
 	////	ImGuiLoopHandler

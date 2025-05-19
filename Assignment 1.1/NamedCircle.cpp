@@ -1,99 +1,82 @@
 #include "NamedCircle.h"
 
 #include <iostream>
-
 #include <cmath>
-#include <ranges>
 
 namespace nc
 {
-    template<typename VectorType, typename DivisorType>
-    auto NamedCircle::vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor) -> sf::Vector2<VectorType> {
-        return sf::Vector2<VectorType>{v.x / divisor, v.y / divisor};
-    }
-
-    sf::Color NamedCircle::ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor) {
-        auto convert = [](const float colorChannel) -> std::uint8_t {
+    constexpr sf::Color NamedCircle::ImGuiColorToSFMLColor(const std::array<float, 3>& ImGuiColor)
+    {
+        auto convert = [](const float colorChannel) -> std::uint8_t
+        {
             if (colorChannel <= 1.0f && colorChannel >= 0.0f)
                 return static_cast<std::uint8_t>(std::round(colorChannel * 255.f));
 
-            throw std::invalid_argument("Invalid ImGuiColor " + std::to_string(colorChannel) + " for sf::Color");
+            throw std::invalid_argument("Invalid ImGuiColor " + std::to_string(colorChannel));
         };
 
-        return sf::Color{
+        return {
             convert(ImGuiColor[0]),
             convert(ImGuiColor[1]),
-            convert(ImGuiColor[2]),
-        };
+            convert(ImGuiColor[2])};
     }
 
-    auto NamedCircle::SFMLColorToImGui(const sf::Color& color) -> std::array<float, 3> {
-        return std::array{
+    constexpr auto NamedCircle::SFMLColorToImGui(const sf::Color& color) -> std::array<float, 3> {
+        return {
             static_cast<float>(color.r) / 255.f,
             static_cast<float>(color.g) / 255.f,
             static_cast<float>(color.b) / 255.f,
         };
     }
 
-    sf::Color NamedCircle::invertColor(const sf::Color& color)
+    constexpr sf::Color NamedCircle::invertColor(const sf::Color& color)
     {
-
         auto invert = [](const std::uint8_t colorChannel) -> std::uint8_t
         {
             std::uint8_t inverted = 255 - colorChannel;
 
             //Чуть для большей контрастности
             if (inverted < 122)
-                inverted = std::min(inverted+50, 255);
+                inverted = std::min(inverted+45, 255);
             else
-                inverted = std::max(inverted-50, 0);
+                inverted = std::max(inverted-45, 0);
 
             return inverted;
         };
-        return {invert(color.r), invert(color.g), invert(color.b), color.a};
+
+        return {
+            invert(color.r),
+            invert(color.g),
+            invert(color.b),
+            color.a
+        };
     }
 
-    int NamedCircle::randomInt(std::mt19937_64& gen, const int min, const int max) {
+    constexpr int NamedCircle::randomInt(std::mt19937_64& gen, const int min, const int max) {
         std::uniform_int_distribution distribution(min, max);
         return distribution(gen);
     }
 
-    float NamedCircle::randomFloat(std::mt19937_64& gen, const float min, const float max) {
+    constexpr float NamedCircle::randomFloat(std::mt19937_64& gen, const float min, const float max) {
         std::uniform_real_distribution distribution(min, max);
         return distribution(gen);
     }
 
-    void NamedCircle::processAxisCollision(const float centerPos, const float radius, float& velocity, const float axis) {
-        /*if (centerPos - radius <= 0.f || centerPos + radius >= axis)
-            velocity *= -1;*/
-        /*if (centerPos - radius >= 0.f) {
-            velocity = velocity < 0.f ? -velocity : velocity;
-        }
-        else if (centerPos + radius >= axis) {
-            velocity = velocity > 0.f ? -velocity : velocity;
-        }*/
+    constexpr void NamedCircle::processAxisCollision(const float centerPos, const float radius, float& velocity, const float axis)
+    {
         if (centerPos - radius <= 0.f) {
-            if (velocity < 0.f) velocity = -velocity; // Reverse negative velocity
-        }
-        // Check if the circle is colliding with the right/bottom boundary
-        else if (centerPos + radius >= axis) {
-            if (velocity > 0.f) velocity = -velocity; // Reverse positive velocity
+            if (velocity < 0.f) velocity = -velocity;
+        } else if (centerPos + radius >= axis) {
+            if (velocity > 0.f) velocity = -velocity;
         }
         //Ну да юзанул нейросеть, фаршмак знаю
     }
 
-    void NamedCircle::processOtherCircleCollision(NamedCircle &otherCircle)
-    {
-        std::cout << "NamedCircle::processOtherCircleCollision()" << std::endl;
-        if (circle.getGlobalBounds().findIntersection(otherCircle.circle.getGlobalBounds())) {
-            this->velocity = {velocity.x * -1, velocity.y * -1};
-            otherCircle.velocity = {otherCircle.velocity.x * -1, otherCircle.velocity.y * -1};
-        }
-    }
-
-    void NamedCircle::centeringText() {
+    constexpr void NamedCircle::centeringText() {
         std::cout << "NamedCircle::centeringText()" << std::endl;
-        this->textCenter = circle.getLocalBounds().getCenter() - name.getLocalBounds().getCenter();
+
+        this->textCenter = circle.getLocalBounds().getCenter()
+            - name.getLocalBounds().getCenter();
     }
 
     ///////////////////////////////////////////////////
@@ -109,8 +92,8 @@ namespace nc
         const sf::Vector2f& velocity
     )
         : circle{radius, static_cast<std::size_t>(pointCount)}
-    , name(font, name, 24)
-    , velocity(velocity)
+        , name(font, name, 24)
+        , velocity(velocity)
     {
         std::cout << "NamedCircle::NamedCircle()" << std::endl;
         centeringText();
@@ -195,30 +178,31 @@ namespace nc
     ////    ГЕТТЕРЫ
     ///////////////////////////////////////////////////
 
-    float NamedCircle::getRadius() const {
+    constexpr float NamedCircle::getRadius() const {
         return circle.getRadius();
     }
-    std::size_t NamedCircle::getPointCount() const {
+    constexpr std::size_t NamedCircle::getPointCount() const {
         return circle.getPointCount();
     }
-    std::string NamedCircle::getName() const {
+    constexpr std::string NamedCircle::getName() const {
         return name.getString();
     }
-    sf::Vector2f NamedCircle::getPosition() const {
+    constexpr sf::Vector2f NamedCircle::getPosition() const {
         return circle.getPosition();
     }
-    sf::Vector2f NamedCircle::getVelocity() const {
+    constexpr sf::Vector2f NamedCircle::getVelocity() const {
         return velocity;
     }
-    std::array<float, 2> NamedCircle::getImGuiVelocity() const {
+    constexpr std::array<float, 2> NamedCircle::getImGuiVelocity() const {
         return {velocity.x, velocity.y};
     }
-    std::array<float, 3> NamedCircle::getImGuiFillColor() const {
+    constexpr std::array<float, 3> NamedCircle::getImGuiFillColor() const {
         return SFMLColorToImGui(this->circle.getFillColor());
     }
 
     bool NamedCircle::operator==(const NamedCircle &other) const
     {
+        //Пиздец
         if (circle.getPosition() == other.circle.getPosition()
             && circle.getRadius() == other.circle.getRadius()
             && circle.getPointCount() == other.circle.getPointCount()
@@ -247,7 +231,8 @@ namespace nc
         if (isTextDrawn) window.draw(name);
     }
 
-    void NamedCircle::processScreenCollision(const sf::Vector2u& screenSize) {
+    void NamedCircle::processScreenCollision(const sf::Vector2u& screenSize)
+    {
         processAxisCollision(
             circle.getGlobalBounds().getCenter().x,
             circle.getRadius(),
@@ -261,6 +246,22 @@ namespace nc
             velocity.y,
             static_cast<float>(screenSize.y)
         );
+    }
+
+    /*
+    constexpr void NamedCircle::processOtherCircleCollision(NamedCircle &otherCircle)
+    {
+        std::cout << "NamedCircle::processOtherCircleCollision()" << std::endl;
+        if (circle.getGlobalBounds().findIntersection(otherCircle.circle.getGlobalBounds())) {
+            this->velocity = {velocity.x * -1, velocity.y * -1};
+            otherCircle.velocity = {otherCircle.velocity.x * -1, otherCircle.velocity.y * -1};
+        }
+    }
+    */
+
+    template<typename VectorType, typename DivisorType>
+    auto vectorDivider(const sf::Vector2<VectorType>& v, DivisorType divisor) -> sf::Vector2<VectorType> {
+        return sf::Vector2<VectorType>{v.x / divisor, v.y / divisor};
     }
 
     NamedCircle getElement(const unsigned selectedIndex, const std::list<NamedCircle> &lsCircles)
@@ -318,7 +319,7 @@ namespace nc
     {
         if (currentIndex == selectedIndex) {
             std::cout << "Updating circle with selectedIndex " << selectedIndex << std::endl;
-            circle.setRadius(radius, screenSize);
+            if (circle.getRadius() != radius) circle.setRadius(radius, screenSize);
             if (circle.getPointCount() != pointCount) circle.setPointCount(pointCount);
             if (circle.getVelocity() != velocity) circle.setVelocity(velocity);
             if (circle.getName() != name) circle.setName(name);

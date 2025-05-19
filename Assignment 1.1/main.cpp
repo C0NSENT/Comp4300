@@ -28,7 +28,10 @@ void outputSfVector(const std::string& label, const sf::FloatRect& vector) {
 }
 
 //TODO: Переделать рандом, а то кал какой-то
-void initCirclesList(NamesParser& fNames, std::list<nc::NamedCircle>& lsCircles, const sf::Vector2u& screenSize);
+
+bool areCirclesColliding(const nc::NamedCircle& circle1, const nc::NamedCircle& circle2);
+void handleCirclesAxisCollision(float circle1Center,
+	float circle2Center, float& circle1Velocity, float& circle2Velocity);
 void processCirclesCollision(std::list<nc::NamedCircle>& lsCircles);
 
 int main()
@@ -96,14 +99,12 @@ int main()
 					}
 					ImGui::EndCombo();
 				}
-
 				ImGui::Spacing();
 				ImGui::Checkbox("Draw circle", &loopHandler.isCircleDrawn);
 				ImGui::SameLine();
 				ImGui::Checkbox("Draw name", &loopHandler.isNameDrawn);
 				ImGui::SliderFloat("Radius", &loopHandler.radius, 0.0f, 200.0f);
 				ImGui::SliderInt("Points", &loopHandler.pointCount, 32, 64);
-				//std::cout << ImGuiColor[0] << " " << ImGuiColor[1] <<  " " << ImGuiColor[2] << std::endl;
 				ImGui::ColorEdit3("Display Color", loopHandler.ImGuiCircleFillColor.data());
 				//TODO: Сделать враппер над velocity чтобы скорость отображалась без минуса
 				//Да можно передавать классы и стуктуры,
@@ -115,7 +116,6 @@ int main()
 
 				if (ImGui::Button("Add Circle"))
 				{
-					//for (short i = 0; i < 1000; i++)
 					lsCircles.emplace_back(gen, font, fNames.getRandomName(gen), screenSize);
 				}
 				ImGui::EndTabItem();
@@ -144,51 +144,57 @@ int main()
 	return 0;
 }
 
+bool areCirclesColliding(const nc::NamedCircle &circle1, const nc::NamedCircle &circle2)
+{
+	const sf::Vector2f circle1Center{circle1.getCircleCenter()};
+	const sf::Vector2f circle2Center{circle2.getCircleCenter()};
+
+	//Отрезки
+	const sf::Vector2f Segments{ circle1Center.x - circle2Center.x,
+		circle1Center.y - circle2Center.y };
+
+	//Расстояние между двумя центрами кругов
+	const float hypotenuse = std::hypot(Segments.x, Segments.y);
+
+	return hypotenuse <= circle1.getRadius() + circle2.getRadius();
+}
+
+void handleCirclesAxisCollision(const float circle1Center,
+	const float circle2Center, float& circle1Velocity, float& circle2Velocity)
+{
+	if (circle1Center < circle2Center) {
+		nc::invertSignTo(false, circle1Velocity);
+		nc::invertSignTo(true, circle2Velocity);
+	}
+	else {
+		nc::invertSignTo(true, circle1Velocity);
+		nc::invertSignTo(false, circle2Velocity);
+	}
+}
+
 //ЭТО ПИЗДЕЦ
 void processCirclesCollision(std::list<nc::NamedCircle> &lsCircles)
 {
-	std::vector isProcessed(lsCircles.size(), false);
-
-	auto i{0};
-	for (auto it1 = lsCircles.begin(); it1 != lsCircles.end(); ++it1, i++)
+	for (auto it1 = lsCircles.begin(); it1 != lsCircles.end(); ++it1)
 	{
-		auto j{0};
-		for (auto it2 = std::next(it1); it2 != lsCircles.end(); ++it2, j++)
+		for (auto it2 = std::next(it1); it2 != lsCircles.end(); ++it2)
 		{
-			const std::pair circle1{it1->getCircleCenter(),
-				it1->getRadius()};
-			const std::pair circle2{it2->getCircleCenter(),
-				it2->getRadius()};
+			if (areCirclesColliding(*it1, *it2))
+			{
+				handleCirclesAxisCollision(
+					it1->getCircleCenter().x,
+					it2->getCircleCenter().x,
+					it1->velocity.x,
+					it2->velocity.x
+				);
 
-			//Отрезки
-			const sf::Vector2f lineSegments{ circle1.first.x - circle2.first.x,
-				circle1.first.y - circle2.first.y };
-
-			//Расстояние между двумя центрами кругов
-			float hypotenuse = std::sqrt(std::pow(lineSegments.x,2) + std::pow(lineSegments.y, 2));
-
-			if (hypotenuse <= (circle1.second + circle2.second)) {
-
-				if (circle1.first.x < circle2.first.x) {
-					nc::invertSignTo(false, it1->velocity.x);
-					nc::invertSignTo(true, it2->velocity.x);
-				}
-				else {
-					nc::invertSignTo(true, it1->velocity.x);
-					nc::invertSignTo(false, it2->velocity.x);
-				}
-
-				if (circle1.first.y < circle2.first.y) {
-					nc::invertSignTo(false, it1->velocity.y);
-					nc::invertSignTo(true, it2->velocity.y);
-				}
-				else {
-					nc::invertSignTo(true, it1->velocity.y);
-					nc::invertSignTo(false, it2->velocity.y);
-				}
-
+				handleCirclesAxisCollision(
+					it1->getCircleCenter().y,
+					it2->getCircleCenter().y,
+					it1->velocity.y,
+					it2->velocity.y
+				);
 			}
 		}
-
 	}
 }

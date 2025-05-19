@@ -124,7 +124,7 @@ namespace nc
             randomFloat(gen, 0.f, static_cast<float>(screenSize.y))});
         this->setVelocity(sf::Vector2f{randomFloat(gen, -5.f, 5.f),
             randomFloat(gen, -5.f, 5.f)});
-        this->setColor({
+        this->setColor(sf::Color{
             static_cast<std::uint8_t>(randomInt(gen, 0, 255)),
             static_cast<std::uint8_t>(randomInt(gen, 0, 255)),
             static_cast<std::uint8_t>(randomInt(gen, 0, 255))
@@ -186,7 +186,7 @@ namespace nc
     bool NamedCircle::operator==(const NamedCircle &other) const
     {
         //Пиздец
-        if (circle.getPosition() == other.circle.getPosition()
+        return circle.getPosition() == other.circle.getPosition()
             && circle.getRadius() == other.circle.getRadius()
             && circle.getPointCount() == other.circle.getPointCount()
             && circle.getFillColor() == other.circle.getFillColor()
@@ -194,11 +194,7 @@ namespace nc
             && velocity == other.velocity
             && textCenter == other.textCenter
             && isCircleDrawn == other.isCircleDrawn
-            && isTextDrawn == other.isTextDrawn)
-            {
-            return true;
-        }
-        return false;
+            && isTextDrawn == other.isTextDrawn;
     }
 
     ///////////////////////////////////////////////////

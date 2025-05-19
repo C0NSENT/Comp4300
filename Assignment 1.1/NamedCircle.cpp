@@ -74,7 +74,6 @@ namespace nc
         } else if (centerPos + radius >= axis) {
             invertSignTo(false, velocity);
         }
-        //Ну да юзанул нейросеть, фаршмак знаю
     }
 
     constexpr void NamedCircle::centeringText() {

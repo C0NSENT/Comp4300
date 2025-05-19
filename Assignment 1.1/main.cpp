@@ -16,6 +16,7 @@
 
 //TODO: синглттон логгер
 //TODO: Переделать добавление новых кругов, чтобы они друга на друга не накладывались
+//TODO: Переписать весь в соответствие с ECS
 
 template<typename T>
 void outputSfVector(const std::string& label, const sf::Vector2<T> & vector) {

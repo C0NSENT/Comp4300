@@ -1,19 +1,34 @@
 #pragma once
 
-#include <tuple>
 #include <type_traits>
 
 ///The Land Of Rape And Honey
 namespace lrh
 {
-	template <typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+	/////////////////////////////////////////////////////////////////////
+	/// \brief Концепт для проверки типа на числовой.
+	///	\details Добавил чтобы всю эту хуйбалу не писать по сто раз
+	///
+	/////////////////////////////////////////////////////////////////////
+	template<typename T>
+	concept is_numeric = std::is_arithmetic_v<T>
+		and not std::is_same_v<T, bool>
+		and not std::is_same_v<T, char>;
+
+	/////////////////////////////////////////////////////////////////////
+	/// \brief Самописный аналог sf::Vector2
+	///
+	/////////////////////////////////////////////////////////////////////
+
+	template <typename T> requires is_numeric<T>
 	class Vector2
 	{
 	public:
-		/////////////////////////////////////
-		///    КОНСТУКТОРЫ
-		////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		///
+		///        КОНСТУКТОРЫ
+		///
+		/////////////////////////////////////////////////////////////////////
 
 		constexpr Vector2() = default;
 		constexpr Vector2(const T& x, const T& y) : x(x), y(y) {}
@@ -24,7 +39,7 @@ namespace lrh
 		///			между двумя векторами по  обеим осям
 		///
 		/////////////////////////////////////////////////////////////////////
-		constexpr auto distance(const Vector2 &other) const -> Vector2;
+		constexpr auto distance(const Vector2& other) const -> Vector2;
 
 		/////////////////////////////////////////////////////////////////////
 		/// \brief Вычисляет гипотенузу по
@@ -32,24 +47,30 @@ namespace lrh
 		///			квадратного корня
 		///
 		/////////////////////////////////////////////////////////////////////
-		constexpr auto lengthSquared() const;
+		constexpr auto lengthSquared() -> T;
 
-		/////////////////////////////////////
-		///    ПЕРЕГРУЗКА ОПЕРАТОРОВ
-		////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////
+		///
+		///        ПЕРЕГРУЗКА ОПЕРАТОРОВ
+		///
+		/////////////////////////////////////////////////////////////////////
 
+		/////////////////////////////////////////////////////////////////////
+		/// \brief Инверсия знака числа
+		///
+		/////////////////////////////////////////////////////////////////////
 		constexpr auto operator-() -> Vector2;
 
-		[[nodiscard]] constexpr auto operator+(const Vector2 &rhs) -> Vector2;
-		[[nodiscard]] constexpr auto operator-(const Vector2 &rhs) -> Vector2;
-		[[nodiscard]] constexpr auto operator*(const Vector2 &rhs) -> Vector2;
-		[[nodiscard]] constexpr auto operator/(const Vector2 &rhs) -> Vector2;
-		constexpr auto operator=(const Vector2 &rhs) -> Vector2 &;
+		[[nodiscard]] constexpr auto operator+(const Vector2& rhs) -> Vector2;
+		[[nodiscard]] constexpr auto operator-(const Vector2& rhs) -> Vector2;
+		[[nodiscard]] constexpr auto operator*(const Vector2& rhs) -> Vector2;
+		[[nodiscard]] constexpr auto operator/(const Vector2& rhs) -> Vector2;
+		constexpr auto operator=(const Vector2& rhs) -> Vector2&;
 
-		constexpr auto operator+=(const Vector2 &rhs) -> Vector2 &;
-		constexpr auto operator-=(const Vector2 &rhs) -> Vector2 &;
-		constexpr auto operator*=(const Vector2 &rhs) -> Vector2 &;
-		constexpr auto operator/=(const Vector2 &rhs) -> Vector2 &;
+		constexpr auto operator+=(const Vector2& rhs) -> Vector2&;
+		constexpr auto operator-=(const Vector2& rhs) -> Vector2&;
+		constexpr auto operator*=(const Vector2& rhs) -> Vector2&;
+		constexpr auto operator/=(const Vector2& rhs) -> Vector2&;
 
 		[[nodiscard]] constexpr bool operator==(const Vector2& rhs);
 		[[nodiscard]] constexpr bool operator!=(const Vector2& rhs);
@@ -59,77 +80,91 @@ namespace lrh
 		[[nodiscard]] constexpr auto operator*(T val) -> Vector2;
 		[[nodiscard]] constexpr auto operator/(T val) -> Vector2;
 
-		constexpr auto operator+=(T val) -> Vector2 &;
-		constexpr auto operator-=(T val) -> Vector2 &;
-		constexpr auto operator*=(T val) -> Vector2 &;
-		constexpr auto operator/=(T val) -> Vector2 &;
+		constexpr auto operator+=(T val) -> Vector2&;
+		constexpr auto operator-=(T val) -> Vector2&;
+		constexpr auto operator*=(T val) -> Vector2&;
+		constexpr auto operator/=(T val) -> Vector2&;
 
+		/////////////////////////////////////////////////////////////////////
+		///
+		///        СВОЙСТВА
+		///
+		/////////////////////////////////////////////////////////////////////
 		T x{};
 		T y{};
 	};
 
 	/////////////////////////////////////////////////////////////////////
 	///	\brief Псевдонимы для часто используемых типов
+	///	\details Прям как в SFML
 	///
 	/////////////////////////////////////////////////////////////////////
 	using Vector2f = Vector2<float>;
 	using Vector2i = Vector2<int>;
 	using Vector2u = Vector2<unsigned>;
 
-	////////////////////////////////////////////////////////////////
-
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::distance(const Vector2 &other) const -> Vector2
+	/////////////////////////////////////////////////////////////////////
+	///
+	///        РЕАЛИЗАЦИЯ
+	///
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::distance(const Vector2& other) const -> Vector2
 	{
 		return {x - other.x, y - other.y};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::lengthSquared() const
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::lengthSquared() -> T
 	{
 		return {x * x + y * y};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator-() -> Vector2
 	{
 		*this = {-x, -y};
 		return {-x, -y};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator+(const Vector2& rhs) -> Vector2
 	{
 		return {x + rhs.x, y + rhs.y};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator-(const Vector2& rhs) -> Vector2
 	{
 		return {x - rhs.x, y - rhs.y};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator*(const Vector2& rhs) -> Vector2
 	{
 		return {x * rhs.x, y * rhs.y};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr Vector2<T> Vector2<T>::operator/(const Vector2& rhs)
 	{
 		return {x / rhs.x, y / rhs.y};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator=(const Vector2& rhs) -> Vector2&
 	{
 		if (this != &rhs) {
@@ -139,103 +174,121 @@ namespace lrh
 		return *this;
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator+=(const Vector2 &rhs) -> Vector2&
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator+=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this + rhs;
 		return *this;
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator-=(const Vector2 &rhs) -> Vector2&
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator-=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this - rhs;
 		return *this;
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator*=(const Vector2 &rhs) -> Vector2&
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator*=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this * rhs;
 		return *this;
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator/=(const Vector2 &rhs) -> Vector2&
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator/=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this / rhs;
 		return *this;
 	}
 
-	template<typename T> requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr bool Vector2<T>::operator==(const Vector2 &rhs) {
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr bool Vector2<T>::operator==(const Vector2& rhs)
+	{
 		return x == rhs.x && y == rhs.y;
 	}
 
-	template<typename T> requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr bool Vector2<T>::operator!=(const Vector2 &rhs) {
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr bool Vector2<T>::operator!=(const Vector2& rhs)
+	{
 		return !(*this == rhs);
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator+(const T val) -> Vector2
 	{
 		return {x + val, y + val};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator-(T val) -> Vector2
 	{
 		return {x - val, y - val};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator*(T val) -> Vector2
 	{
 		return {x * val, y * val};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator/(T val) -> Vector2
 	{
 		return {x / val, y / val};
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator+=(T val) -> Vector2 &
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator+=(T val) -> Vector2&
 	{
 		*this = *this + val;
 		return *this;
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator-=(T val) -> Vector2 &
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator-=(T val) -> Vector2&
 	{
 		*this = *this - val;
 		return *this;
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator*=(T val) -> Vector2 &
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator*=(T val) -> Vector2&
 	{
 		*this = *this * val;
 		return *this;
 	}
 
-	template<typename T>
-	requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-	constexpr auto Vector2<T>::operator/=(T val) -> Vector2 &
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
+	constexpr auto Vector2<T>::operator/=(T val) -> Vector2&
 	{
 		*this = *this / val;
 		return *this;

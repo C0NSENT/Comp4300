@@ -15,7 +15,6 @@ int main()
 	oleg += 229;
 	mongol = mongol + 3;
 	-oleg;
-
 	std::cout << oleg.x << " " << oleg.y << std::endl;
 	std::cout << mongol.x << " " << mongol.y << std::endl;
 	std::cout <<  copy.x << " " << copy.y << std::endl;

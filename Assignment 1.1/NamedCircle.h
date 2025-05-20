@@ -186,6 +186,4 @@ namespace nc
 	}
 }
 
-
-
 #endif

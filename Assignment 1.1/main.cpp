@@ -62,7 +62,8 @@ int main()
 
 	int selectedIndex{0};
 
-	while (window.isOpen()) {
+	while (window.isOpen())
+	{
 		std::cout
 			<< "===========================================\n"
 			<< "              NEW LOOP                     \n"

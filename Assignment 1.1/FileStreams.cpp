@@ -39,10 +39,8 @@ public:
 		return name;
 	}
 
-
 private:
 	std::ifstream _fNames;
 };
-
 
 #endif //FILESTREAMS

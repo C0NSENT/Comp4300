@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <bits/valarray_after.h>
 
 ///The Land Of Rape And Honey
 namespace lrh
@@ -29,10 +30,15 @@ namespace lrh
 		///        КОНСТУКТОРЫ
 		///
 		/////////////////////////////////////////////////////////////////////
-
 		constexpr Vector2() = default;
 		constexpr Vector2(const T& x, const T& y) : x(x), y(y) {}
 		constexpr Vector2(const Vector2& other) : x(other.x), y(other.y) {}
+
+		/////////////////////////////////////////////////////////////////////
+		///
+		///        МЕТОДЫ
+		///
+		/////////////////////////////////////////////////////////////////////
 
 		//////////////////////////////////////////////////////////////////////
 		/// \brief Вычисляет расстояние
@@ -42,12 +48,21 @@ namespace lrh
 		constexpr auto distance(const Vector2& other) const -> Vector2;
 
 		/////////////////////////////////////////////////////////////////////
-		/// \brief Вычисляет гипотенузу по
-		///			теореме Пифагора, но без
+		/// \brief Вычисляет квадрат длины вектора
+		/// \details Вычисляет гипотенузу по
+		///         теореме Пифагора, но без
 		///			квадратного корня
 		///
 		/////////////////////////////////////////////////////////////////////
-		constexpr auto lengthSquared() -> T;
+		constexpr T lengthSquared() const;
+
+		/////////////////////////////////////////////////////////////////////
+		/// \brief Вычисляет длину вектора
+		/// \details Вычисляет гипотенузу по
+		///         теореме Пифагора
+		///
+		/////////////////////////////////////////////////////////////////////
+		constexpr T length() const;
 
 		/////////////////////////////////////////////////////////////////////
 		///
@@ -72,8 +87,9 @@ namespace lrh
 		constexpr auto operator*=(const Vector2& rhs) -> Vector2&;
 		constexpr auto operator/=(const Vector2& rhs) -> Vector2&;
 
-		[[nodiscard]] constexpr bool operator==(const Vector2& rhs);
-		[[nodiscard]] constexpr bool operator!=(const Vector2& rhs);
+		//Добавил const чтобы можно было сравнивать константные векторы
+		[[nodiscard]] constexpr bool operator==(const Vector2& rhs) const;
+		[[nodiscard]] constexpr bool operator!=(const Vector2& rhs) const;
 
 		[[nodiscard]] constexpr auto operator+(T val) -> Vector2;
 		[[nodiscard]] constexpr auto operator-(T val) -> Vector2;
@@ -90,8 +106,8 @@ namespace lrh
 		///        СВОЙСТВА
 		///
 		/////////////////////////////////////////////////////////////////////
-		T x{};
-		T y{};
+		T x{0};
+		T y{0};
 	};
 
 	/////////////////////////////////////////////////////////////////////
@@ -116,7 +132,7 @@ namespace lrh
 
 	/////////////////////////////////////////////////////////////////////
 	template<typename T> requires is_numeric<T>
-	constexpr auto Vector2<T>::lengthSquared() -> T
+	constexpr T Vector2<T>::lengthSquared() const
 	{
 		return {x * x + y * y};
 	}
@@ -124,9 +140,16 @@ namespace lrh
 
 	/////////////////////////////////////////////////////////////////////
 	template<typename T> requires is_numeric<T>
+	constexpr T Vector2<T>::length() const
+	{
+		return std::sqrt(this->lengthSquared());
+	}
+
+
+	/////////////////////////////////////////////////////////////////////
+	template<typename T> requires is_numeric<T>
 	constexpr auto Vector2<T>::operator-() -> Vector2
 	{
-		*this = {-x, -y};
 		return {-x, -y};
 	}
 
@@ -213,7 +236,7 @@ namespace lrh
 
 	/////////////////////////////////////////////////////////////////////
 	template<typename T> requires is_numeric<T>
-	constexpr bool Vector2<T>::operator==(const Vector2& rhs)
+	constexpr bool Vector2<T>::operator==(const Vector2& rhs) const
 	{
 		return x == rhs.x && y == rhs.y;
 	}
@@ -221,7 +244,7 @@ namespace lrh
 
 	/////////////////////////////////////////////////////////////////////
 	template<typename T> requires is_numeric<T>
-	constexpr bool Vector2<T>::operator!=(const Vector2& rhs)
+	constexpr bool Vector2<T>::operator!=(const Vector2& rhs) const
 	{
 		return !(*this == rhs);
 	}

@@ -6,7 +6,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "../Vector2.tpp"
+#include "Vector2.tpp"
 
 namespace lrh
 {

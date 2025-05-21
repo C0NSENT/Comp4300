@@ -7,19 +7,33 @@ add_subdirectory(
         ../../external_libs
         ${CMAKE_BINARY_DIR}/external_libs
 )
-add_subdirectory(systems)
+
+set(SYSTEMS_SOURCES
+        systems/Entity_Manager.cpp
+        systems/Entity_Manager.hpp
+        systems/Game.cpp
+        systems/Game.hpp
+        systems/Physics.cpp
+        systems/Physics.hpp
+)
+
+#[[set(SYSTEMS_SOURCES
+        systems/Game.cpp
+        systems/Game.hpp
+        systems/EntityManager.cpp
+        systems/EntityManager.hpp
+
+        )]]
 
 add_executable(${PROJECT_NAME}
-        Component.hpp
-        Entity.hpp
+        ${SYSTEMS_SOURCES}
+
         Entity.cpp
-        EntityManager.hpp
-        EntityManager.cpp
-        Game.hpp
-        Game.cpp
-        Physics.hpp
-        Physics.cpp
+        Entity.hpp
+        Components.hpp
         Vector2.tpp
         main.cpp
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE external_libs systems)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC external_libs)

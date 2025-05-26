@@ -17,14 +17,6 @@ set(SYSTEMS_SOURCES
         systems/Physics.hpp
 )
 
-#[[set(SYSTEMS_SOURCES
-        systems/Game.cpp
-        systems/Game.hpp
-        systems/EntityManager.cpp
-        systems/EntityManager.hpp
-
-        )]]
-
 add_executable(${PROJECT_NAME}
         ${SYSTEMS_SOURCES}
 
@@ -32,6 +24,8 @@ add_executable(${PROJECT_NAME}
         Entity.hpp
         Components.hpp
         Vector2.tpp
+        Logger.hpp
+        Logger.cpp
         main.cpp
 )
 

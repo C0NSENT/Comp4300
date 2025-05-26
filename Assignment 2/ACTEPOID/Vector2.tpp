@@ -1,7 +1,7 @@
 #pragma once
 
 #include <type_traits>
-#include <bits/valarray_after.h>
+#include <cmath>
 
 ///The Land Of Rape And Honey
 namespace lrh

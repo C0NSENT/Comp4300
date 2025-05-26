@@ -2,12 +2,16 @@
 // Created by consent_ on 21/05/25.
 //
 
+/////////////////////////////////////////////////////////////////////
+///      СОВЕСТКИЙ ГЕНПЛАН
+///TODO:
 #pragma once
 
 #include <fstream>
+#include <sstream>
 #include <string>
 
-#include <chrono>
+
 
 
 namespace lrh
@@ -20,27 +24,35 @@ namespace lrh
 	class Logger
 	{
 	public:
-		enum class Level : uint8_t {
-			Info = 0, Warning, Error
+		enum class lvl : uint8_t
+		{
+			Info, Warning, Error, Debug, Fatal
 		};
 
-		static Logger& instance();
+		friend std::ostream& operator<<(std::ostream& os, lvl lvl);
 
-		void write(Level level, const std::string& message);
+		[[nodiscard]] static Logger& instance();
+		void write(lvl level, const std::string& message);
 
+		/////////////////////////////////////////////////////////////////////
+		///
+		///		ЖЕРТВЫ СТАЛИНСКИХ РЕПРЕССИЙ
+		///
+		/////////////////////////////////////////////////////////////////////
 		Logger(const Logger&) = delete;
-		Logger(Logger&&) = delete;
 		Logger& operator=(const Logger&) = delete;
-		Logger& operator=(Logger&&) = delete;
 
 	private:
 		explicit Logger(const std::string& fileName);
 		~Logger();
-		static std::string createFileName(const std::string& currentDateTime = currentDateTime());
+
+		static std::string createFileName();
 		static std::string currentDateTime();
+		static std::stringstream toStringStream;
 
+		//Зачем я это добавил лол?
 
-		std::string fileName;
-		std::ofstream fileStream;
+		//std::string fileName;
+		std::ofstream ofs;
 	};
 }

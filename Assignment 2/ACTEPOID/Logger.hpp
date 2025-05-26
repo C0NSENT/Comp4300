@@ -4,18 +4,26 @@
 
 /////////////////////////////////////////////////////////////////////
 ///      СОВЕСТКИЙ ГЕНПЛАН
-///TODO:
+///		TODO: Вывод даты и времени влог
+///		TODO: Адекватное формирование названия лога
 #pragma once
 
 #include <fstream>
-#include <sstream>
 #include <string>
 
-
+#include <source_location>
 
 
 namespace lrh
 {
+	enum class Level : uint8_t
+	{
+		Info, Warning, Error, Debug, Fatal
+	};
+
+	std::ostream& operator<<(std::ostream& ss, Level level);
+
+
 	/////////////////////////////////////////////////////////////////////
 	///
 	/// \brief Синглтон для логирования игры
@@ -24,15 +32,12 @@ namespace lrh
 	class Logger
 	{
 	public:
-		enum class lvl : uint8_t
-		{
-			Info, Warning, Error, Debug, Fatal
-		};
-
-		friend std::ostream& operator<<(std::ostream& os, lvl lvl);
-
 		[[nodiscard]] static Logger& instance();
-		void write(lvl level, const std::string& message);
+		void write(
+			const std::string &message,
+			Level level = Level::Info,
+			const std::source_location& location = std::source_location::current()
+		);
 
 		/////////////////////////////////////////////////////////////////////
 		///
@@ -43,16 +48,13 @@ namespace lrh
 		Logger& operator=(const Logger&) = delete;
 
 	private:
-		explicit Logger(const std::string& fileName);
+		explicit Logger(const char* fileName);
 		~Logger();
 
-		static std::string createFileName();
-		static std::string currentDateTime();
-		static std::stringstream toStringStream;
+		static const char* createFileName();
+		static const char* currentDateTime();
 
-		//Зачем я это добавил лол?
 
-		//std::string fileName;
 		std::ofstream ofs;
 	};
 }

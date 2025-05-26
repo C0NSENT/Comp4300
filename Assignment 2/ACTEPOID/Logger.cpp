@@ -4,62 +4,80 @@
 
 #include "Logger.hpp"
 
+#include <sstream>
+
 #include <array>
 #include <ctime>
 
-lrh::Logger& lrh::Logger::instance()
+
+namespace lrh
 {
-    static Logger singleton(createFileName());
-    return singleton;
-}
+    std::ostream& operator<<(std::ostream &ss, const Level level)
+    {
+        constexpr static std::array arrStrLvl {
+            "INFO", "WARNING", "ERROR","DEBUG", "FATAL"
+        };
 
-void lrh::Logger::write(const lvl level, const std::string& message)
-{
-    //TODO: Добавить цветовую оформленность сообщений в зависимости от уровня
-    constexpr static std::array arrLogType{
-        "INFO", "WARNING", "ERROR","DEBUG", "FATAL"
-    };
+        ss << arrStrLvl[static_cast<int>(level)];
 
-    switch (level) {
-        case lvl::Info:
-
-            break;
-        case lvl::Warning:
-
-            break;
-        case lvl::Error:
-
-            break;
+        return ss;
     }
 
-    ofs << message;
-}
-
-lrh::Logger::Logger(const std::string &fileName)
-{
-    ofs.open(fileName,  std::ios::app);
-
-    if (not ofs.is_open()) {
-        throw std::runtime_error("Could not open log file: " + fileName);
+    Logger& Logger::instance()
+    {
+        static Logger singleton(createFileName());
+        return singleton;
     }
 
+    void Logger::write(
+        const std::string &message,
+        const Level level,
+        const std::source_location& location
+    )
+    {
+        std::stringstream log;
+
+        log << '[' << currentDateTime() << "] "
+            << "[" << level << "]\t"
+            << '\"' << location.file_name() << '\"'
+            << "(" << location.line() << ":"
+            << location.column() << ")\t"
+            << location.function_name() << '\t'
+            << message << '\n';
+
+        ofs << log.str();
+    }
+
+    Logger::Logger(const char* fileName)
+    {
+        ofs.open(fileName, std::ios::app);
+
+        if (not ofs.is_open()) {
+            throw std::runtime_error("Could not open log file: " + std::string{fileName});
+        }
+    }
+
+    Logger::~Logger() {
+        //Закрываем файл и можно добавить
+        //Закрывающее сообщение лог файла
+        //TODO: Чекнуть как другие работяги закрывают лог файл
+        //ofs << "this is the end, my lonely friend, the end\n";
+    }
+
+    const char* Logger::createFileName() {
+        return {"log_.log"};
+    }
+
+    const char* Logger::currentDateTime() {
+        const static std::time_t currentTime = std::time(nullptr);
+        const std::tm* structTime = std::localtime(&currentTime);
+
+        constexpr static std::size_t bufferSize{20};
+        static char buffer[bufferSize];
+        //TODO: Не
+        constexpr static auto timeFormat{"%Y-%m-%d %H:%M:%S"};
+        std::strftime(buffer, bufferSize, timeFormat, structTime);
+
+        return buffer;
+    }
 }
-
-lrh::Logger::~Logger() {
-    //Закрываем файл и можно добавить
-    //Закрывающее сообщение лог файла
-    //TODO: Чекнуть как другие работяги закрывают лог файл
-    ofs << "ВСЕ ДОЛЖНЫ ЗИГОВАТЬ";
-}
-
-std::string lrh::Logger::createFileName() {
-    return {"log_.log"};
-}
-
-std::string lrh::Logger::currentDateTime() {
-    /*const std::time_t currentTime = std::time(nullptr);
-    std::tm* localTime = std::localtime(&currentTime);*/
-
-    return "test";
-}
-

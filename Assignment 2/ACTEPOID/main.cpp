@@ -5,7 +5,8 @@
 #include "Vector2.tpp"
 #include "Logger.hpp"
 #include <iostream>
-#include <unistd.h>
+
+#include <filesystem>
 
 void Vector2Test()
 {
@@ -35,8 +36,7 @@ void loggerTest() {
 
 
 
-int main()
-{
+int main() {
 	//std::fstream("test.log", std::ios::trunc);
 	// loggerTest();
 	// sleep(2);

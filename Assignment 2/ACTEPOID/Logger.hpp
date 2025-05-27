@@ -13,10 +13,8 @@
 
 #include <source_location>
 
-
 namespace lrh
 {
-
 	/////////////////////////////////////////////////////////////////////
 	///
 	/// \brief Синглтон для логирования игры
@@ -24,6 +22,7 @@ namespace lrh
 	/////////////////////////////////////////////////////////////////////
 	class Logger
 	{
+		using sl =  std::source_location;
 		enum class Level : uint8_t
 		{
 			Info, Debug, Warning, Error,  Fatal
@@ -32,17 +31,16 @@ namespace lrh
 		friend std::ostream& operator<<(std::ostream& ss, Level level);
 
 	public:
-
 		static void info(const std::string& message,
-			const std::source_location& loc = std::source_location::current());
+			const sl& loc = sl::current());
 		static void debug(const std::string& message,
-			const std::source_location& loc = std::source_location::current());
+			const sl& loc = sl::current());
 		static void warning(const std::string& message,
-			const std::source_location& loc = std::source_location::current());
+			const sl& loc = sl::current());
 		static void error(const std::string& message,
-			const std::source_location& loc = std::source_location::current());
+			const sl& loc = sl::current());
 		static void fatal(const std::string& message,
-			const std::source_location& loc = std::source_location::current());
+			const sl& loc = sl::current());
 
 		/////////////////////////////////////////////////////////////////////
 		///
@@ -53,24 +51,25 @@ namespace lrh
 		Logger& operator=(const Logger&) = delete;
 
 	private:
-
 		explicit Logger(const char* fileName);
 		~Logger();
 
-		static std::source_location getCurrent();
-
-		[[nodiscard]] static Logger& getInstance();
+		static Logger& getInstance();
 
 		void write(
 			const std::string &message,
 			Level lvl,
-			const std::source_location& loc = std::source_location::current()
+			const sl& loc = sl::current()
 		);
+		static int getCurrentLogID();
 
 		static const char* createFileName();
-		static const char* currentDateTime();
+		static const char *getCurrentDateTime(const char *format);
 
+		static std::string logIDtoStr(int id);
 		static const char *formatFileName(const std::string &fileName);
+
+		constexpr static auto logsDir{"logs/"};
 
 		std::ofstream ofs;
 	};

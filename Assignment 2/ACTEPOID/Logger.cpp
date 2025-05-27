@@ -8,7 +8,8 @@
 
 #include <array>
 #include <ctime>
-
+#include <filesystem>
+#include <ranges>
 #include <iostream>
 
 
@@ -25,22 +26,18 @@ namespace lrh
         return ss;
     }
 
-    Logger& Logger::getInstance()
-    {
-        static Logger singleton(createFileName());
-        return singleton;
-    }
-
     void Logger::write(
         const std::string &message,
         const Level lvl,
-        const std::source_location& loc
+        const sl& loc
     )
     {
+        static auto format{"%Y %m %d | %H:%M:%S"};
+
         std::stringstream log;
 
         log << lvl << "\t: "
-            << '[' << currentDateTime() << " | "
+            << '[' << getCurrentDateTime(format) << " | "
             << formatFileName(loc.file_name()) << "\t| "
             << loc.function_name() << " | "
             << loc.line() << "] : "
@@ -48,30 +45,56 @@ namespace lrh
 
         ofs << log.str();
         ofs.flush();
-        std::cout << "абоб" << std::endl;
     }
 
-    void Logger::info(const std::string &message, const std::source_location &loc)
+    Logger& Logger::getInstance()
+    {
+        static Logger singleton(createFileName());
+        return singleton;
+    }
+
+    int Logger::getCurrentLogID()
+    {
+        namespace fs = std::filesystem;
+
+        constexpr static auto logNameFormat{"%Y_%m_%d_"};
+        const static fs::path path(logsDir);
+
+        for (const auto& entry : fs::directory_iterator(logsDir))
+        {
+            const std::string fileName{entry.path().filename()};
+            if (fileName.starts_with(getCurrentDateTime(logNameFormat)))
+            {
+                const std::size_t idPos = fileName.find_last_of('_') + 1;
+                const std::string strID = fileName.substr(idPos);
+
+                return std::stoi(strID)+1;
+            }
+        }
+        return 0;
+    }
+
+    void Logger::info(const std::string &message, const sl &loc)
     {
         getInstance().write(message, Level::Info, loc);
     }
 
-    void Logger::debug(const std::string &message, const std::source_location &loc)
+    void Logger::debug(const std::string &message, const sl &loc)
     {
         getInstance().write(message, Level::Debug, loc);
     }
 
-    void Logger::warning(const std::string &message, const std::source_location &loc)
+    void Logger::warning(const std::string &message, const sl &loc)
     {
         getInstance().write(message, Level::Warning, loc);
     }
 
-    void Logger::error(const std::string &message, const std::source_location &loc)
+    void Logger::error(const std::string &message, const sl &loc)
     {
         getInstance().write(message, Level::Error, loc);
     }
 
-    void Logger::fatal(const std::string &message, const std::source_location &loc)
+    void Logger::fatal(const std::string &message, const sl &loc)
     {
         getInstance().write(message, Level::Fatal, loc);
     }
@@ -93,20 +116,37 @@ namespace lrh
     }
 
     const char* Logger::createFileName() {
-        return {"log_.log"};
+        std::filesystem::create_directory(logsDir);
+        static std::stringstream fileName;
+        fileName << /*logsDir <<*/ getCurrentDateTime("%Y_%m_%d_") << logIDtoStr(getCurrentLogID()) << ".log";
+        std::cout << fileName.str().c_str() << std::endl;
+
+        static const char* name(fileName.str().c_str());
+        return name;
     }
 
-    const char* Logger::currentDateTime() {
-        const std::time_t currentTime = std::time(nullptr);
-        const std::tm* structTime = std::localtime(&currentTime);
+    const char *Logger::getCurrentDateTime(const char* format)
+    {
+        const std::time_t currentTime{std::time(nullptr)};
+        const std::tm* structTime{std::localtime(&currentTime)};
 
         constexpr static std::size_t bufferSize{25};
         static char buffer[bufferSize];
 
-        constexpr static auto timeFormat{"%Y %m %d | %H:%M:%S"};
-        std::strftime(buffer, bufferSize, timeFormat, structTime);
+        //constexpr static auto timeFormat{"%Y %m %d | %H:%M:%S"};
+        std::strftime(buffer, bufferSize, format, structTime);
 
         return buffer;
+    }
+
+    std::string Logger::logIDtoStr(const int id)
+    {
+        std::string strID{std::to_string(id)};
+        const auto zeros = static_cast<int>(3 - strID.length());
+
+        strID.insert(strID.begin(), zeros, '0');
+
+        return strID;
     }
 
     const char* Logger::formatFileName(const std::string &fileName)

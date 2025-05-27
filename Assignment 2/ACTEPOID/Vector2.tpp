@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <cmath>
+#include "Logger.hpp"
 
 ///The Land Of Rape And Honey
 namespace lrh

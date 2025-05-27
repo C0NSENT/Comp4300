@@ -9,10 +9,12 @@
 #include <array>
 #include <ctime>
 
+#include <iostream>
+
 
 namespace lrh
 {
-    std::ostream& operator<<(std::ostream &ss, const Level level)
+    std::ostream& operator<<(std::ostream &ss, const Logger::Level level)
     {
         constexpr static std::array arrStrLvl {
             "INFO", "WARNING", "ERROR","DEBUG", "FATAL"
@@ -23,7 +25,7 @@ namespace lrh
         return ss;
     }
 
-    Logger& Logger::instance()
+    Logger& Logger::getInstance()
     {
         static Logger singleton(createFileName());
         return singleton;
@@ -31,21 +33,47 @@ namespace lrh
 
     void Logger::write(
         const std::string &message,
-        const Level level,
-        const std::source_location& location
+        const Level lvl,
+        const std::source_location& loc
     )
     {
         std::stringstream log;
 
-        log << '[' << currentDateTime() << "] "
-            << "[" << level << "]\t"
-            << '\"' << location.file_name() << '\"'
-            << "(" << location.line() << ":"
-            << location.column() << ")\t"
-            << location.function_name() << '\t'
+        log << lvl << "\t: "
+            << '[' << currentDateTime() << " | "
+            << formatFileName(loc.file_name()) << "\t| "
+            << loc.function_name() << " | "
+            << loc.line() << "] : "
             << message << '\n';
 
         ofs << log.str();
+        ofs.flush();
+        std::cout << "абоб" << std::endl;
+    }
+
+    void Logger::info(const std::string &message, const std::source_location &loc)
+    {
+        getInstance().write(message, Level::Info, loc);
+    }
+
+    void Logger::debug(const std::string &message, const std::source_location &loc)
+    {
+        getInstance().write(message, Level::Debug, loc);
+    }
+
+    void Logger::warning(const std::string &message, const std::source_location &loc)
+    {
+        getInstance().write(message, Level::Warning, loc);
+    }
+
+    void Logger::error(const std::string &message, const std::source_location &loc)
+    {
+        getInstance().write(message, Level::Error, loc);
+    }
+
+    void Logger::fatal(const std::string &message, const std::source_location &loc)
+    {
+        getInstance().write(message, Level::Fatal, loc);
     }
 
     Logger::Logger(const char* fileName)
@@ -69,15 +97,22 @@ namespace lrh
     }
 
     const char* Logger::currentDateTime() {
-        const static std::time_t currentTime = std::time(nullptr);
+        const std::time_t currentTime = std::time(nullptr);
         const std::tm* structTime = std::localtime(&currentTime);
 
-        constexpr static std::size_t bufferSize{20};
+        constexpr static std::size_t bufferSize{25};
         static char buffer[bufferSize];
-        //TODO: Не
-        constexpr static auto timeFormat{"%Y-%m-%d %H:%M:%S"};
+
+        constexpr static auto timeFormat{"%Y %m %d | %H:%M:%S"};
         std::strftime(buffer, bufferSize, timeFormat, structTime);
 
         return buffer;
+    }
+
+    const char* Logger::formatFileName(const std::string &fileName)
+    {
+        //Ебать я  умный
+        const std::size_t pos = fileName.find_last_of('/');
+        return &fileName[pos + 1];
     }
 }

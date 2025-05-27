@@ -4,7 +4,7 @@
 
 /////////////////////////////////////////////////////////////////////
 ///      СОВЕСТКИЙ ГЕНПЛАН
-///		TODO: Вывод даты и времени влог
+///
 ///		TODO: Адекватное формирование названия лога
 #pragma once
 
@@ -16,13 +16,6 @@
 
 namespace lrh
 {
-	enum class Level : uint8_t
-	{
-		Info, Warning, Error, Debug, Fatal
-	};
-
-	std::ostream& operator<<(std::ostream& ss, Level level);
-
 
 	/////////////////////////////////////////////////////////////////////
 	///
@@ -31,13 +24,25 @@ namespace lrh
 	/////////////////////////////////////////////////////////////////////
 	class Logger
 	{
+		enum class Level : uint8_t
+		{
+			Info, Debug, Warning, Error,  Fatal
+		};
+
+		friend std::ostream& operator<<(std::ostream& ss, Level level);
+
 	public:
-		[[nodiscard]] static Logger& instance();
-		void write(
-			const std::string &message,
-			Level level = Level::Info,
-			const std::source_location& location = std::source_location::current()
-		);
+
+		static void info(const std::string& message,
+			const std::source_location& loc = std::source_location::current());
+		static void debug(const std::string& message,
+			const std::source_location& loc = std::source_location::current());
+		static void warning(const std::string& message,
+			const std::source_location& loc = std::source_location::current());
+		static void error(const std::string& message,
+			const std::source_location& loc = std::source_location::current());
+		static void fatal(const std::string& message,
+			const std::source_location& loc = std::source_location::current());
 
 		/////////////////////////////////////////////////////////////////////
 		///
@@ -48,12 +53,24 @@ namespace lrh
 		Logger& operator=(const Logger&) = delete;
 
 	private:
+
 		explicit Logger(const char* fileName);
 		~Logger();
+
+		static std::source_location getCurrent();
+
+		[[nodiscard]] static Logger& getInstance();
+
+		void write(
+			const std::string &message,
+			Level lvl,
+			const std::source_location& loc = std::source_location::current()
+		);
 
 		static const char* createFileName();
 		static const char* currentDateTime();
 
+		static const char *formatFileName(const std::string &fileName);
 
 		std::ofstream ofs;
 	};

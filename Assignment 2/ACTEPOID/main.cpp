@@ -3,7 +3,7 @@
 //
 
 #include "Vector2.tpp"
-#include <Logger.hpp>
+#include "Logger.hpp"
 #include <iostream>
 #include <unistd.h>
 
@@ -23,6 +23,7 @@ void Vector2Test()
 	std::cout <<  foo.x << " " << foo.y << std::endl;
 }
 
+/*
 void loggerTest() {
 	lrh::Logger::instance().write("aboba", lrh::Level::Info);
 	lrh::Logger::instance().write("Ахуй", lrh::Level::Info);
@@ -30,6 +31,7 @@ void loggerTest() {
 	lrh::Logger::instance().write("<UNK>", lrh::Level::Error);
 	lrh::Logger::instance().write("<UNK>", lrh::Level::Debug);
 }
+*/
 
 
 
@@ -40,11 +42,10 @@ int main()
 	// sleep(2);
 	//loggerTest();
 
-	//TODO: Почему-то не выводит в реалтайме
-	while (true) {
+	/*while (true) {
 		lrh::Logger::instance().write("aboba");
 		sleep(1);
-	}
-	Vector2Test();
-
+	}*/
+	lrh::Logger::info("Shooting stars never stop");
+	lrh::Logger::debug("Welcome to the Pleasure Dome");
 }

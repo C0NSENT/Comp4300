@@ -9,9 +9,8 @@
 #include <array>
 #include <ctime>
 #include <filesystem>
-#include <ranges>
+///Удалить после завершения класса
 #include <iostream>
-
 
 namespace lrh
 {
@@ -25,55 +24,6 @@ namespace lrh
 
         return ss;
     }
-
-    void Logger::write(
-        const std::string &message,
-        const Level lvl,
-        const sl& loc
-    )
-    {
-        static auto format{"%Y %m %d | %H:%M:%S"};
-
-        std::stringstream log;
-
-        log << lvl << "\t: "
-            << '[' << getCurrentDateTime(format) << " | "
-            << formatFileName(loc.file_name()) << "\t| "
-            << loc.function_name() << " | "
-            << loc.line() << "] : "
-            << message << '\n';
-
-        ofs << log.str();
-        ofs.flush();
-    }
-
-    Logger& Logger::getInstance()
-    {
-        static Logger singleton(createFileName());
-        return singleton;
-    }
-
-    int Logger::getCurrentLogID()
-    {
-        namespace fs = std::filesystem;
-
-        constexpr static auto logNameFormat{"%Y_%m_%d_"};
-        const static fs::path path(logsDir);
-
-        for (const auto& entry : fs::directory_iterator(logsDir))
-        {
-            const std::string fileName{entry.path().filename()};
-            if (fileName.starts_with(getCurrentDateTime(logNameFormat)))
-            {
-                const std::size_t idPos = fileName.find_last_of('_') + 1;
-                const std::string strID = fileName.substr(idPos);
-
-                return std::stoi(strID)+1;
-            }
-        }
-        return 0;
-    }
-
     void Logger::info(const std::string &message, const sl &loc)
     {
         getInstance().write(message, Level::Info, loc);
@@ -115,10 +65,37 @@ namespace lrh
         //ofs << "this is the end, my lonely friend, the end\n";
     }
 
+    Logger& Logger::getInstance()
+    {
+        static Logger singleton(createFileName());
+        return singleton;
+    }
+
+    void Logger::write(
+        const std::string &message,
+        const Level lvl,
+        const sl& loc
+    )
+    {
+        static auto format{"%Y %m %d | %H:%M:%S"};
+
+        std::stringstream log;
+
+        log << lvl << "\t: "
+            << '[' << getCurrentDateTime(format) << " | "
+            << formatFileName(loc.file_name()) << "\t| "
+            << loc.function_name() << " | "
+            << loc.line() << "] : "
+            << message << '\n';
+
+        ofs << log.str();
+        ofs.flush();
+    }
+
     const char* Logger::createFileName() {
         std::filesystem::create_directory(logsDir);
         static std::stringstream fileName;
-        fileName << /*logsDir <<*/ getCurrentDateTime("%Y_%m_%d_") << logIDtoStr(getCurrentLogID()) << ".log";
+        fileName << /*logsDir <<*/ getCurrentDateTime("%Y_%m_%d_") << logIDtoStr(getLastLogID()) << ".log";
         std::cout << fileName.str().c_str() << std::endl;
 
         static const char* name(fileName.str().c_str());
@@ -139,6 +116,27 @@ namespace lrh
         return buffer;
     }
 
+    int Logger::getLastLogID()
+    {
+        namespace fs = std::filesystem;
+
+        constexpr static auto logNameFormat{"%Y_%m_%d_"};
+        const static fs::path path(logsDir);
+
+        for (const auto& entry : fs::directory_iterator(logsDir))
+        {
+            const std::string fileName{entry.path().filename()};
+            if (fileName.starts_with(getCurrentDateTime(logNameFormat)))
+            {
+                const std::size_t idPos = fileName.find_last_of('_') + 1;
+                const std::string strID = fileName.substr(idPos);
+
+                return std::stoi(strID)+1;
+            }
+        }
+        return 1;
+    }
+
     std::string Logger::logIDtoStr(const int id)
     {
         std::string strID{std::to_string(id)};
@@ -149,9 +147,12 @@ namespace lrh
         return strID;
     }
 
+    /**
+     * @param fileName Полный путь до файла
+     * @return Указатель на начало названия файла
+     */
     const char* Logger::formatFileName(const std::string &fileName)
     {
-        //Ебать я  умный
         const std::size_t pos = fileName.find_last_of('/');
         return &fileName[pos + 1];
     }

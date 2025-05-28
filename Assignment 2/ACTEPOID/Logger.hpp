@@ -2,10 +2,7 @@
 // Created by consent_ on 21/05/25.
 //
 
-/////////////////////////////////////////////////////////////////////
-///      СОВЕСТКИЙ ГЕНПЛАН
-///
-///		TODO: Адекватное формирование названия лога
+
 #pragma once
 
 #include <fstream>
@@ -15,14 +12,11 @@
 
 namespace lrh
 {
-	/////////////////////////////////////////////////////////////////////
-	///
 	/// \brief Синглтон для логирования игры
-	///
-	/////////////////////////////////////////////////////////////////////
 	class Logger
 	{
 		using sl =  std::source_location;
+
 		enum class Level : uint8_t
 		{
 			Info, Debug, Warning, Error,  Fatal
@@ -31,6 +25,7 @@ namespace lrh
 		friend std::ostream& operator<<(std::ostream& ss, Level level);
 
 	public:
+		///Методы для упрощение использования логгера
 		static void info(const std::string& message,
 			const sl& loc = sl::current());
 		static void debug(const std::string& message,
@@ -42,16 +37,12 @@ namespace lrh
 		static void fatal(const std::string& message,
 			const sl& loc = sl::current());
 
-		/////////////////////////////////////////////////////////////////////
-		///
-		///		ЖЕРТВЫ СТАЛИНСКИХ РЕПРЕССИЙ
-		///
-		/////////////////////////////////////////////////////////////////////
 		Logger(const Logger&) = delete;
 		Logger& operator=(const Logger&) = delete;
 
 	private:
 		explicit Logger(const char* fileName);
+		///Кандидат на удаление
 		~Logger();
 
 		static Logger& getInstance();
@@ -61,14 +52,19 @@ namespace lrh
 			Level lvl,
 			const sl& loc = sl::current()
 		);
-		static int getCurrentLogID();
+
 
 		static const char* createFileName();
 		static const char *getCurrentDateTime(const char *format);
 
+		static int getLastLogID();
 		static std::string logIDtoStr(int id);
+
 		static const char *formatFileName(const std::string &fileName);
 
+		///Тоже кандидат на удаление
+		///Хотя можно реализовать возможность изменения пути
+		///куда логи сохраняеются
 		constexpr static auto logsDir{"logs/"};
 
 		std::ofstream ofs;

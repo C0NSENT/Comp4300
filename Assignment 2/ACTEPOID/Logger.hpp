@@ -2,7 +2,6 @@
 // Created by consent_ on 21/05/25.
 //
 
-
 #pragma once
 
 #include <fstream>
@@ -12,7 +11,7 @@
 
 namespace lrh
 {
-	/// \brief Синглтон для логирования игры
+	/// @brief Синглтон для логирования игры
 	class Logger
 	{
 		using sl =  std::source_location;
@@ -25,7 +24,6 @@ namespace lrh
 		friend std::ostream& operator<<(std::ostream& ss, Level level);
 
 	public:
-		///Методы для упрощение использования логгера
 		static void info(const std::string& message,
 			const sl& loc = sl::current());
 		static void debug(const std::string& message,
@@ -41,10 +39,7 @@ namespace lrh
 		Logger& operator=(const Logger&) = delete;
 
 	private:
-		explicit Logger(const char* fileName);
-		///Кандидат на удаление
-		~Logger();
-
+		explicit Logger(const std::string& fileName);
 		static Logger& getInstance();
 
 		void write(
@@ -53,19 +48,13 @@ namespace lrh
 			const sl& loc = sl::current()
 		);
 
+		static std::string createFileName(const char* logsLocation = "logs/") ;
+		static const char* getCurrentDateTime(const char* format);
 
-		static const char* createFileName();
-		static const char *getCurrentDateTime(const char *format);
+		static int getLogID(const char* logsLocation);
+		static std::string formatLogID(int id);
 
-		static int getLastLogID();
-		static std::string logIDtoStr(int id);
-
-		static const char *formatFileName(const std::string &fileName);
-
-		///Тоже кандидат на удаление
-		///Хотя можно реализовать возможность изменения пути
-		///куда логи сохраняеются
-		constexpr static auto logsDir{"logs/"};
+		static const char* getFileName(const std::string &fileName);
 
 		std::ofstream ofs;
 	};

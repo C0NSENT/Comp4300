@@ -5,18 +5,15 @@
 #include "Logger.hpp"
 
 #include <sstream>
-
-#include <array>
 #include <ctime>
 #include <filesystem>
-///Удалить после завершения класса
-#include <iostream>
 
 namespace lrh
 {
-    std::ostream& operator<<(std::ostream &ss, const Logger::Level level)
+    std::ostream& operator<<(std::ostream& ss, const Logger::Level level)
     {
-        constexpr static std::array arrStrLvl {
+        constexpr static const char* arrStrLvl[]
+        {
             "INFO", "WARNING", "ERROR","DEBUG", "FATAL"
         };
 
@@ -24,45 +21,39 @@ namespace lrh
 
         return ss;
     }
-    void Logger::info(const std::string &message, const sl &loc)
+
+    void Logger::info(const std::string& message, const sl& loc)
     {
         getInstance().write(message, Level::Info, loc);
     }
 
-    void Logger::debug(const std::string &message, const sl &loc)
+    void Logger::debug(const std::string& message, const sl& loc)
     {
         getInstance().write(message, Level::Debug, loc);
     }
 
-    void Logger::warning(const std::string &message, const sl &loc)
+    void Logger::warning(const std::string& message, const sl& loc)
     {
         getInstance().write(message, Level::Warning, loc);
     }
 
-    void Logger::error(const std::string &message, const sl &loc)
+    void Logger::error(const std::string& message, const sl& loc)
     {
         getInstance().write(message, Level::Error, loc);
     }
 
-    void Logger::fatal(const std::string &message, const sl &loc)
+    void Logger::fatal(const std::string& message, const sl& loc)
     {
         getInstance().write(message, Level::Fatal, loc);
     }
 
-    Logger::Logger(const char* fileName)
+    Logger::Logger(const std::string& fileName)
     {
         ofs.open(fileName, std::ios::app);
 
         if (not ofs.is_open()) {
             throw std::runtime_error("Could not open log file: " + std::string{fileName});
         }
-    }
-
-    Logger::~Logger() {
-        //Закрываем файл и можно добавить
-        //Закрывающее сообщение лог файла
-        //TODO: Чекнуть как другие работяги закрывают лог файл
-        //ofs << "this is the end, my lonely friend, the end\n";
     }
 
     Logger& Logger::getInstance()
@@ -72,37 +63,40 @@ namespace lrh
     }
 
     void Logger::write(
-        const std::string &message,
+        const std::string& message,
         const Level lvl,
         const sl& loc
     )
     {
-        static auto format{"%Y %m %d | %H:%M:%S"};
+        constexpr static auto format{"%Y %m %d | %H:%M:%S"};
 
         std::stringstream log;
 
         log << lvl << "\t: "
             << '[' << getCurrentDateTime(format) << " | "
-            << formatFileName(loc.file_name()) << "\t| "
+            << getFileName(loc.file_name()) << "\t| "
             << loc.function_name() << " | "
             << loc.line() << "] : "
             << message << '\n';
 
         ofs << log.str();
+
         ofs.flush();
     }
 
-    const char* Logger::createFileName() {
-        std::filesystem::create_directory(logsDir);
-        static std::stringstream fileName;
-        fileName << /*logsDir <<*/ getCurrentDateTime("%Y_%m_%d_") << logIDtoStr(getLastLogID()) << ".log";
-        std::cout << fileName.str().c_str() << std::endl;
+    std::string Logger::createFileName(const char* logsLocation)
+    {
+        std::filesystem::create_directory(logsLocation);
 
-        static const char* name(fileName.str().c_str());
-        return name;
+        std::stringstream fileName;
+
+        fileName << logsLocation << getCurrentDateTime("%Y_%m_%d_")
+            << formatLogID(getLogID(logsLocation)) << ".log";
+
+        return fileName.str();
     }
 
-    const char *Logger::getCurrentDateTime(const char* format)
+    const char* Logger::getCurrentDateTime(const char* format)
     {
         const std::time_t currentTime{std::time(nullptr)};
         const std::tm* structTime{std::localtime(&currentTime)};
@@ -110,34 +104,36 @@ namespace lrh
         constexpr static std::size_t bufferSize{25};
         static char buffer[bufferSize];
 
-        //constexpr static auto timeFormat{"%Y %m %d | %H:%M:%S"};
         std::strftime(buffer, bufferSize, format, structTime);
 
         return buffer;
     }
 
-    int Logger::getLastLogID()
+
+    int Logger::getLogID(const char* logsLocation)
     {
         namespace fs = std::filesystem;
 
         constexpr static auto logNameFormat{"%Y_%m_%d_"};
-        const static fs::path path(logsDir);
+        const static fs::path path(logsLocation);
 
-        for (const auto& entry : fs::directory_iterator(logsDir))
+        int id{1};
+        for (const auto& entry : fs::directory_iterator(logsLocation))
         {
             const std::string fileName{entry.path().filename()};
-            if (fileName.starts_with(getCurrentDateTime(logNameFormat)))
-            {
-                const std::size_t idPos = fileName.find_last_of('_') + 1;
-                const std::string strID = fileName.substr(idPos);
 
-                return std::stoi(strID)+1;
+            if (fileName.starts_with(getCurrentDateTime(logNameFormat))) {
+                id++;
             }
         }
-        return 1;
+        return id;
     }
 
-    std::string Logger::logIDtoStr(const int id)
+    /**
+     * @brief Приводит ID к строке и заполняет ее,
+     * добавляя нули что длина строки была 3
+     */
+    std::string Logger::formatLogID(const int id)
     {
         std::string strID{std::to_string(id)};
         const auto zeros = static_cast<int>(3 - strID.length());
@@ -148,10 +144,12 @@ namespace lrh
     }
 
     /**
+     *@brief Находит начало незвания самого файла
+     *
      * @param fileName Полный путь до файла
      * @return Указатель на начало названия файла
      */
-    const char* Logger::formatFileName(const std::string &fileName)
+    const char* Logger::getFileName(const std::string &fileName)
     {
         const std::size_t pos = fileName.find_last_of('/');
         return &fileName[pos + 1];

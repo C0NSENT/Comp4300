@@ -1,6 +1,7 @@
-//
-// Created by consent_ on 21/05/25.
-//
+/**
+ * @date 30-05-2025
+ * @author consent_
+ */
 
 #include "Logger.hpp"
 
@@ -129,10 +130,6 @@ namespace lrh
         return id;
     }
 
-    /**
-     * @brief Приводит ID к строке и заполняет ее,
-     * добавляя нули что длина строки была 3
-     */
     std::string Logger::formatLogID(const int id)
     {
         std::string strID{std::to_string(id)};
@@ -143,15 +140,14 @@ namespace lrh
         return strID;
     }
 
+
     /**
-     *@brief Находит начало незвания самого файла
-     *
-     * @param fileName Полный путь до файла
-     * @return Указатель на начало названия файла
-     */
-    const char* Logger::getFileName(const std::string &fileName)
+    * \details Возвращает указатель на \fullPath, который указывает
+    * на начало названия самого файла
+    */
+    const char* Logger::getFileName(const std::string &fullPath)
     {
-        const std::size_t pos = fileName.find_last_of('/');
-        return &fileName[pos + 1];
+        const std::size_t pos = fullPath.find_last_of('/');
+        return &fullPath[pos + 1];
     }
 }

@@ -3,9 +3,9 @@
  * @author consent_
  *
  * @brief Простенький логгер для игры,
- * чтобы сделать чуть проще, и для реализации паттерна синглитон
+ * чтобы сделать чуть проще, и для реализации паттерна синглтон
  *
- * @details При вызове функций логгера создает файл в директория "logs/"
+ * @details При вызове функций логгера создает файл в директории "logs/"
  * с названием в формате "2025_05_30_001.log" и записывает в него сообщения
  * в формате:
  *
@@ -27,14 +27,14 @@ namespace lrh
 		///Простенький enum для простоты определения уровня лога
 		enum class Level : uint8_t
 		{
-			Info, Debug, Warning, Error,  Fatal
+			Info, Debug, Warning, Error, Fatal
 		};
 
 		friend std::ostream& operator<<(std::ostream& ss, Level level);
 
 	public:
 		///@brief Враппер над write() для удобства работы с логгером
-		///@param loc по-умолчанию передает функция, где вызван логгер
+		///@param loc По-умолчанию передает функция, где вызван логгер
 		static void info(const std::string& message,
 			const sl& loc = sl::current());
 		static void debug(const std::string& message,
@@ -46,8 +46,8 @@ namespace lrh
 		static void fatal(const std::string& message,
 			const sl& loc = sl::current());
 
-		///Копирование и присваивание не разрешены
-		///т.к. это синглтон
+		///Копирование и присваивание не разрешены,
+		///так как это синглтон
 		Logger(const Logger&) = delete;
 		Logger& operator=(const Logger&) = delete;
 

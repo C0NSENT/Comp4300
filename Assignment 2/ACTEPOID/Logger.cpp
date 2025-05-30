@@ -15,7 +15,7 @@ namespace lrh
     {
         constexpr static const char* arrStrLvl[]
         {
-            "INFO", "WARNING", "ERROR","DEBUG", "FATAL"
+            "INFO", "DEBUG", "WARNING", "ERROR", "FATAL"
         };
 
         ss << arrStrLvl[static_cast<int>(level)];
@@ -52,7 +52,8 @@ namespace lrh
     {
         ofs.open(fileName, std::ios::app);
 
-        if (not ofs.is_open()) {
+        if (not ofs.is_open())
+        {
             throw std::runtime_error("Could not open log file: " + std::string{fileName});
         }
     }
@@ -110,7 +111,6 @@ namespace lrh
         return buffer;
     }
 
-
     int Logger::getLogID(const char* logsLocation)
     {
         namespace fs = std::filesystem;
@@ -140,9 +140,8 @@ namespace lrh
         return strID;
     }
 
-
     /**
-    * \details Возвращает указатель на \fullPath, который указывает
+    * \details Возвращает указатель на fullPath, который указывает
     * на начало названия самого файла
     */
     const char* Logger::getFileName(const std::string &fullPath)

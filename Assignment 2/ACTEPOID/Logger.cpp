@@ -53,9 +53,7 @@ namespace lrh
         ofs.open(fileName, std::ios::app);
 
         if (not ofs.is_open())
-        {
-            throw std::runtime_error("Could not open log file: " + std::string{fileName});
-        }
+            throw std::runtime_error("Could not open log file: " + fileName);
     }
 
     Logger& Logger::getInstance()
@@ -117,15 +115,15 @@ namespace lrh
 
         constexpr static auto logNameFormat{"%Y_%m_%d_"};
         const static fs::path path(logsLocation);
+        const static auto currentDate{getCurrentDateTime(logNameFormat)};
 
         int id{1};
-        for (const auto& entry : fs::directory_iterator(logsLocation))
+        for (const fs::directory_entry& entry : fs::directory_iterator(logsLocation))
         {
             const std::string fileName{entry.path().filename()};
 
-            if (fileName.starts_with(getCurrentDateTime(logNameFormat))) {
-                id++;
-            }
+            ///Здесь строка а не char для использования методов строки
+            if (fileName.starts_with(currentDate)) id++;
         }
         return id;
     }

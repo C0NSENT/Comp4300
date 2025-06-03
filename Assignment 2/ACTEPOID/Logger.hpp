@@ -2,8 +2,7 @@
  * @date 30-05-2025
  * @author consent_
  *
- * @brief Простенький логгер для игры,
- * чтобы сделать чуть проще, и для реализации паттерна синглтон
+ * @brief Простенький логгер для игры.
  *
  * @details При вызове функций логгера создает файл в директории "logs/"
  * с названием в формате "2025_05_30_001.log" и записывает в него сообщения
@@ -62,6 +61,7 @@ namespace lrh
 			Level lvl,
 			const sl& loc = sl::current()
 		);
+
 		///@brief Возвращает строку с именем файла в формате "2025_05_30_001.log"
 		static std::string createFileName(const char* logsLocation = "logs/");
 		static const char* getCurrentDateTime(const char* format);

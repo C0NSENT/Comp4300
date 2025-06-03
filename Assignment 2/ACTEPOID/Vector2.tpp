@@ -2,7 +2,8 @@
 
 #include <type_traits>
 #include <cmath>
-#include "Logger.hpp"
+
+#include <string>
 
 ///The Land Of Rape And Honey
 namespace lrh
@@ -13,18 +14,27 @@ namespace lrh
 	///
 	/////////////////////////////////////////////////////////////////////
 	template<typename T>
-	concept is_numeric = std::is_arithmetic_v<T>
+	concept isNumeric = std::is_arithmetic_v<T>
 		and not std::is_same_v<T, bool>
 		and not std::is_same_v<T, char>;
+
+
+
+
 
 	/////////////////////////////////////////////////////////////////////
 	/// \brief Самописный аналог sf::Vector2
 	///
 	/////////////////////////////////////////////////////////////////////
 
-	template <typename T> requires is_numeric<T>
+	template <typename T> requires isNumeric<T>
 	class Vector2
 	{
+		template<typename T>
+constexpr bool isFloat = std::is_floating_point_v<T>;
+
+		constexpr static void throwIfZero(const Vector2<T>& v, std::string_view errorMessage);
+		constexpr static void throwIfNotFloat(const Vector2<T>& v, std::string_view errorMessage);
 	public:
 		/////////////////////////////////////////////////////////////////////
 		///
@@ -46,7 +56,7 @@ namespace lrh
 		///			между двумя векторами по  обеим осям
 		///
 		/////////////////////////////////////////////////////////////////////
-		constexpr auto distance(const Vector2& other) const -> Vector2;
+		[[nodiscard]] constexpr auto distance(const Vector2& other) const -> Vector2;
 
 		/////////////////////////////////////////////////////////////////////
 		/// \brief Вычисляет квадрат длины вектора
@@ -55,7 +65,7 @@ namespace lrh
 		///			квадратного корня
 		///
 		/////////////////////////////////////////////////////////////////////
-		constexpr T lengthSquared() const;
+		[[nodiscard]] constexpr T lengthSquared() const;
 
 		/////////////////////////////////////////////////////////////////////
 		/// \brief Вычисляет длину вектора
@@ -63,7 +73,9 @@ namespace lrh
 		///         теореме Пифагора
 		///
 		/////////////////////////////////////////////////////////////////////
-		constexpr T length() const;
+		[[nodiscard]] constexpr T length() const;
+
+		[[nodiscard]] constexpr T normalized() const;
 
 		/////////////////////////////////////////////////////////////////////
 		///
@@ -120,19 +132,28 @@ namespace lrh
 	using Vector2i = Vector2<int>;
 	using Vector2u = Vector2<unsigned>;
 
+	template<typename T> requires isNumeric<T>
+	constexpr void Vector2<T>::throwIfZero(const Vector2<T> &v, std::string_view errorMessage) {
+
+	}
+
+	template<typename T> requires isNumeric<T>
+	constexpr void Vector2<T>::throwIfNotFloat(const Vector2<T> &v, std::string_view errorMessage) {
+	}
+
 	/////////////////////////////////////////////////////////////////////
 	///
 	///        РЕАЛИЗАЦИЯ
 	///
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::distance(const Vector2& other) const -> Vector2
 	{
 		return {x - other.x, y - other.y};
 	}
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr T Vector2<T>::lengthSquared() const
 	{
 		return {x * x + y * y};
@@ -140,15 +161,21 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr T Vector2<T>::length() const
 	{
+		//throwIfNotFloat(this, )
 		return std::sqrt(this->lengthSquared());
+	}
+
+	template<typename T> requires isNumeric<T>
+	constexpr T Vector2<T>::normalized() const {
+
 	}
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator-() -> Vector2
 	{
 		return {-x, -y};
@@ -156,7 +183,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator+(const Vector2& rhs) -> Vector2
 	{
 		return {x + rhs.x, y + rhs.y};
@@ -164,7 +191,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator-(const Vector2& rhs) -> Vector2
 	{
 		return {x - rhs.x, y - rhs.y};
@@ -172,7 +199,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator*(const Vector2& rhs) -> Vector2
 	{
 		return {x * rhs.x, y * rhs.y};
@@ -180,7 +207,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr Vector2<T> Vector2<T>::operator/(const Vector2& rhs)
 	{
 		return {x / rhs.x, y / rhs.y};
@@ -188,7 +215,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator=(const Vector2& rhs) -> Vector2&
 	{
 		if (this != &rhs) {
@@ -200,7 +227,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator+=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this + rhs;
@@ -209,7 +236,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator-=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this - rhs;
@@ -218,7 +245,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator*=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this * rhs;
@@ -227,7 +254,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator/=(const Vector2& rhs) -> Vector2&
 	{
 		*this = *this / rhs;
@@ -236,7 +263,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr bool Vector2<T>::operator==(const Vector2& rhs) const
 	{
 		return x == rhs.x && y == rhs.y;
@@ -244,7 +271,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr bool Vector2<T>::operator!=(const Vector2& rhs) const
 	{
 		return !(*this == rhs);
@@ -252,7 +279,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator+(const T val) -> Vector2
 	{
 		return {x + val, y + val};
@@ -260,7 +287,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator-(T val) -> Vector2
 	{
 		return {x - val, y - val};
@@ -268,7 +295,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator*(T val) -> Vector2
 	{
 		return {x * val, y * val};
@@ -276,7 +303,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator/(T val) -> Vector2
 	{
 		return {x / val, y / val};
@@ -284,7 +311,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator+=(T val) -> Vector2&
 	{
 		*this = *this + val;
@@ -293,7 +320,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator-=(T val) -> Vector2&
 	{
 		*this = *this - val;
@@ -302,7 +329,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator*=(T val) -> Vector2&
 	{
 		*this = *this * val;
@@ -311,7 +338,7 @@ namespace lrh
 
 
 	/////////////////////////////////////////////////////////////////////
-	template<typename T> requires is_numeric<T>
+	template<typename T> requires isNumeric<T>
 	constexpr auto Vector2<T>::operator/=(T val) -> Vector2&
 	{
 		*this = *this / val;

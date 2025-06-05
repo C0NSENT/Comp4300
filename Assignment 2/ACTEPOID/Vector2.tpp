@@ -9,7 +9,10 @@
 
 #include <type_traits>
 #include <cmath>
+
 #include <stdexcept>
+#include <source_location>
+#include <string>
 
 ///The Land Of Rape And Honey
 namespace lrh
@@ -17,6 +20,12 @@ namespace lrh
 	template <typename T> requires std::is_arithmetic_v<T>
 	class Vector2
 	{
+		using sl = std::source_location;
+
+		///Выбрасывает ошибки если деление на ноль
+		constexpr static void throwIfDivisionByZero(T num, const sl& location = sl::current());
+		constexpr static void throwIfDivisionByZero(const Vector2& v, const sl& location = sl::current());
+
 	public:
 		constexpr Vector2() = default;
 		constexpr Vector2(const T& x, const T& y) : x(x), y(y) {}
@@ -80,6 +89,9 @@ namespace lrh
 		constexpr auto operator*=(T num) -> Vector2&;
 		constexpr auto operator/=(T num) -> Vector2&;
 
+		[[nodiscard]] constexpr bool operator==(T num) const;
+		[[nodiscard]] constexpr bool operator!=(T num) const;
+
 		T x{0};
 		T y{0};
 	};
@@ -91,6 +103,25 @@ namespace lrh
 	using Vector2i = Vector2<int>;
 	using Vector2u = Vector2<unsigned>;
 
+
+	template<typename T> requires std::is_arithmetic_v<T>
+	constexpr void Vector2<T>::throwIfDivisionByZero(const T num, const sl &location)
+	{
+		if (num == 0)
+		{
+			throw std::logic_error(
+				std::string{location.function_name()} +
+				": error - Division by zero"
+			);
+		}
+	}
+
+	template<typename T> requires std::is_arithmetic_v<T>
+	constexpr void Vector2<T>::throwIfDivisionByZero(const Vector2& v, const sl& location)
+	{
+		throwIfDivisionByZero(v.x, location);
+		throwIfDivisionByZero(v.y, location);
+	}
 
 	template<typename T> requires std::is_arithmetic_v<T>
 	constexpr auto Vector2<T>::distance(const Vector2& other) const -> Vector2
@@ -119,6 +150,7 @@ namespace lrh
 	constexpr Vector2<T> Vector2<T>::normalized() const
 	requires std::is_floating_point_v<T>
 	{
+		throwIfDivisionByZero(length());
 		return *this / length();
 	}
 
@@ -154,11 +186,7 @@ namespace lrh
 	template<typename T> requires std::is_arithmetic_v<T>
 	constexpr auto Vector2<T>::operator/(const Vector2& rhs) const -> Vector2
 	{
-		if (rhs.x == 0 and rhs.y == 0)
-		{
-			throw std::runtime_error("Division by zero");
-		}
-		
+		throwIfDivisionByZero(rhs);
 		return {x / rhs.x, y / rhs.y};
 	}
 
@@ -201,6 +229,7 @@ namespace lrh
 	template<typename T> requires std::is_arithmetic_v<T>
 	constexpr auto Vector2<T>::operator/=(const Vector2& rhs) -> Vector2&
 	{
+		throwIfDivisionByZero(rhs);
 		*this = *this / rhs;
 		return *this;
 	}
@@ -216,7 +245,7 @@ namespace lrh
 	template<typename T> requires std::is_arithmetic_v<T>
 	constexpr bool Vector2<T>::operator!=(const Vector2& rhs) const
 	{
-		return !(*this == rhs);
+		return not (*this == rhs);
 	}
 
 
@@ -228,33 +257,29 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-(T num) const -> Vector2
+	constexpr auto Vector2<T>::operator-(const T num) const -> Vector2
 	{
 		return {x - num, y - num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*(T num) const -> Vector2
+	constexpr auto Vector2<T>::operator*(const T num) const -> Vector2
 	{
 		return {x * num, y * num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator/(T num) const -> Vector2
+	constexpr auto Vector2<T>::operator/(const T num) const -> Vector2
 	{
-		if (num == 0)
-		{
-			throw std::runtime_error("Division by zero");	
-		}
-		
+		throwIfDivisionByZero(num);
 		return {x / num, y / num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+=(T num) -> Vector2&
+	constexpr auto Vector2<T>::operator+=(const T num) -> Vector2&
 	{
 		*this = *this + num;
 		return *this;
@@ -262,7 +287,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-=(T num) -> Vector2&
+	constexpr auto Vector2<T>::operator-=(const T num) -> Vector2&
 	{
 		*this = *this - num;
 		return *this;
@@ -270,7 +295,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*=(T num) -> Vector2&
+	constexpr auto Vector2<T>::operator*=(const T num) -> Vector2&
 	{
 		*this = *this * num;
 		return *this;
@@ -278,9 +303,22 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator/=(T num) -> Vector2&
+	constexpr auto Vector2<T>::operator/=(const T num) -> Vector2&
 	{
+		throwIfDivisionByZero(num);
 		*this = *this / num;
 		return *this;
+	}
+
+	template<typename T> requires std::is_arithmetic_v<T>
+	constexpr bool Vector2<T>::operator==(const T num) const
+	{
+		return this->x == num and this->y == num;
+	}
+
+	template<typename T> requires std::is_arithmetic_v<T>
+	constexpr bool Vector2<T>::operator!=(const T num) const
+	{
+		return not (*this == num);
 	}
 }

@@ -29,8 +29,9 @@ namespace lrh
 			const int points,
 			const sf::Color& fill,
 			const sf::Color& outline,
-			const float thickness)
-			: circle(radius, points)
+			const float thickness
+		)
+		: circle(radius, points)
 		{
 			circle.setFillColor(fill);
 			circle.setOutlineColor(outline);

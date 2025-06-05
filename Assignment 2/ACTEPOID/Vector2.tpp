@@ -97,7 +97,6 @@ namespace lrh
 	};
 
 
-
 	///Псевдонимы для часто используемых типов, прям как в SFML
 	using Vector2f = Vector2<float>;
 	using Vector2i = Vector2<int>;
@@ -194,7 +193,8 @@ namespace lrh
 	template<typename T> requires std::is_arithmetic_v<T>
 	constexpr auto Vector2<T>::operator=(const Vector2& rhs) -> Vector2&
 	{
-		if (this != &rhs) {
+		if (this != &rhs)
+		{
 			x = rhs.x;
 			y = rhs.y;
 		}

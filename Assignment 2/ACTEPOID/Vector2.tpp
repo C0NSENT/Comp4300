@@ -9,21 +9,13 @@
 
 #include <type_traits>
 #include <cmath>
-#include <source_location>
+#include <stdexcept>
 
 ///The Land Of Rape And Honey
 namespace lrh
 {
-	/// Концепт для проверки является ли число нулем
-	/*template<typename T>
-	concept isNotZero = requires (T num, T num2)
-	{
-		num!=0.f;
-	};*/
-
 	template <typename T> requires std::is_arithmetic_v<T>
 	class Vector2
-
 	{
 	public:
 		constexpr Vector2() = default;
@@ -64,10 +56,10 @@ namespace lrh
 		///@brief Инвертирует знак
 		constexpr auto operator-() const  -> Vector2;
 
-		[[nodiscard]] constexpr auto operator+(const Vector2& rhs) -> Vector2;
-		[[nodiscard]] constexpr auto operator-(const Vector2& rhs) -> Vector2;
-		[[nodiscard]] constexpr auto operator*(const Vector2& rhs) -> Vector2;
-		[[nodiscard]] constexpr auto operator/(const Vector2& rhs) -> Vector2;
+		[[nodiscard]] constexpr auto operator+(const Vector2& rhs) const -> Vector2;
+		[[nodiscard]] constexpr auto operator-(const Vector2& rhs) const -> Vector2;
+		[[nodiscard]] constexpr auto operator*(const Vector2& rhs) const -> Vector2;
+		[[nodiscard]] constexpr auto operator/(const Vector2& rhs) const -> Vector2;
 		constexpr auto operator=(const Vector2& rhs) -> Vector2&;
 
 		constexpr auto operator+=(const Vector2& rhs) -> Vector2&;
@@ -78,15 +70,15 @@ namespace lrh
 		[[nodiscard]] constexpr bool operator==(const Vector2& rhs) const;
 		[[nodiscard]] constexpr bool operator!=(const Vector2& rhs) const;
 
-		[[nodiscard]] constexpr auto operator+(T val) -> Vector2;
-		[[nodiscard]] constexpr auto operator-(T val) -> Vector2;
-		[[nodiscard]] constexpr auto operator*(T val) -> Vector2;
-		[[nodiscard]] constexpr auto operator/(T val) -> Vector2;
+		[[nodiscard]] constexpr auto operator+(T num) const -> Vector2;
+		[[nodiscard]] constexpr auto operator-(T num) const -> Vector2;
+		[[nodiscard]] constexpr auto operator*(T num) const -> Vector2;
+		[[nodiscard]] constexpr auto operator/(T num) const -> Vector2;
 
-		constexpr auto operator+=(T val) -> Vector2&;
-		constexpr auto operator-=(T val) -> Vector2&;
-		constexpr auto operator*=(T val) -> Vector2&;
-		constexpr auto operator/=(T val) -> Vector2&;
+		constexpr auto operator+=(T num) -> Vector2&;
+		constexpr auto operator-=(T num) -> Vector2&;
+		constexpr auto operator*=(T num) -> Vector2&;
+		constexpr auto operator/=(T num) -> Vector2&;
 
 		T x{0};
 		T y{0};
@@ -139,29 +131,34 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+(const Vector2& rhs) -> Vector2
+	constexpr auto Vector2<T>::operator+(const Vector2& rhs) const -> Vector2
 	{
 		return {x + rhs.x, y + rhs.y};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-(const Vector2& rhs) -> Vector2
+	constexpr auto Vector2<T>::operator-(const Vector2& rhs) const -> Vector2
 	{
 		return {x - rhs.x, y - rhs.y};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*(const Vector2& rhs) -> Vector2
+	constexpr auto Vector2<T>::operator*(const Vector2& rhs) const -> Vector2
 	{
 		return {x * rhs.x, y * rhs.y};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr Vector2<T> Vector2<T>::operator/(const Vector2& rhs)
+	constexpr auto Vector2<T>::operator/(const Vector2& rhs) const -> Vector2
 	{
+		if (rhs.x == 0 and rhs.y == 0)
+		{
+			throw std::runtime_error("Division by zero");
+		}
+		
 		return {x / rhs.x, y / rhs.y};
 	}
 
@@ -212,7 +209,7 @@ namespace lrh
 	template<typename T> requires std::is_arithmetic_v<T>
 	constexpr bool Vector2<T>::operator==(const Vector2& rhs) const
 	{
-		return x == rhs.x && y == rhs.y;
+		return x == rhs.x and y == rhs.y;
 	}
 
 
@@ -224,61 +221,66 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+(const T val) -> Vector2
+	constexpr auto Vector2<T>::operator+(const T num) const -> Vector2
 	{
-		return {x + val, y + val};
+		return {x + num, y + num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-(T val) -> Vector2
+	constexpr auto Vector2<T>::operator-(T num) const -> Vector2
 	{
-		return {x - val, y - val};
+		return {x - num, y - num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*(T val) -> Vector2
+	constexpr auto Vector2<T>::operator*(T num) const -> Vector2
 	{
-		return {x * val, y * val};
+		return {x * num, y * num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator/(T val) -> Vector2
+	constexpr auto Vector2<T>::operator/(T num) const -> Vector2
 	{
-		return {x / val, y / val};
+		if (num == 0)
+		{
+			throw std::runtime_error("Division by zero");	
+		}
+		
+		return {x / num, y / num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+=(T val) -> Vector2&
+	constexpr auto Vector2<T>::operator+=(T num) -> Vector2&
 	{
-		*this = *this + val;
+		*this = *this + num;
 		return *this;
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-=(T val) -> Vector2&
+	constexpr auto Vector2<T>::operator-=(T num) -> Vector2&
 	{
-		*this = *this - val;
+		*this = *this - num;
 		return *this;
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*=(T val) -> Vector2&
+	constexpr auto Vector2<T>::operator*=(T num) -> Vector2&
 	{
-		*this = *this * val;
+		*this = *this * num;
 		return *this;
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator/=(T val) -> Vector2&
+	constexpr auto Vector2<T>::operator/=(T num) -> Vector2&
 	{
-		*this = *this / val;
+		*this = *this / num;
 		return *this;
 	}
 }

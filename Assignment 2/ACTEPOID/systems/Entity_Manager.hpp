@@ -2,15 +2,20 @@
 // Created by consent_ on 21/05/25.
 //
 
-//std::deque
 #pragma once
 
 #include "Entity.hpp"
 
-#include<vector>
+#include<unordered_map>
 
-class EntityManager 
+namespace lrh
 {
+    class Entity_Manager
+    {
+    public:
 
-public:
-};
+    private:
+
+
+    };
+}

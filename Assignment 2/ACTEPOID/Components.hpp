@@ -10,17 +10,26 @@
 
 namespace lrh
 {
-	struct CTransform
+
+
+	struct Component {
+		enum class Type : std::uint8_t {
+			transform, shape, collision, score, lifeSpan, input
+		};
+	};
+
+	struct CTransform : Component
 	{
 		Vector2f pos{0.0, 0.0};
 		Vector2f velocity{0.0, 0.0};
 		float angle{0};
 
+		CTransform()=default;
 		CTransform(const Vector2f &p, const Vector2f &v, float a)
 			: pos(p), velocity(v), angle(a) {}
 	};
 
-	struct CShape
+	struct CShape : Component
 	{
 		sf::CircleShape circle;
 
@@ -40,10 +49,10 @@ namespace lrh
 		}
 	};
 
-	struct CCollision {
+	struct CCollision : Component{
 		float radius{0};
 
-		explicit CCollision(const float r) : radius(r) {}
+		CCollision(const float r) : radius(r) {}
 	};
 
 	struct CScore {
@@ -52,7 +61,7 @@ namespace lrh
 		explicit CScore(const unsigned s) : score(s) {}
 	};
 
-	struct CLifespan
+	struct CLifespan : Component
 	{
 		unsigned remaining{0};
 		unsigned total{0};
@@ -61,7 +70,7 @@ namespace lrh
 			: remaining(t), total(t) {}
 	};
 
-	struct CInput
+	struct CInput : Component
 	{
 		bool up{false};
 		bool left{false};

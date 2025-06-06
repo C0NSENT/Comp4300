@@ -1,49 +1,80 @@
-//
-// Created by consent_ on 21/05/25.
-//
-
 #pragma once
 
 #include "Components.hpp"
 
-#include <array>
-#include <source_location>
+#include <vector>
+//#include<type_traits>
 
 namespace lrh
 {
     class Entity
     {
-
-        friend class EntityManager;
-
-        constexpr static bool isIndexesValid(const std::array<std::int8_t, 6>& arrComponentsIndexes);
-
-        constexpr static void throwIfIndexesInvalid(const std::array<std::int8_t, 6>& arrComponentsIndexes,
-            const std::source_location& location = std::source_location::current());
-
     public:
-        enum class ComponentType : std::uint8_t
-        {
-            transform = 0, shape, collision, score, lifeSpan, input
-        };
+        constexpr Entity(std::uint32_t id, bool isActive = true);
+        ~Entity();
 
-        [[nodiscard]] constexpr bool getIsExist() const;
-        [[nodiscard]] constexpr std::int8_t getIndex(ComponentType type) const;
+        constexpr bool getIsActive() const;
+        constexpr std::uint32_t getId() const;
 
-        [[nodiscard]] constexpr bool hasComponent(ComponentType type) const;
+        template <typename T> requires std::is_base_of_v<T, Component>
+        constexpr T getComponent() const;
 
-        constexpr void setIsExist(bool isExist);
-        constexpr void setIndex(ComponentType type, std::int8_t index);
-        constexpr void setIndexes(const std::array<std::int8_t, 6>& arrComponentsIndexes);
+        template <typename T> requires std::is_base_of_v<Component, T>
+        constexpr bool hasComponent() const;
+
+        void setIsActive(bool active);
+        void setId(std::uint32_t id);
+
+        template <typename T> requires std::is_base_of_v<Component, T>
+        void addComponent();
 
     private:
-
-        constexpr Entity() : m_isExist(true) {}
-        constexpr Entity(const std::array<std::int8_t, 6>& arrComponentsIndexes);
-        constexpr Entity(bool isExist, const std::array<std::int8_t, 6>& arrComponentsIndexes);
-
-        bool m_isExist{false};
-        std::array<std::int8_t, 6> m_arrComponentsIndexes{-1, -1, -1, -1, -1, -1};
+        bool m_isActive;
+        std::uint32_t m_id;
+        std::vector<Component*> m_vComponents;
     };
+
+    constexpr Entity::Entity(const std::uint32_t id, const bool isActive)
+        : m_isActive(isActive), m_id(id)
+    {
+    }
+
+    inline Entity::~Entity() {
+    }
+
+    constexpr bool Entity::getIsActive() const
+    {
+        return m_isActive;
+    }
+
+    constexpr std::uint32_t Entity::getId() const
+    {
+        return m_id;
+    }
+
+    template<typename T> requires std::is_base_of_v<T, Component>
+    constexpr T Entity::getComponent() const
+    {
+
+    }
+
+    template<typename T> requires std::is_base_of_v<Component, T>
+    constexpr bool Entity::hasComponent() const
+    {
+        for (const auto* component : m_vComponents) {
+
+        }
+    }
+
+    inline void Entity::setIsActive(bool active)
+    {
+    }
+
+    inline void Entity::setId(std::uint32_t id) {
+    }
+
+    template<typename T> requires std::is_base_of_v<Component, T>
+    void Entity::addComponent() {
+    }
 }
 

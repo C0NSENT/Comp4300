@@ -7,27 +7,30 @@
 #include "Components.hpp"
 
 #include <array>
+#include <source_location>
 
 namespace lrh
 {
     class Entity
     {
-        using arrComponentsIndexes = std::array<std::int8_t, 6>;
+
         friend class EntityManager;
 
         constexpr static bool isIndexesValid(const std::array<std::int8_t, 6>& arrComponentsIndexes);
 
-    public:
+        constexpr static void throwIfIndexesInvalid(const std::array<std::int8_t, 6>& arrComponentsIndexes,
+            const std::source_location& location = std::source_location::current());
 
+    public:
         enum class ComponentType : std::uint8_t
         {
             transform = 0, shape, collision, score, lifeSpan, input
         };
 
-        constexpr bool getIsExist() const;
-        constexpr std::int8_t getIndex(ComponentType type) const;
+        [[nodiscard]] constexpr bool getIsExist() const;
+        [[nodiscard]] constexpr std::int8_t getIndex(ComponentType type) const;
 
-        constexpr bool hasComponent(ComponentType type) const;
+        [[nodiscard]] constexpr bool hasComponent(ComponentType type) const;
 
         constexpr void setIsExist(bool isExist);
         constexpr void setIndex(ComponentType type, std::int8_t index);

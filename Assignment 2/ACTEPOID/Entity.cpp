@@ -19,6 +19,14 @@ namespace lrh
         return true;
     }
 
+    constexpr void Entity::throwIfIndexesInvalid(const std::array<std::int8_t, 6>& arrComponentsIndexes,
+        const std::source_location& location)
+    {
+        if (isIndexesValid(arrComponentsIndexes))
+            throw std::invalid_argument(std::string{location.function_name()}
+                + " : Index is invalid");
+    }
+
     constexpr bool Entity::getIsExist() const
     {
         return m_isExist;
@@ -49,9 +57,7 @@ namespace lrh
 
     constexpr void Entity::setIndexes(const std::array<std::int8_t, 6>& arrComponentsIndexes)
     {
-        static_assert(isIndexesValid(arrComponentsIndexes),
-            "Entity::setIndexes(): indexes are not valid");
-
+        throwIfIndexesInvalid(arrComponentsIndexes);
         m_arrComponentsIndexes = arrComponentsIndexes;
     }
 
@@ -61,6 +67,6 @@ namespace lrh
     constexpr Entity::Entity(const bool isExist, const std::array<std::int8_t, 6> &arrComponentsIndexes)
         : m_isExist(isExist), m_arrComponentsIndexes(arrComponentsIndexes)
     {
-        static_assert(isIndexesValid(m_arrComponentsIndexes), "Entity::Entity(): indexes are not valid");
+        throwIfIndexesInvalid(arrComponentsIndexes);
     }
 }

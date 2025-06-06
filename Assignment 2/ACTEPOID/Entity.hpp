@@ -6,39 +6,41 @@
 
 #include "Components.hpp"
 
-#include <tuple>
+#include <array>
 
 namespace lrh
 {
     class Entity
     {
+        using arrComponentsIndexes = std::array<std::int8_t, 6>;
         friend class EntityManager;
 
-        enum class tag : std::uint8_t
-        {
-            player, enemy ///дописать теги
-        };
-
-        bool m_isActive;
-        std::uint8_t m_id;
-        tag m_tag;
-
-        constexpr Entity(std::uint8_t id, tag tag);
+        constexpr static bool isIndexesValid(const std::array<std::int8_t, 6>& arrComponentsIndexes);
 
     public:
 
-        std::tuple<CTransform, CShape, CCollision,
-        CInput, CScore, CLifespan> tComponents;
+        enum class ComponentType : std::uint8_t
+        {
+            transform = 0, shape, collision, score, lifeSpan, input
+        };
 
-        [[nodiscard]] constexpr bool getIsActive() const;
+        constexpr bool getIsExist() const;
+        constexpr std::int8_t getIndex(ComponentType type) const;
 
-        [[nodiscard]] constexpr tag getTag() const;
+        constexpr bool hasComponent(ComponentType type) const;
 
-        [[nodiscard]] constexpr std::uint8_t id() const;
+        constexpr void setIsExist(bool isExist);
+        constexpr void setIndex(ComponentType type, std::int8_t index);
+        constexpr void setIndexes(const std::array<std::int8_t, 6>& arrComponentsIndexes);
 
-        constexpr void destroy();
+    private:
 
+        constexpr Entity() : m_isExist(true) {}
+        constexpr Entity(const std::array<std::int8_t, 6>& arrComponentsIndexes);
+        constexpr Entity(bool isExist, const std::array<std::int8_t, 6>& arrComponentsIndexes);
 
+        bool m_isExist{false};
+        std::array<std::int8_t, 6> m_arrComponentsIndexes{-1, -1, -1, -1, -1, -1};
     };
 }
 

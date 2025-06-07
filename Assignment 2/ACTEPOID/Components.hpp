@@ -14,23 +14,24 @@ namespace lrh
 		virtual ~Component() = default;
 	};
 
-	struct CTransform : public Component
+	struct CTransform final : public Component
 	{
 		Vector2f pos{0.f, 0.f};
 		Vector2f velocity{0.f, 0.f};
 		float angle{0};
 
-		constexpr CTransform()=default;
+		constexpr CTransform() = default;
 		constexpr CTransform(const Vector2f &p, const Vector2f &v, const float a)
 			: pos(p), velocity(v), angle(a) {}
+		constexpr CTransform(const CTransform&) = default;
 	};
 
-	struct СPolygonShape : public Component
+	struct CPolygonShape final : public Component
 	{
 		sf::CircleShape polygonShape;
 
-		constexpr СPolygonShape()=default;
-		constexpr СPolygonShape(
+		constexpr CPolygonShape() = default;
+		constexpr CPolygonShape(
 			const float radius,
 			const int points,
 			const sf::Color& fill,
@@ -44,23 +45,26 @@ namespace lrh
 			polygonShape.setOutlineThickness(thickness);
 			polygonShape.setOrigin({radius, radius});
 		}
+		constexpr CPolygonShape(const CPolygonShape& ) = default;
 	};
 
-	struct CCollision : public Component{
+	struct CCollision final : public Component{
 		float radius{0};
 
-		constexpr CCollision()=default;
+		constexpr CCollision() = default;
 		constexpr explicit CCollision(const float r) : radius(r) {}
+		constexpr CCollision(const CCollision&) = default;
 	};
 
-	struct CScore {
+	struct CScore final : public Component
+	{
 		uint16_t score{0};
 
 		constexpr CScore() = default;
 		constexpr explicit CScore(const uint16_t s) : score(s) {}
 	};
 
-	struct CLifespan : public Component
+	struct CLifespan final : public Component
 	{
 		///Возможно придется переделывать чтобы
 		///нормально работало со временем sfml
@@ -70,9 +74,10 @@ namespace lrh
 		constexpr CLifespan() = default;
 		constexpr explicit CLifespan(const uint16_t t)
 			: remaining(t), total(t) {}
+		constexpr CLifespan(const CLifespan&) = default;
 	};
 
-	struct CInput : public Component
+	struct CInput final : public Component
 	{
 		bool up{false};
 		bool left{false};
@@ -93,5 +98,6 @@ namespace lrh
 			, down(down)
 		{
 		}
+		constexpr CInput(const CInput&) = default;
 	};
 }

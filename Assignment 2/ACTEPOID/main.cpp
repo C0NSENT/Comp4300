@@ -33,12 +33,12 @@ int main()
     std::cout << static_cast<lrh::CCollision*>(TiPutin.at(0))->radius;*/
 
     lrh::Entity gay(32);
-    gay.addComponent<lrh::CCollision>(lrh::CCollision{2});
+    gay.addComponent(lrh::CCollision{2}).addComponent(lrh::CLifespan{23});
 
     std::cout << gay.hasComponent<lrh::CCollision>() << std::endl;
     std::cout << gay.hasComponent<lrh::CTransform>() << std::endl;
 
-    std::cout << typeid(gay.getComponent<lrh::CTransform>()).name() << std::endl;
+    std::cout << (gay.getComponent<lrh::CTransform>() == nullptr) << std::endl;
 
     std::cout << gay.getComponent<lrh::CLifespan>()->remaining;
 

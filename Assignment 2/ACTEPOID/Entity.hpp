@@ -1,11 +1,10 @@
 #pragma once
 
-#include <algorithm>
-#include <cstdint>
-
 #include "Components.hpp"
 
 #include <vector>
+#include <type_traits>
+#include <cstdint>
 
 namespace lrh
 {
@@ -15,10 +14,8 @@ namespace lrh
 
     class Entity
     {
-        enum class ComponentType : uint8_t {
-            transform=0, shape, collision, score, lifeSpan, input
-        };
-
+        template<typename T> requires isComponent
+        size_t getIndex() const;
 
     public:
         constexpr Entity(uint32_t id, bool isActive = true);
@@ -33,8 +30,9 @@ namespace lrh
         template <typename T> requires isComponent<T>
         [[nodiscard]] constexpr bool hasComponent() const;
 
-        void setIsActive(bool active);
-        void setId(uint32_t id);
+        constexpr Entity& setIsActive(bool active);
+
+        constexpr Entity& setId(uint32_t id);
 
         template <typename T> requires isComponent<T>
         Entity& addComponent();
@@ -50,28 +48,15 @@ namespace lrh
     };
 
     constexpr Entity::Entity(const uint32_t id, const bool isActive)
-    : m_isActive(isActive), m_id(id)
-    {
-    }
-
-
-
-    constexpr bool Entity::getIsActive() const
-    {
-        return m_isActive;
-    }
-
-    constexpr std::uint32_t Entity::getId() const
-    {
-        return m_id;
-    }
+        : m_isActive(isActive), m_id(id) {}
 
     template<typename T> requires isComponent<T>
-    constexpr const T* Entity::getComponent() const
+   constexpr const T* Entity::getComponent() const
     {
         for (const Component* component : this->m_vComponents)
         {
-            if (this->hasComponent<T>()) {
+            //Да знаю принцип DRY пошел нахуй
+            if (dynamic_cast<const T*>(component) != nullptr) {
                 return static_cast<const T*>(component);
             }
         }
@@ -89,26 +74,24 @@ namespace lrh
         return false;
     }
 
-    inline void Entity::setIsActive(const bool active)
+    template<typename T> requires isComponent
+    size_t Entity::getIndex() const
     {
-        this->m_isActive = active;
-    }
-
-    inline void Entity::setId(const uint32_t id)
-    {
-        this->m_id = id;
+        for (auto i )
     }
 
     template<typename T> requires isComponent<T>
-    Entity& Entity::addComponent()
+  Entity& Entity::addComponent()
     {
         this->m_vComponents.push_back(new T());
+        return *this;
     }
 
     template<typename T> requires isComponent<T>
     Entity& Entity::addComponent(const T& component)
     {
         this->m_vComponents.push_back(new T(component));
+        return *this;
     }
 }
 

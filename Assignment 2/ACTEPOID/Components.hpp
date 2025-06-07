@@ -5,72 +5,73 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/System/Angle.inl>
 
 #include "Vector2.tpp"
 
 namespace lrh
 {
+	struct Component {};
 
-
-	struct Component {
-		enum class Type : std::uint8_t {
-			transform, shape, collision, score, lifeSpan, input
-		};
-	};
-
-	struct CTransform : Component
+	struct CTransform : public Component
 	{
-		Vector2f pos{0.0, 0.0};
-		Vector2f velocity{0.0, 0.0};
-		float angle{0};
+		Vector2f pos{0.f, 0.f};
+		Vector2f velocity{0.f, 0.f};
+		sf::Angle angle;
 
-		CTransform()=default;
-		CTransform(const Vector2f &p, const Vector2f &v, float a)
+		constexpr CTransform()=default;
+		constexpr CTransform(const Vector2f &p, const Vector2f &v, const float a)
 			: pos(p), velocity(v), angle(a) {}
 	};
 
-	struct CShape : Component
+	struct СPolygonShape : public Component
 	{
-		sf::CircleShape circle;
+		sf::CircleShape polygonShape;
 
-		CShape(
+		constexpr СPolygonShape()=default;
+		constexpr СPolygonShape(
 			const float radius,
 			const int points,
 			const sf::Color& fill,
 			const sf::Color& outline,
 			const float thickness
 		)
-		: circle(radius, points)
+		: polygonShape(radius, points)
 		{
-			circle.setFillColor(fill);
-			circle.setOutlineColor(outline);
-			circle.setOutlineThickness(thickness);
-			circle.setOrigin({radius, radius});
+			polygonShape.setFillColor(fill);
+			polygonShape.setOutlineColor(outline);
+			polygonShape.setOutlineThickness(thickness);
+			polygonShape.setOrigin({radius, radius});
 		}
 	};
 
-	struct CCollision : Component{
+	struct CCollision : public Component{
 		float radius{0};
 
-		CCollision(const float r) : radius(r) {}
+		constexpr CCollision()=default;
+		constexpr explicit CCollision(const float r) : radius(r) {}
 	};
 
 	struct CScore {
-		unsigned score{0};
+		uint16_t score{0};
 
-		explicit CScore(const unsigned s) : score(s) {}
+		constexpr CScore() = default;
+		constexpr explicit CScore(const uint16_t s) : score(s) {}
 	};
 
-	struct CLifespan : Component
+	struct CLifespan : public Component
 	{
-		unsigned remaining{0};
-		unsigned total{0};
+		///Возможно придется переделывать чтобы
+		///нормально работало со временем sfml
+		uint16_t remaining{0};
+		uint16_t total{0};
 
-		explicit CLifespan(const unsigned t)
+		constexpr CLifespan() = default;
+		constexpr explicit CLifespan(const uint16_t t)
 			: remaining(t), total(t) {}
 	};
 
-	struct CInput : Component
+	struct CInput : public Component
 	{
 		bool up{false};
 		bool left{false};
@@ -78,6 +79,18 @@ namespace lrh
 		bool down{false};
 		bool shoot{false};
 
-		CInput() = default;
+		constexpr CInput() = default;
+		constexpr CInput(
+			const bool up,
+			const bool left,
+			const bool right,
+			const bool down
+			)
+			: up(up)
+			, left(left)
+			, right(right)
+			, down(down)
+		{
+		}
 	};
 }

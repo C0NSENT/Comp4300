@@ -4,25 +4,43 @@
 
 #include "Vector2.tpp"
 #include "Logger.hpp"
+#include <unistd.h>
 
 #include <iostream>
+#include "Components.hpp"
+#include "Entity.hpp"
 
-void Vector2Test()
+#include "SFML/System/Vector2.hpp"
+
+#include <array>
+#include <unordered_map>
+#include <iostream>
+#include <vector>
+
+int main()
 {
-	lrh::Vector2f oleg{3, 3};
-	lrh::Vector2f mongol{1, 2};
-	lrh::Vector2 copy{oleg};
-	lrh::Vector2 foo{oleg + copy};
-	oleg += 229;
-	mongol = mongol + 3;
-	-oleg;
-	oleg.distance(mongol);
-	std::cout << oleg.x << " " << oleg.y << std::endl;
-	std::cout << mongol.x << " " << mongol.y << std::endl;
-	std::cout <<  copy.x << " " << copy.y << std::endl;
-	std::cout <<  foo.x << " " << foo.y << std::endl;
+    /*std::unordered_map<int, int> um;
+
+    for (auto i = 0; i < 2000; i++) {
+        std::cout << um.size() << " " << um.bucket_count() << "\n";
+        um.insert({i , i});
+    }*/
+
+    /*std::vector<lrh::Component*>  TiPutin;
+    TiPutin.push_back(new lrh::CCollision(2));
+
+
+    std::cout << static_cast<lrh::CCollision*>(TiPutin.at(0))->radius;*/
+
+    lrh::Entity gay(32);
+    gay.addComponent<lrh::CCollision>(lrh::CCollision{2});
+
+    std::cout << gay.hasComponent<lrh::CCollision>() << std::endl;
+    std::cout << gay.hasComponent<lrh::CTransform>() << std::endl;
+
+    std::cout << typeid(gay.getComponent<lrh::CTransform>()).name() << std::endl;
+
+    std::cout << gay.getComponent<lrh::CLifespan>()->remaining;
+
 }
 
-int main() {
-
-}

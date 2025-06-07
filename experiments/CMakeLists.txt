@@ -27,3 +27,11 @@ add_executable(${PROJECT_NAME} CompilerOptimizations.cpp)
 project(sizeOf LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 add_executable(${PROJECT_NAME} sizeOf.cpp)
+
+project(VectorOfDerivedClasses LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)
+add_executable(${PROJECT_NAME} VectorOfDerivedClasses.cpp)
+
+project(GetNameOfType LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)
+add_executable(${PROJECT_NAME} GetNameOfType.cpp)

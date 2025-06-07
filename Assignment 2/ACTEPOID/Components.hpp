@@ -5,19 +5,20 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <SFML/System/Angle.inl>
 
 #include "Vector2.tpp"
 
 namespace lrh
 {
-	struct Component {};
+	struct Component {
+		virtual ~Component() = default;
+	};
 
 	struct CTransform : public Component
 	{
 		Vector2f pos{0.f, 0.f};
 		Vector2f velocity{0.f, 0.f};
-		sf::Angle angle;
+		float angle{0};
 
 		constexpr CTransform()=default;
 		constexpr CTransform(const Vector2f &p, const Vector2f &v, const float a)

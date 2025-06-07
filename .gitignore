@@ -496,3 +496,5 @@
 /external_libs/cmake-build-debug-clang-event-trace/build.ninja
 /external_libs/cmake-build-debug-clang-event-trace/cmake_install.cmake
 /external_libs/cmake-build-debug-clang-event-trace/CMakeCache.txt
+!/experiments/
+!/experiments/

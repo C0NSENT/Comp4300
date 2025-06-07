@@ -12,6 +12,8 @@
 #include<iostream>
 #include <vector>
 
+std::vector
+
 #include <random>
 
 //TODO: синглттон логгер

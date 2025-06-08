@@ -1,10 +1,19 @@
+/**
+* @date 08-06-2025
+ * @author consent_
+ *
+ * @brief
+ */
+
 #pragma once
 
 #include "Components.hpp"
+#include "Logger.hpp"
 
 #include <vector>
 #include <type_traits>
 #include <cstdint>
+#include <numeric>
 
 namespace lrh
 {
@@ -14,8 +23,11 @@ namespace lrh
 
     class Entity
     {
-        template<typename T> requires isComponent
-        size_t getIndex() const;
+        template<typename T> requires isComponent<T>
+        constexpr size_t getComponentIndex() const;
+
+        template<typename T> requires isComponent<T>
+        constexpr void throwIfHasComponent() const;
 
     public:
         constexpr Entity(uint32_t id, bool isActive = true);
@@ -23,20 +35,20 @@ namespace lrh
 
         [[nodiscard]] constexpr bool getIsActive() const;
         [[nodiscard]] constexpr auto getId() const -> uint32_t;
-        template <typename T>
-        requires isComponent<T>
-        constexpr const T* getComponent() const;
+        template <typename T> requires isComponent<T>
+        [[nodiscard]] constexpr const T* getComponent() const;
+
+        template <typename T> requires isComponent<T>
+        [[nodiscard]] constexpr T* getComponentMutable();
 
         template <typename T> requires isComponent<T>
         [[nodiscard]] constexpr bool hasComponent() const;
 
         constexpr Entity& setIsActive(bool active);
-
         constexpr Entity& setId(uint32_t id);
 
         template <typename T> requires isComponent<T>
         Entity& addComponent();
-
         template <typename T> requires isComponent<T>
         Entity& addComponent(const T& component);
 
@@ -51,14 +63,27 @@ namespace lrh
         : m_isActive(isActive), m_id(id) {}
 
     template<typename T> requires isComponent<T>
-   constexpr const T* Entity::getComponent() const
+    constexpr const T* Entity::getComponent() const
     {
-        for (const Component* component : this->m_vComponents)
+        //Опять принцип dry пошел нахуй
+        const auto index{ this-> getComponentIndex<T>() };
+
+        if (index != std::numeric_limits<size_t>::max())
         {
-            //Да знаю принцип DRY пошел нахуй
-            if (dynamic_cast<const T*>(component) != nullptr) {
-                return static_cast<const T*>(component);
-            }
+            const T* component{ static_cast<const T*>(m_vComponents[index])};
+            return component;
+        }
+        return nullptr;
+    }
+
+    template<typename T> requires isComponent<T>
+    constexpr T* Entity::getComponentMutable()
+    {
+        const auto index{ this->getComponentIndex<T>() };
+        if ( index != std::numeric_limits<size_t>::max())
+        {
+            T* component{static_cast<T*>(m_vComponents[index])};
+            return component;
         }
         return nullptr;
     }
@@ -66,23 +91,35 @@ namespace lrh
     template<typename T> requires isComponent<T>
     constexpr bool Entity::hasComponent() const
     {
-        for (const auto* component : m_vComponents)
-        {
-            if (dynamic_cast<const T*>(component) != nullptr)
-                return true;
-        }
-        return false;
-    }
-
-    template<typename T> requires isComponent
-    size_t Entity::getIndex() const
-    {
-        for (auto i )
+        return (this->getComponentIndex<T>() != -1);
     }
 
     template<typename T> requires isComponent<T>
-  Entity& Entity::addComponent()
+    constexpr size_t Entity::getComponentIndex() const
     {
+        for (size_t i = 0u; i < this->m_vComponents.size(); ++i)
+        {
+            if (dynamic_cast<const T*>(this->m_vComponents[i]) != nullptr)
+                return i;
+        }
+        ///Индекс массива никогда не будет равен максимуму
+        return std::numeric_limits<size_t>::max();
+    }
+
+    template<typename T> requires isComponent<T>
+    constexpr void Entity::throwIfHasComponent() const
+    {
+        if (this->hasComponent<T>())
+        {
+            Logger::fatal("Entity already exists!");
+            throw std::logic_error("Entity::addComponent<T>() : Component  already exists");
+        }
+    }
+
+    template<typename T> requires isComponent<T>
+    Entity& Entity::addComponent()
+    {
+        throwIfHasComponent<T>();
         this->m_vComponents.push_back(new T());
         return *this;
     }
@@ -90,6 +127,7 @@ namespace lrh
     template<typename T> requires isComponent<T>
     Entity& Entity::addComponent(const T& component)
     {
+        throwIfHasComponent<T>();
         this->m_vComponents.push_back(new T(component));
         return *this;
     }

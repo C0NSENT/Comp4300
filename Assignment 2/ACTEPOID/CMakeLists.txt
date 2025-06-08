@@ -20,8 +20,7 @@ set(SYSTEMS_SOURCES
 add_executable(${PROJECT_NAME}
         ${SYSTEMS_SOURCES}
 
-        Entity.cpp
-        Entity.hpp
+        Entity.tpp
         Components.hpp
         Vector2.tpp
         Logger.hpp

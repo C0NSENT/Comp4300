@@ -2,7 +2,7 @@
 * @date 08-06-2025
  * @author consent_
  *
- * @brief
+ * @brief Контейнер, который хранит компоненты
  */
 
 #pragma once
@@ -30,7 +30,8 @@ namespace lrh
         constexpr void throwIfHasComponent() const;
 
     public:
-        constexpr Entity(uint32_t id, bool isActive = true);
+
+        constexpr explicit Entity(uint32_t id, bool isActive = true);
         ~Entity();
 
         [[nodiscard]] constexpr bool getIsActive() const;
@@ -54,21 +55,62 @@ namespace lrh
 
     private:
 
+        constexpr static size_t notFoundIndex{std::numeric_limits<size_t>::max()};
+
         bool m_isActive;
         uint32_t m_id;
         std::vector<Component*> m_vComponents;
     };
 
+    template<typename T> requires isComponent<T>
+    constexpr size_t Entity::getComponentIndex() const
+    {
+        for (size_t i = 0u; i < this->m_vComponents.size(); ++i)
+        {
+            if (dynamic_cast<const T*>(this->m_vComponents[i]) != nullptr)
+                return i;
+        }
+        return notFoundIndex;
+    }
+
+    template<typename T> requires isComponent<T>
+    constexpr void Entity::throwIfHasComponent() const
+    {
+        if (this->hasComponent<T>())
+        {
+            Logger::fatal("Entity already exists!");
+            throw std::logic_error("Entity::addComponent<T>() : Component  already exists");
+        }
+    }
+
     constexpr Entity::Entity(const uint32_t id, const bool isActive)
-        : m_isActive(isActive), m_id(id) {}
+    : m_isActive(isActive), m_id(id) {}
+
+    inline Entity::~Entity()
+    {
+        for (auto* component : m_vComponents) {
+            delete component;
+        }
+    }
+
+    constexpr bool Entity::getIsActive() const
+    {
+        return m_isActive;
+    }
+
+    constexpr uint32_t Entity::getId() const
+    {
+        return m_id;
+    }
 
     template<typename T> requires isComponent<T>
     constexpr const T* Entity::getComponent() const
     {
         //Опять принцип dry пошел нахуй
+        //TODO: Погуглить можно ли как-то кастовать одного в другое
         const auto index{ this-> getComponentIndex<T>() };
 
-        if (index != std::numeric_limits<size_t>::max())
+        if (index != notFoundIndex)
         {
             const T* component{ static_cast<const T*>(m_vComponents[index])};
             return component;
@@ -80,9 +122,10 @@ namespace lrh
     constexpr T* Entity::getComponentMutable()
     {
         const auto index{ this->getComponentIndex<T>() };
-        if ( index != std::numeric_limits<size_t>::max())
+
+        if (index != notFoundIndex)
         {
-            T* component{static_cast<T*>(m_vComponents[index])};
+            T* component{ static_cast<T*>(m_vComponents[index]) };
             return component;
         }
         return nullptr;
@@ -91,29 +134,19 @@ namespace lrh
     template<typename T> requires isComponent<T>
     constexpr bool Entity::hasComponent() const
     {
-        return (this->getComponentIndex<T>() != -1);
+        return this->getComponentIndex<T>() != notFoundIndex;
     }
 
-    template<typename T> requires isComponent<T>
-    constexpr size_t Entity::getComponentIndex() const
+    constexpr Entity& Entity::setIsActive(const bool active)
     {
-        for (size_t i = 0u; i < this->m_vComponents.size(); ++i)
-        {
-            if (dynamic_cast<const T*>(this->m_vComponents[i]) != nullptr)
-                return i;
-        }
-        ///Индекс массива никогда не будет равен максимуму
-        return std::numeric_limits<size_t>::max();
+        this->m_isActive = active;
+        return *this;
     }
 
-    template<typename T> requires isComponent<T>
-    constexpr void Entity::throwIfHasComponent() const
+    constexpr Entity& Entity::setId(const uint32_t id)
     {
-        if (this->hasComponent<T>())
-        {
-            Logger::fatal("Entity already exists!");
-            throw std::logic_error("Entity::addComponent<T>() : Component  already exists");
-        }
+        this->m_id = id;
+        return *this;
     }
 
     template<typename T> requires isComponent<T>

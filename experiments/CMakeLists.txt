@@ -1,37 +1,21 @@
 cmake_minimum_required(VERSION 3.30)
-project(Text_centering)
+project(Experiments LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 
-# Добавляем поддиректорию с явным указанием бинарной директории
+# Add external libraries
 add_subdirectory(
         ../external_libs
         ${CMAKE_BINARY_DIR}/external_libs
 )
 
-add_executable(${PROJECT_NAME} text_centering.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE external_libs)
+add_executable(Text_centering text_centering.cpp)
+target_link_libraries(Text_centering PRIVATE external_libs)
 
-project(staticRandom LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
-add_executable(${PROJECT_NAME} staticRandom.cpp)
-
-project(passingArray LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
-add_executable(${PROJECT_NAME} passingArray.cpp)
-
-project(CompilerOptimizations LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
-add_executable(${PROJECT_NAME} CompilerOptimizations.cpp)
-
-project(sizeOf LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
-add_executable(${PROJECT_NAME} sizeOf.cpp)
-
-project(VectorOfDerivedClasses LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
-add_executable(${PROJECT_NAME} VectorOfDerivedClasses.cpp)
-
-project(GetNameOfType LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
-add_executable(${PROJECT_NAME} GetNameOfType.cpp)
+add_executable(staticRandom staticRandom.cpp)
+add_executable(passingArray passingArray.cpp)
+add_executable(CompilerOptimizations CompilerOptimizations.cpp)
+add_executable(sizeOf sizeOf.cpp)
+add_executable(VectorOfDerivedClasses VectorOfDerivedClasses.cpp)
+add_executable(GetNameOfType GetNameOfType.cpp)
+add_executable(EcsMini EcsMini.cpp)

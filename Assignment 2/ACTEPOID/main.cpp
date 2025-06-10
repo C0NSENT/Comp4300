@@ -8,9 +8,9 @@
 
 #include <iostream>
 #include "Components.hpp"
-#include "Entity.hpp"
+#include "Entity.tpp"
 
-#include "SFML/System/Vector2.hpp"
+//#include "SFML/System/Vector2.hpp"
 
 #include <array>
 #include <unordered_map>
@@ -32,15 +32,27 @@ int main()
 
     std::cout << static_cast<lrh::CCollision*>(TiPutin.at(0))->radius;*/
 
-    lrh::Entity gay(32);
-    gay.addComponent(lrh::CCollision{2}).addComponent(lrh::CLifespan{23});
+    lrh::Entity gay ( 32 );
+    gay.addComponent ( lrh::CCollision{ 2 } ).addComponent ( lrh::CLifespan{ 23 } );
 
-    std::cout << gay.hasComponent<lrh::CCollision>() << std::endl;
-    std::cout << gay.hasComponent<lrh::CTransform>() << std::endl;
+    std::cout << gay.hasComponent <lrh::CCollision>() << std::endl;
+    std::cout << gay.hasComponent <lrh::CTransform>() << std::endl;
 
-    std::cout << (gay.getComponent<lrh::CTransform>() == nullptr) << std::endl;
+    std::cout << (gay.getComponent <lrh::CTransform>() == nullptr) << std::endl;
 
-    std::cout << gay.getComponent<lrh::CLifespan>()->remaining;
+    gay.getComponentMutable <lrh::CLifespan>()->remaining = 42;
+    std::cout << gay.getComponent <lrh::CLifespan>()->remaining;
+
+    gay.addComponent(lrh::CInput());
+
+    gay.getComponentMutable<lrh::CInput>()->down = true;
+
+    //gay.~Entity();
+
+    std::vector jopa ( 3, 228 );
+    //jopa.
+
+    std::cout << "Тентакли";
 
 }
 

@@ -6,10 +6,10 @@
 #include <iostream>
 #include <memory>
 
-class Base {
+class Component {
 };
 
-class DerivedA : public Base {
+class DerivedA : public Component {
 public:
     int num;
 
@@ -17,7 +17,7 @@ public:
     int getA() const { return num; }
 };
 
-class DerivedB : Base {
+class DerivedB : Component {
 public:
     int num;
 
@@ -25,7 +25,7 @@ public:
     int getA() const { return num; }
 };
 
-class DerivedC : Base {
+class DerivedC : Component {
 public:
     int num;
 
@@ -44,7 +44,7 @@ int main() {
 
     std::cout << static_cast<DerivedA*>(ptr)->getA();*/
 
-    std::vector<std::unique_ptr<Base>> vec;
+    std::vector<std::unique_ptr<Component>> vec;
     vec.push_back(std::make_unique<DerivedA>(1));
     std::cout << std::dynamic_pointer_cast<DerivedA>>vec[0]->getA() << std::endl;
 }

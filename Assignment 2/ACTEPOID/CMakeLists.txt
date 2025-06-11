@@ -9,8 +9,8 @@ add_subdirectory(
 )
 
 set(SYSTEMS_SOURCES
-        systems/Entity_Manager.cpp
-        systems/Entity_Manager.hpp
+        systems/EntityManager.cpp
+        systems/EntityManager.hpp
         systems/Game.cpp
         systems/Game.hpp
         systems/Physics.cpp

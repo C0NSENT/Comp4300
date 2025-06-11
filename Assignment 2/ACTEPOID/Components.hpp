@@ -5,7 +5,6 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
 
 #include "Vector2.tpp"
 
@@ -17,41 +16,33 @@ namespace lrh
 	};
 
 
-	struct CTransform final : public Component
+	struct Transform final : public Component
 	{
+		constexpr Transform() = default;
+		constexpr Transform( const Vector2f &position, const Vector2f &velocity, const float angle )
+			: pos{ position }, velocity{ velocity }, angle{ angle } {}
+		constexpr Transform( const Transform & ) = default;
+
+		/*constexpr ~Transform()
+		{
+			std::cout << "~CTransform()" << std::endl;
+		};*/
+
 		Vector2f pos{};
 		Vector2f velocity{};
 		float angle{};
 
-		constexpr CTransform() = default;
-
-
-		constexpr CTransform( const Vector2f &p, const Vector2f &v, const float a )
-			: pos{ p }, velocity{ v }, angle{ a }
-		{
-		}
-
-
-		constexpr CTransform( const CTransform & ) = default;
-
-
-		constexpr ~CTransform()
-		{
-			std::cout << "~CTransform()" << std::endl;
-		};
 	};
 
 
 	struct CPolygonShape final : public Component
 	{
-		sf::CircleShape polygonShape{};
-
 		constexpr CPolygonShape() = default;
 
 
 		constexpr CPolygonShape(
 			const float radius,
-			const int points,
+			const size_t points,
 			const sf::Color &fill,
 			const sf::Color &outline,
 			const float thickness
@@ -66,51 +57,34 @@ namespace lrh
 
 
 		constexpr CPolygonShape( const CPolygonShape & ) = default;
+
+		sf::CircleShape polygonShape{};
 	};
 
 
 	struct CCollision final : public Component
 	{
-		float radius{};
-
 		constexpr CCollision() = default;
-
-
-		constexpr explicit CCollision( const float r ) : radius( r )
-		{
-		}
-
-
+		constexpr explicit CCollision( const float radius ) : radius{ radius } {}
 		constexpr CCollision( const CCollision & ) = default;
 
-
-		constexpr ~CCollision()
-		{
-			std::cout << "~CCollision()" << std::endl;
-		}
+		float radius{};
 	};
 
 
 	struct CScore final : public Component
 	{
-		uint16_t score{};
-
 		constexpr CScore() = default;
 
 
-		constexpr explicit CScore( const uint16_t s ) : score{ s }
-		{
-		}
+		constexpr explicit CScore( const uint32_t score ) : score{ score } {}
+
+		uint32_t score{};
 	};
 
 
 	struct CLifespan final : public Component
 	{
-		///Возможно придется переделывать чтобы
-		///нормально работало со временем sfml
-		uint16_t remaining{};
-		uint16_t total{};
-
 		constexpr CLifespan() = default;
 
 
@@ -121,13 +95,16 @@ namespace lrh
 
 
 		constexpr CLifespan( const CLifespan & ) = default;
+
+		///Возможно придется переделывать чтобы
+		///нормально работало со временем sfml
+		uint16_t remaining{};
+		uint16_t total{};
 	};
 
 
 	struct CInput final : public Component
 	{
-		bool up{}, left{}, right{}, down{}, shoot{};
-
 		constexpr CInput() = default;
 
 
@@ -138,13 +115,14 @@ namespace lrh
 			const bool down
 		)
 			: up{ up }
-		, left{ left }
-		, right{ right }
-		, down{ down }
+			, left{ left }
+			, right{ right }
+			, down{ down }
 		{
 		}
 
-
 		constexpr CInput( const CInput & ) = default;
+
+		bool up{}, left{}, right{}, down{}, shoot{};
 	};
 }

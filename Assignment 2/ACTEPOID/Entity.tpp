@@ -24,16 +24,17 @@ namespace lrh
 
 	class Entity
 	{
+		friend class EntityManager;
+
 		template<typename T> requires isComponent<T>
 		constexpr size_t getComponentIndex() const;
 
 		template<typename T> requires isComponent<T>
 		constexpr void throwIfHasComponent() const;
 
-	public:
 
 		constexpr explicit Entity( uint32_t id, bool isActive = true, uint8_t size = 4 );
-
+		constexpr Entity( const Entity& rhs );
 		~Entity();
 
 		[[nodiscard]] constexpr bool getIsActive() const;
@@ -98,6 +99,18 @@ namespace lrh
 		: m_isActive{ isActive }, m_id{ id }
 	{
 		m_vComponents.reserve( size );
+	}
+
+
+	constexpr Entity::Entity( const Entity &rhs )
+	{
+		this->m_isActive =  rhs.m_isActive;
+		this->m_id = rhs.m_id;
+		this->m_vComponents.reserve( rhs.m_vComponents.size() );
+
+		//this->m_vComponents( rhs.m_vComponents );
+		for ( auto component : rhs.m_vComponents)
+			this->m_vComponents.emplace_back( component );
 	}
 
 
@@ -198,6 +211,13 @@ namespace lrh
 	template<typename T> requires isComponent<T>
 	Entity &Entity::removeComponent()
 	{
+		const auto index{ getComponentIndex<T>() };
+		if( index  != notFoundIndex )
+		{
+			delete this->m_vComponents[index];
+			m_vComponents.erase( m_vComponents.begin() + index );
+		}
+
 		return *this;
 	}
 }

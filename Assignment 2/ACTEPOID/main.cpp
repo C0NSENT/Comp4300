@@ -36,9 +36,9 @@ int main()
     gay.addComponent ( lrh::CCollision{ 2 } ).addComponent ( lrh::CLifespan{ 23 } );
 
     std::cout << gay.hasComponent <lrh::CCollision>() << std::endl;
-    std::cout << gay.hasComponent <lrh::CTransform>() << std::endl;
+    std::cout << gay.hasComponent <lrh::Transform>() << std::endl;
 
-    std::cout << (gay.getComponent <lrh::CTransform>() == nullptr) << std::endl;
+    std::cout << (gay.getComponent <lrh::Transform>() == nullptr) << std::endl;
 
     gay.getComponentMutable <lrh::CLifespan>()->remaining = 42;
     std::cout << gay.getComponent <lrh::CLifespan>()->remaining;
@@ -48,6 +48,8 @@ int main()
     gay.getComponentMutable<lrh::CInput>()->down = true;
 
     //gay.~Entity();
+
+    gay.removeComponent<lrh::CInput>();
 
     std::vector jopa ( 3, 228 );
     //jopa.

@@ -2,14 +2,8 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1.1/cmake-build-debug/_deps/imgui-sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1.1/cmake-build-debug/_deps/imgui-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 1.1/cmake-build-debug/_deps/sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 2/ACTEPOID/cmake-build-debug/_deps/imgui-sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 2/ACTEPOID/cmake-build-debug/_deps/imgui-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Assignment 2/ACTEPOID/cmake-build-debug/_deps/sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/experiments/cmake-build-debug/_deps/imgui-sfml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/experiments/cmake-build-debug/_deps/imgui-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/experiments/cmake-build-debug/_deps/sfml-src" vcs="Git" />
+  </component>
+  <component name="VcsProjectSettings">
+    <option name="detectVcsMappingsAutomatically" value="false" />
   </component>
 </project>

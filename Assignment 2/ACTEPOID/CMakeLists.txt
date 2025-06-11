@@ -15,6 +15,8 @@ set(SYSTEMS_SOURCES
         systems/Game.hpp
         systems/Physics.cpp
         systems/Physics.hpp
+        IdManager.cpp
+        IdManager.hpp
 )
 
 add_executable(${PROJECT_NAME}

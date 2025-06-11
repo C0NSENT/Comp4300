@@ -103,12 +103,10 @@ namespace lrh
 
 
 	constexpr Entity::Entity( const Entity &rhs )
+		: m_isActive{ rhs.m_isActive }
+		, m_id{ rhs.m_id }
+		, m_vComponents{ rhs.m_vComponents }
 	{
-		this->m_isActive =  rhs.m_isActive;
-		this->m_id = rhs.m_id;
-		this->m_vComponents.reserve( rhs.m_vComponents.size() );
-
-		//this->m_vComponents( rhs.m_vComponents );
 		for ( auto component : rhs.m_vComponents)
 			this->m_vComponents.emplace_back( component );
 	}

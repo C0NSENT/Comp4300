@@ -8,14 +8,18 @@
 
 namespace lrh
 {
-	constexpr Id::Id() : m_id(IdManager::instance().id()) {}
-
-
-	constexpr int16_t IdManager::id()
+	constexpr Id::IdManager &Id::IdManager::instance()
 	{
-		for (auto id{ 0 }; id < SIZE; ++id)
+		static IdManager self;
+		return self;
+	}
+
+
+	constexpr int16_t Id::IdManager::id()
+	{
+		for (int16_t id{ 0 }; id < SIZE; ++id)
 		{
-			if ( bool &occupied{ m_ids[id] }; not occupied)
+			if ( bool &occupied{ m_ids[id] }; not occupied )
 			{
 				occupied = true;
 				return id;
@@ -25,10 +29,13 @@ namespace lrh
 	}
 
 
-	constexpr void IdManager::freeId( const int16_t id )
+	constexpr void Id::IdManager::freeId( const int16_t id )
 	{
 		m_ids[id] = false;
 	}
+
+
+	constexpr Id::Id() : m_id{ IdManager::instance().id() } {}
 
 
 	Id::~Id()
@@ -37,12 +44,26 @@ namespace lrh
 	}
 
 
-	constexpr IdManager &IdManager::instance()
+	int16_t Id::id() const
 	{
-		static IdManager self;
-		return self;
+		return this->m_id;
+	}
+
+
+	constexpr int16_t Id::maxId()
+	{
+		return IdManager::SIZE;
+	}
+
+
+	constexpr int16_t Id::invalidId()
+	{
+		return IdManager::INVALID;
 	}
 }
 
 
-
+std::size_t std::hash<lrh::Id>::operator()( const lrh::Id &id ) const noexcept
+{
+	return std::hash<int16_t>{}( id.id());
+}

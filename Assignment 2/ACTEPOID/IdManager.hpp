@@ -13,41 +13,61 @@
 
 #include <array>
 #include <cstdint>
+#include <functional> ///<- Нужно для хэширования
 
 namespace lrh
 {
-	class IdManager
-	{
-	public:
-
-		[[nodiscard]] constexpr static IdManager &instance();
-
-		[[nodiscard]] constexpr int16_t id();
-		constexpr void freeId(int16_t id);
-
-		constexpr static int16_t SIZE{ 16384 };
-		constexpr static auto INVALID{ -1 };
-
-	private:
-		constexpr IdManager() = default;
-
-		std::array<bool, SIZE> m_ids{}; //Блядь почему он сука бул в байтах хранит долбоеб
-	};
-
 	class Id
 	{
+		class IdManager
+		{
+		public:
+			[[nodiscard]] constexpr static IdManager &instance();
+
+			[[nodiscard]] constexpr int16_t id();
+			constexpr void freeId(int16_t id);
+
+
+			static constexpr int16_t SIZE{ 16384 };
+			static constexpr int16_t INVALID{ -1 };
+
+		private:
+
+			constexpr IdManager() = default;
+
+			//TODO: Когда будет время сделать указатель на массив для оптимизации
+			//bool *currentId { &m_ids[0] };
+
+			std::array<bool, SIZE> m_ids{}; //Блядь почему он сука бул в байтах хранит долбоеб
+		};
+
 	public:
 
 		constexpr Id();
 		~Id();
 
+		int16_t id() const;
+		static constexpr int16_t maxId();
+		static constexpr int16_t invalidId();
+
 		auto operator<=>(const Id &) const = default;
+
+		Id(const Id &) = delete;
+		Id &operator=(const Id &) = delete;
 
 	private:
 
 		int16_t m_id{};
 	};
 }
+
+
+template<>
+struct std::hash<lrh::Id>
+{
+	size_t operator()(const lrh::Id &id) const noexcept;
+};
+
 
 
 

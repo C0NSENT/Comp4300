@@ -5,29 +5,22 @@
 #pragma once
 
 #include "Entity.tpp"
+#include "IdManager.hpp"
 
 #include <unordered_map>
 
 
-//TODO: Победить этот ебучий хеш-тейбл и реализовать нормальный класс айди
-
 namespace lrh
 {
-	class Id
-	{
-		public:
-
-
-	};
-
 	class EntityManager
 	{
-	public:
+		class UpdateBuffer;
 
-		static EntityManager &Instance();
+	public:
+		constexpr  EntityManager() = default;
 
 		constexpr EntityManager &update();
-		constexpr EntityManager &addEntity(const Entity &&entity);
+		constexpr EntityManager &addEntity(const Entity &entity);
 		constexpr EntityManager &removeDeadEntities();
 		constexpr EntityManager &removeEntity(int32_t id);
 
@@ -41,19 +34,32 @@ namespace lrh
 
 	private:
 
-		constexpr  EntityManager() = default;
+		std::unordered_map<Id, Entity> m_entities;
+	};
+
+	class EntityManager::UpdateBuffer
+	{
+		using EntityMap = std::unordered_map<int16_t, Entity>;
+	public:
+
+		UpdateBuffer &instance();
+		void clear();
+
+		[[nodiscard]] EntityMap &getData();
 
 
-		constexpr static int32_t INVALID{ -1 };
+		bool hasEntity(const Id& id) const;
+		UpdateBuffer &addEntity( const Id& id, const Entity &entity );
+		UpdateBuffer &removeEntity( const Id &id );
+
+		[[nodiscard]] Entity &getEntityMutable( const Id &id );
 
 
-		std::vector<int32_t> m_availableIds{};
 
-		int32_t m_currentId{};
+	private:
 
-		size_t m_pendingEntitiesCount{};
-		std::vector<std::pair<int32_t, Entity>> m_pendingEntities{};
+		UpdateBuffer() = default;
 
-		std::unordered_map<int32_t, Entity> m_entities;
+		EntityMap m_updateBuffer{};
 	};
 }

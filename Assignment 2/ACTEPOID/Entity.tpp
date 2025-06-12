@@ -11,7 +11,6 @@
 #include "Logger.hpp"
 
 #include <cstdint>
-#include <numeric>
 #include <type_traits>
 #include <vector>
 
@@ -24,24 +23,20 @@ namespace lrh
 
 	class Entity
 	{
-		using cmp::Component;
-
-		//friend class EntityManager;
 
 		template<typename T> requires isComponent<T>
-		constexpr size_t getComponentIndex() const;
+		constexpr  int16_t getComponentIndex() const;
+
+	public:
 
 		template<typename T> requires isComponent<T>
 		constexpr void throwIfHasComponent() const;
 
-
-		constexpr explicit Entity( uint32_t id, bool isActive = true, uint8_t size = 4 );
-		constexpr Entity( const Entity& rhs );
+		explicit Entity(bool isActive = true, int16_t size = 4 );
+		Entity( const Entity& rhs );
 		~Entity();
 
 		[[nodiscard]] constexpr bool getIsActive() const;
-
-		[[nodiscard]] constexpr auto getId() const -> uint32_t;
 
 		template<typename T> requires isComponent<T>
 		[[nodiscard]] constexpr const T *getComponent() const;
@@ -54,8 +49,6 @@ namespace lrh
 
 		constexpr Entity &setIsActive( bool active );
 
-		constexpr Entity &setId( uint32_t id );
-
 		template<typename T> requires isComponent<T>
 		Entity &addComponent();
 
@@ -63,26 +56,28 @@ namespace lrh
 		Entity &addComponent( const T &component );
 
 		template<typename T> requires isComponent<T>
+		Entity &addComponent( T &&component );
+
+		template<typename T> requires isComponent<T>
 		Entity &removeComponent();
 
 	private:
-
-		constexpr static size_t notFoundIndex{ std::numeric_limits<uint8_t>::max() + 1};
+		static constexpr int16_t MAX_SIZE{ 256 };
+		static constexpr int16_t NOT_FOUND_INDEX{ -1 };
 
 		bool m_isActive{};
-		uint32_t m_id{};
-		std::vector<Component *> m_vComponents;
+		std::vector<cmp::Component *> m_vComponents{};
 	};
 
 
 	template<typename T> requires isComponent<T>
-	constexpr size_t Entity::getComponentIndex() const
+	constexpr int16_t Entity::getComponentIndex() const
 	{
 		for( auto i = 0u; i < this->m_vComponents.size(); ++i )
 		{
 			if (dynamic_cast<T *>(this->m_vComponents[i])) return i;
 		}
-		return notFoundIndex;
+		return NOT_FOUND_INDEX;
 	}
 
 
@@ -97,26 +92,33 @@ namespace lrh
 	}
 
 
-	constexpr Entity::Entity( const uint32_t id, const bool isActive, const uint8_t size )
-		: m_isActive{ isActive }, m_id{ id }
+	inline Entity::Entity(const bool isActive, const int16_t size )
+		: m_isActive{ isActive }
 	{
+		if ( size < 0 )
+			throw std::logic_error( "Entity::Entity() : size < 0" );
+
+		if( size > MAX_SIZE )
+			throw std::logic_error( "Entity::Entity() : size > MAX_SIZE" );
+
 		m_vComponents.reserve( size );
 	}
 
 
-	constexpr Entity::Entity( const Entity &rhs )
+	inline Entity::Entity( const Entity &rhs )
 		: m_isActive{ rhs.m_isActive }
-		, m_id{ rhs.m_id }
-		, m_vComponents{ rhs.m_vComponents }
 	{
-		for ( auto component : rhs.m_vComponents)
-			this->m_vComponents.emplace_back( component );
+		m_vComponents.reserve( rhs.m_vComponents.size() );
+
+		for (const auto* component : rhs.m_vComponents)
+			if (component)
+				m_vComponents.push_back( new auto(*component));
 	}
 
 
 	inline Entity::~Entity()
 	{
-		for(Component *component : m_vComponents )
+		for( const cmp::Component *component : m_vComponents )
 		{
 			delete component;
 		}
@@ -129,12 +131,6 @@ namespace lrh
 	}
 
 
-	constexpr uint32_t Entity::getId() const
-	{
-		return m_id;
-	}
-
-
 	template<typename T> requires isComponent<T>
 	constexpr const T *Entity::getComponent() const
 	{
@@ -142,7 +138,7 @@ namespace lrh
 		//TODO: Погуглить можно ли как-то кастовать одно в другое
 		const auto index{ this->getComponentIndex<T>() };
 
-		if( index != notFoundIndex )
+		if( index != NOT_FOUND_INDEX )
 		{
 			const T *component{ static_cast<const T *>(m_vComponents[index]) };
 			return component;
@@ -156,7 +152,7 @@ namespace lrh
 	{
 		const auto index{ this->getComponentIndex<T>() };
 
-		if( index != notFoundIndex )
+		if( index != NOT_FOUND_INDEX )
 		{
 			T *component{ static_cast<T *>(m_vComponents[index]) };
 			return component;
@@ -168,20 +164,13 @@ namespace lrh
 	template<typename T> requires isComponent<T>
 	constexpr bool Entity::hasComponent() const
 	{
-		return this->getComponentIndex<T>() != notFoundIndex;
+		return this->getComponentIndex<T>() != NOT_FOUND_INDEX;
 	}
 
 
 	constexpr Entity &Entity::setIsActive( const bool active )
 	{
 		this->m_isActive = active;
-		return *this;
-	}
-
-
-	constexpr Entity &Entity::setId( const uint32_t id )
-	{
-		this->m_id = id;
 		return *this;
 	}
 
@@ -212,7 +201,7 @@ namespace lrh
 	Entity &Entity::removeComponent()
 	{
 		const auto index{ getComponentIndex<T>() };
-		if( index  != notFoundIndex )
+		if( index  != NOT_FOUND_INDEX )
 		{
 			delete this->m_vComponents[index];
 			m_vComponents.erase( m_vComponents.begin() + index );

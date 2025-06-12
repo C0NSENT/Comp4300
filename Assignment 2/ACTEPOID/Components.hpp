@@ -13,20 +13,16 @@ namespace lrh::cmp
 	struct Component
 	{
 		virtual ~Component() = default;
+		constexpr Component() = default;
+		constexpr Component(const Component&) = default;
+		constexpr Component(Component&&) = default;
 	};
 
 
 	struct Transform final : public Component
 	{
-		constexpr Transform() = default;
 		constexpr Transform( const Vector2f &position, const Vector2f &velocity, const float angle )
 			: pos{ position }, velocity{ velocity }, angle{ angle } {}
-		constexpr Transform( const Transform & ) = default;
-
-		/*constexpr ~Transform()
-		{
-			std::cout << "~CTransform()" << std::endl;
-		};*/
 
 		Vector2f pos{};
 		Vector2f velocity{};
@@ -37,9 +33,6 @@ namespace lrh::cmp
 
 	struct PolygonShape final : public Component
 	{
-		constexpr PolygonShape() = default;
-
-
 		constexpr PolygonShape(
 			const float radius,
 			const size_t points,
@@ -55,18 +48,13 @@ namespace lrh::cmp
 			polygonShape.setOrigin( { radius, radius } );
 		}
 
-
-		constexpr PolygonShape( const PolygonShape & ) = default;
-
 		sf::CircleShape polygonShape{};
 	};
 
 
 	struct Collision final : public Component
 	{
-		constexpr Collision() = default;
 		constexpr explicit Collision( const float radius ) : radius{ radius } {}
-		constexpr Collision( const Collision & ) = default;
 
 		float radius{};
 	};
@@ -74,9 +62,6 @@ namespace lrh::cmp
 
 	struct Score final : public Component
 	{
-		constexpr Score() = default;
-
-
 		constexpr explicit Score( const uint32_t score ) : score{ score } {}
 
 		uint32_t score{};
@@ -85,16 +70,9 @@ namespace lrh::cmp
 
 	struct Lifespan final : public Component
 	{
-		constexpr Lifespan() = default;
-
-
 		constexpr explicit Lifespan( const uint16_t time )
-			: remaining{ time }, total{ time }
-		{
-		}
+			: remaining{ time }, total{ time } {}
 
-
-		constexpr Lifespan( const Lifespan & ) = default;
 
 		///Возможно придется переделывать чтобы
 		///нормально работало со временем sfml
@@ -105,23 +83,21 @@ namespace lrh::cmp
 
 	struct Input final : public Component
 	{
-		constexpr Input() = default;
-
-
 		constexpr Input(
 			const bool up,
 			const bool left,
 			const bool right,
-			const bool down
+			const bool down,
+			const bool shoot
 		)
 			: up{ up }
 			, left{ left }
 			, right{ right }
 			, down{ down }
+			, shoot{ shoot }
 		{
 		}
 
-		constexpr Input( const Input & ) = default;
 
 		bool up{}, left{}, right{}, down{}, shoot{};
 	};

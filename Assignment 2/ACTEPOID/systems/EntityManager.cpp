@@ -4,48 +4,53 @@
 
 #include "EntityManager.hpp"
 
-
-lrh::EntityManager &lrh::EntityManager::Instance()
+namespace lrh
 {
-	static EntityManager self; //Steven Wilson reference?!
-	return self;
+	EntityManager::UpdateBuffer & lrh::EntityManager::UpdateBuffer::instance()
+	{
+		static EntityManager self{};
+
+		return *this;
+	}
+
+
+	void EntityManager::UpdateBuffer::clear()
+	{
+		m_updateBuffer.clear();
+	}
+
+
+	EntityManager::UpdateBuffer::EntityMap & lrh::EntityManager::UpdateBuffer::getData()
+	{
+		return m_updateBuffer;
+	}
+
+
+	bool EntityManager::UpdateBuffer::hasEntity( const Id &id ) const
+	{
+		return m_updateBuffer.contains( id.id() );
+	}
+
+
+	EntityManager::UpdateBuffer &EntityManager::UpdateBuffer::addEntity(const Id &id, const Entity &entity )
+	{
+		m_updateBuffer.insert_or_assign(id.id(), entity);
+
+		return *this;
+	}
+
+
+	EntityManager::UpdateBuffer &EntityManager::UpdateBuffer::removeEntity( const Id &id )
+	{
+		m_updateBuffer.erase( id.id() );
+
+		return *this;
+	}
+
+
+	Entity &EntityManager::UpdateBuffer::getEntityMutable( const Id &id )
+	{
+		return m_updateBuffer[id.id()];
+	}
 }
 
-
-lrh::EntityManager &lrh::EntityManager::update()
-{
-	/*m_pendingEntities.clear();
-	m_pendingEntitiesСount = 0;*/
-	this->removeDeadEntities();
-	return *this;
-}
-
-
-lrh::EntityManager &lrh::EntityManager::addEntity( const Entity &entity )
-{
-
-	return *this;
-}
-
-
-lrh::EntityManager &lrh::EntityManager::removeDeadEntities()
-{
-
-}
-
-
-lrh::EntityManager &lrh::EntityManager::removeEntity(const  int32_t id )
-{
-	m_availableIds.push_back( id );
-	return *this;
-}
-
-
-lrh::Entity lrh::EntityManager::getEntity( int32_t id ) const
-{
-}
-
-
-lrh::Entity &lrh::EntityManager::getEntityMutable( int32_t id )
-{
-}

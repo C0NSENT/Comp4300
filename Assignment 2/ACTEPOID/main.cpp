@@ -7,7 +7,6 @@
 #include <unistd.h>
 
 #include <iostream>
-#include "Components.hpp"
 #include "Entity.tpp"
 
 //#include "SFML/System/Vector2.hpp"
@@ -17,44 +16,16 @@
 #include <iostream>
 #include <vector>
 
+void entityTest()
+{
+	lrh::Entity entity{true, 3};
+	entity.addComponent();
+
+
+}
+
 int main()
 {
-    /*std::unordered_map<int, int> um;
-
-    for (auto i = 0; i < 2000; i++) {
-        std::cout << um.size() << " " << um.bucket_count() << "\n";
-        um.insert({i , i});
-    }*/
-
-    /*std::vector<lrh::Component*>  TiPutin;
-    TiPutin.push_back(new lrh::CCollision(2));
-
-
-    std::cout << static_cast<lrh::CCollision*>(TiPutin.at(0))->radius;*/
-
-    lrh::Entity gay ( 32 );
-    gay.addComponent ( lrh::CCollision{ 2 } ).addComponent ( lrh::CLifespan{ 23 } );
-
-    std::cout << gay.hasComponent <lrh::CCollision>() << std::endl;
-    std::cout << gay.hasComponent <lrh::Transform>() << std::endl;
-
-    std::cout << (gay.getComponent <lrh::Transform>() == nullptr) << std::endl;
-
-    gay.getComponentMutable <lrh::CLifespan>()->remaining = 42;
-    std::cout << gay.getComponent <lrh::CLifespan>()->remaining;
-
-    gay.addComponent(lrh::CInput());
-
-    gay.getComponentMutable<lrh::CInput>()->down = true;
-
-    //gay.~Entity();
-
-    gay.removeComponent<lrh::CInput>();
-
-    std::vector jopa ( 3, 228 );
-    //jopa.
-
-    std::cout << "Тентакли";
 
 }
 

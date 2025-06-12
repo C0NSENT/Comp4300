@@ -18,13 +18,15 @@
 namespace lrh
 {
 	template<typename T>
-	concept isComponent = std::is_base_of_v<Component, T>
-												and not std::is_same_v<T, Component>;
+	concept isComponent = std::is_base_of_v<cmp::Component, T>
+												and not std::is_same_v<T, cmp::Component>;
 
 
 	class Entity
 	{
-		friend class EntityManager;
+		using cmp::Component;
+
+		//friend class EntityManager;
 
 		template<typename T> requires isComponent<T>
 		constexpr size_t getComponentIndex() const;
@@ -114,7 +116,7 @@ namespace lrh
 
 	inline Entity::~Entity()
 	{
-		for( Component *component : m_vComponents )
+		for(Component *component : m_vComponents )
 		{
 			delete component;
 		}

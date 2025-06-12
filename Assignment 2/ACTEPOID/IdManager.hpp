@@ -19,27 +19,7 @@ namespace lrh
 {
 	class Id
 	{
-		class IdManager
-		{
-		public:
-			[[nodiscard]] constexpr static IdManager &instance();
-
-			[[nodiscard]] constexpr int16_t id();
-			constexpr void freeId(int16_t id);
-
-
-			static constexpr int16_t SIZE{ 16384 };
-			static constexpr int16_t INVALID{ -1 };
-
-		private:
-
-			constexpr IdManager() = default;
-
-			//TODO: Когда будет время сделать указатель на массив для оптимизации
-			//bool *currentId { &m_ids[0] };
-
-			std::array<bool, SIZE> m_ids{}; //Блядь почему он сука бул в байтах хранит долбоеб
-		};
+		class IdManager;
 
 	public:
 
@@ -58,6 +38,31 @@ namespace lrh
 	private:
 
 		int16_t m_id{};
+	};
+
+	class Id::IdManager
+	{
+	public:
+		[[nodiscard]] static IdManager &instance();
+
+		[[nodiscard]] int16_t id();
+		void freeId(int16_t id);
+
+
+		static constexpr int16_t SIZE{ 16384 };
+		static constexpr int16_t INVALID{ -1 };
+
+	private:
+
+		IdManager() = default;
+
+		IdManager(const IdManager &) = delete;
+		IdManager &operator=(const IdManager &) = delete;
+
+		//TODO: Когда будет время сделать указатель на массив для оптимизации
+		//bool *currentId { &m_ids[0] };
+
+		std::array<bool, SIZE> m_ids{}; //Блядь почему он сука бул в байтах хранит долбоеб
 	};
 }
 

@@ -47,7 +47,6 @@ namespace lrh
 		constexpr static int32_t INVALID{ -1 };
 
 
-
 		std::vector<int32_t> m_availableIds{};
 
 		int32_t m_currentId{};

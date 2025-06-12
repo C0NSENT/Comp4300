@@ -8,33 +8,6 @@
 
 namespace lrh
 {
-	constexpr Id::IdManager &Id::IdManager::instance()
-	{
-		static IdManager self;
-		return self;
-	}
-
-
-	constexpr int16_t Id::IdManager::id()
-	{
-		for (int16_t id{ 0 }; id < SIZE; ++id)
-		{
-			if ( bool &occupied{ m_ids[id] }; not occupied )
-			{
-				occupied = true;
-				return id;
-			}
-		}
-		return INVALID;
-	}
-
-
-	constexpr void Id::IdManager::freeId( const int16_t id )
-	{
-		m_ids[id] = false;
-	}
-
-
 	constexpr Id::Id() : m_id{ IdManager::instance().id() } {}
 
 
@@ -59,6 +32,32 @@ namespace lrh
 	constexpr int16_t Id::invalidId()
 	{
 		return IdManager::INVALID;
+	}
+
+	Id::IdManager &Id::IdManager::instance()
+	{
+		static IdManager self;
+		return self;
+	}
+
+
+	int16_t Id::IdManager::id()
+	{
+		for (int16_t id{ 0 }; id < SIZE; ++id)
+		{
+			if ( bool &occupied{ m_ids[id] }; not occupied )
+			{
+				occupied = true;
+				return id;
+			}
+		}
+		return INVALID;
+	}
+
+
+	void Id::IdManager::freeId( const int16_t id )
+	{
+		m_ids[id] = false;
 	}
 }
 

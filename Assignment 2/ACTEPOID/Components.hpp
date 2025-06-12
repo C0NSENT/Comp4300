@@ -8,7 +8,7 @@
 
 #include "Vector2.tpp"
 
-namespace lrh
+namespace lrh::cmp
 {
 	struct Component
 	{
@@ -35,12 +35,12 @@ namespace lrh
 	};
 
 
-	struct CPolygonShape final : public Component
+	struct PolygonShape final : public Component
 	{
-		constexpr CPolygonShape() = default;
+		constexpr PolygonShape() = default;
 
 
-		constexpr CPolygonShape(
+		constexpr PolygonShape(
 			const float radius,
 			const size_t points,
 			const sf::Color &fill,
@@ -56,45 +56,45 @@ namespace lrh
 		}
 
 
-		constexpr CPolygonShape( const CPolygonShape & ) = default;
+		constexpr PolygonShape( const PolygonShape & ) = default;
 
 		sf::CircleShape polygonShape{};
 	};
 
 
-	struct CCollision final : public Component
+	struct Collision final : public Component
 	{
-		constexpr CCollision() = default;
-		constexpr explicit CCollision( const float radius ) : radius{ radius } {}
-		constexpr CCollision( const CCollision & ) = default;
+		constexpr Collision() = default;
+		constexpr explicit Collision( const float radius ) : radius{ radius } {}
+		constexpr Collision( const Collision & ) = default;
 
 		float radius{};
 	};
 
 
-	struct CScore final : public Component
+	struct Score final : public Component
 	{
-		constexpr CScore() = default;
+		constexpr Score() = default;
 
 
-		constexpr explicit CScore( const uint32_t score ) : score{ score } {}
+		constexpr explicit Score( const uint32_t score ) : score{ score } {}
 
 		uint32_t score{};
 	};
 
 
-	struct CLifespan final : public Component
+	struct Lifespan final : public Component
 	{
-		constexpr CLifespan() = default;
+		constexpr Lifespan() = default;
 
 
-		constexpr explicit CLifespan( const uint16_t time )
+		constexpr explicit Lifespan( const uint16_t time )
 			: remaining{ time }, total{ time }
 		{
 		}
 
 
-		constexpr CLifespan( const CLifespan & ) = default;
+		constexpr Lifespan( const Lifespan & ) = default;
 
 		///Возможно придется переделывать чтобы
 		///нормально работало со временем sfml
@@ -103,12 +103,12 @@ namespace lrh
 	};
 
 
-	struct CInput final : public Component
+	struct Input final : public Component
 	{
-		constexpr CInput() = default;
+		constexpr Input() = default;
 
 
-		constexpr CInput(
+		constexpr Input(
 			const bool up,
 			const bool left,
 			const bool right,
@@ -121,8 +121,9 @@ namespace lrh
 		{
 		}
 
-		constexpr CInput( const CInput & ) = default;
+		constexpr Input( const Input & ) = default;
 
 		bool up{}, left{}, right{}, down{}, shoot{};
 	};
 }
+

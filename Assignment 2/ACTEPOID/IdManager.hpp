@@ -25,6 +25,7 @@ namespace lrh
 
 		Id();
 		constexpr Id(int16_t id );
+		constexpr Id(Id &&rhs) = default;
 		~Id();
 
 		int16_t id() const;
@@ -34,7 +35,6 @@ namespace lrh
 
 		auto operator<=>(const Id &) const = default;
 
-		Id(const Id &rhs);
 		Id &operator=(const Id &) = delete;
 
 	private:

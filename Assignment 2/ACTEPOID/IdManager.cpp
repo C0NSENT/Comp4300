@@ -24,16 +24,6 @@ namespace lrh
 	}
 
 
-	Id::Id( const Id &rhs)
-		: m_isTemp{ rhs.m_isTemp }
-	{
-		if (not m_isTemp)
-			this->m_id = rhs.m_id;
-		else
-			this->m_id = IdManager::instance().id();
-	}
-
-
 	const auto &Id::usedIds()
 	{
 		return IdManager::instance().usedIds();

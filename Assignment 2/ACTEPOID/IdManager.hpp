@@ -24,16 +24,17 @@ namespace lrh
 	public:
 
 		Id();
-		constexpr Id( int16_t temporaryId );
+		constexpr Id(int16_t id );
 		~Id();
 
 		int16_t id() const;
 		static constexpr int16_t maxId();
 		static constexpr int16_t invalidId();
+		static const auto &usedIds();
 
 		auto operator<=>(const Id &) const = default;
 
-		Id(const Id &) = delete;
+		Id(const Id &rhs);
 		Id &operator=(const Id &) = delete;
 
 	private:
@@ -45,14 +46,22 @@ namespace lrh
 	class Id::IdManager
 	{
 	public:
+
+		static constexpr int16_t SIZE{ 16384 };
+		static constexpr int16_t INVALID{ -1 };
+
+	private:
+
+		using UsedIdArray = std::array<bool, SIZE>;
+	public:
 		[[nodiscard]] static IdManager &instance();
 
 		[[nodiscard]] int16_t id();
 		void freeId(int16_t id);
 
+		const UsedIdArray &usedIds() const;
 
-		static constexpr int16_t SIZE{ 16384 };
-		static constexpr int16_t INVALID{ -1 };
+
 
 	private:
 
@@ -64,7 +73,7 @@ namespace lrh
 		//TODO: Когда будет время сделать указатель на массив для оптимизации
 		//bool *currentId { &m_ids[0] };
 
-		std::array<bool, SIZE> m_ids{}; //Блядь почему он сука бул в байтах хранит долбоеб
+		UsedIdArray m_usedIds{}; //Блядь почему он сука бул в байтах хранит долбоеб
 	};
 }
 

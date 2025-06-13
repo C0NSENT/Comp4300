@@ -31,8 +31,9 @@ namespace lrh
 
 	public:
 
-		explicit Entity(bool isActive = true, int16_t size = 4 );
+		Entity(bool isActive = true, int16_t size = 4 );
 		Entity( const Entity& rhs );
+		Entity( Entity&& rhs);
 		~Entity();
 
 		[[nodiscard]] bool getIsActive() const;
@@ -112,6 +113,14 @@ namespace lrh
 		for (const auto* component : rhs.m_vComponents)
 			if (component)
 				m_vComponents.push_back(  component->clone() );
+	}
+
+
+	inline Entity::Entity( Entity &&rhs )
+		: m_isActive{ rhs.m_isActive}
+		,m_vComponents{ std::move( rhs.m_vComponents ) }
+	{
+		rhs.m_isActive = false;
 	}
 
 

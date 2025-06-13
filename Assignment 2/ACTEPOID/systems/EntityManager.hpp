@@ -10,22 +10,25 @@
 #include <unordered_map>
 
 
+
 namespace lrh
 {
 	class EntityManager
 	{
-		class UpdateBuffer;
+		Entity &findEverywhere(int16_t id);
 
 	public:
-		constexpr  EntityManager() = default;
 
-		constexpr EntityManager &update();
-		constexpr EntityManager &addEntity(const Entity &entity);
-		constexpr EntityManager &removeDeadEntities();
-		constexpr EntityManager &removeEntity(int32_t id);
 
-		[[nodiscard]] constexpr Entity getEntity(int32_t id) const;
-		[[nodiscard]] constexpr Entity &getEntityMutable(int32_t id);
+		EntityManager() = default;
+
+		EntityManager &update();
+		EntityManager &emplace( Entity &entity );
+		EntityManager &removeDeadEntities();
+		EntityManager &removeEntity(int16_t id);
+
+		[[nodiscard]] Entity getEntity(int16_t id) const;
+		[[nodiscard]] Entity &getEntityMutable(int16_t id);
 
 		EntityManager(const EntityManager&) = delete;
 		EntityManager(EntityManager&&) = delete;
@@ -34,15 +37,18 @@ namespace lrh
 
 	private:
 
+		std::unordered_map<Id, Entity> m_updateBuffer;
 		std::unordered_map<Id, Entity> m_entities;
 	};
 
-	class EntityManager::UpdateBuffer
+
+	/*class EntityManager::UpdateBuffer
 	{
+		UpdateBuffer() = default;
+
 		using EntityMap = std::unordered_map<int16_t, Entity>;
 	public:
 
-		UpdateBuffer &instance();
 		void clear();
 
 		[[nodiscard]] EntityMap &getData();
@@ -52,14 +58,12 @@ namespace lrh
 		UpdateBuffer &addEntity( const Id& id, const Entity &entity );
 		UpdateBuffer &removeEntity( const Id &id );
 
+		[[nodiscard]] Entity getEntity(const Id& id) const;
 		[[nodiscard]] Entity &getEntityMutable( const Id &id );
-
 
 
 	private:
 
-		UpdateBuffer() = default;
-
 		EntityMap m_updateBuffer{};
-	};
+	};*/
 }

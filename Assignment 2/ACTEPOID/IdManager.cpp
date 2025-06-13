@@ -8,12 +8,13 @@
 
 namespace lrh
 {
-	constexpr Id::Id() : m_id{ IdManager::instance().id() } {}
+	Id::Id() : m_isTemp{ false }, m_id{ IdManager::instance().id() } {}
 
 
 	Id::~Id()
 	{
-		IdManager::instance().freeId(this->m_id);
+		if (not m_isTemp)
+			IdManager::instance().freeId(this->m_id);
 	}
 
 
@@ -21,6 +22,10 @@ namespace lrh
 	{
 		return this->m_id;
 	}
+
+
+	constexpr Id::Id( int16_t temporaryId )
+		: m_isTemp{ true }, m_id{ temporaryId } {}
 
 
 	constexpr int16_t Id::maxId()

@@ -17,37 +17,36 @@
 namespace lrh
 {
 	template<typename T>
-	concept isComponent = std::is_base_of_v<cmp::Component, T>
-												and not std::is_same_v<T, cmp::Component>;
+	concept isComponent = std::is_base_of_v<cmp::BaseComponent, T>
+												and not std::is_same_v<T, cmp::BaseComponent>;
 
 
 	class Entity
 	{
+		template<typename T> requires isComponent<T>
+		int16_t getComponentIndex() const;
 
 		template<typename T> requires isComponent<T>
-		constexpr  int16_t getComponentIndex() const;
+		void throwIfHasComponent() const;
 
 	public:
-
-		template<typename T> requires isComponent<T>
-		constexpr void throwIfHasComponent() const;
 
 		explicit Entity(bool isActive = true, int16_t size = 4 );
 		Entity( const Entity& rhs );
 		~Entity();
 
-		[[nodiscard]] constexpr bool getIsActive() const;
+		[[nodiscard]] bool getIsActive() const;
 
 		template<typename T> requires isComponent<T>
-		[[nodiscard]] constexpr const T *getComponent() const;
+		[[nodiscard]] const T *getComponent() const;
 
 		template<typename T> requires isComponent<T>
-		[[nodiscard]] constexpr T *getComponentMutable();
+		[[nodiscard]] T *getComponentMutable();
 
 		template<typename T> requires isComponent<T>
-		[[nodiscard]] constexpr bool hasComponent() const;
+		[[nodiscard]] bool hasComponent() const;
 
-		constexpr Entity &setIsActive( bool active );
+		Entity &setIsActive( bool active );
 
 		template<typename T> requires isComponent<T>
 		Entity &addComponent();
@@ -66,12 +65,12 @@ namespace lrh
 		static constexpr int16_t NOT_FOUND_INDEX{ -1 };
 
 		bool m_isActive{};
-		std::vector<cmp::Component *> m_vComponents{};
+		std::vector<cmp::BaseComponent *> m_vComponents{};
 	};
 
 
 	template<typename T> requires isComponent<T>
-	constexpr int16_t Entity::getComponentIndex() const
+	int16_t Entity::getComponentIndex() const
 	{
 		for( auto i = 0u; i < this->m_vComponents.size(); ++i )
 		{
@@ -82,7 +81,7 @@ namespace lrh
 
 
 	template<typename T> requires isComponent<T>
-	constexpr void Entity::throwIfHasComponent() const
+	void Entity::throwIfHasComponent() const
 	{
 		if( this->hasComponent<T>() )
 		{
@@ -112,30 +111,28 @@ namespace lrh
 
 		for (const auto* component : rhs.m_vComponents)
 			if (component)
-				m_vComponents.push_back( new auto(*component));
+				m_vComponents.push_back(  component->clone() );
 	}
 
 
 	inline Entity::~Entity()
 	{
-		for( const cmp::Component *component : m_vComponents )
+		for( const cmp::BaseComponent *component : m_vComponents )
 		{
 			delete component;
 		}
 	}
 
 
-	constexpr bool Entity::getIsActive() const
+	inline bool Entity::getIsActive() const
 	{
 		return m_isActive;
 	}
 
 
 	template<typename T> requires isComponent<T>
-	constexpr const T *Entity::getComponent() const
+	const T *Entity::getComponent() const
 	{
-		//Опять принцип dry пошел нахуй
-		//TODO: Погуглить можно ли как-то кастовать одно в другое
 		const auto index{ this->getComponentIndex<T>() };
 
 		if( index != NOT_FOUND_INDEX )
@@ -148,7 +145,7 @@ namespace lrh
 
 
 	template<typename T> requires isComponent<T>
-	constexpr T *Entity::getComponentMutable()
+	T *Entity::getComponentMutable()
 	{
 		const auto index{ this->getComponentIndex<T>() };
 
@@ -162,13 +159,13 @@ namespace lrh
 
 
 	template<typename T> requires isComponent<T>
-	constexpr bool Entity::hasComponent() const
+	bool Entity::hasComponent() const
 	{
 		return this->getComponentIndex<T>() != NOT_FOUND_INDEX;
 	}
 
 
-	constexpr Entity &Entity::setIsActive( const bool active )
+	inline Entity &Entity::setIsActive( const bool active )
 	{
 		this->m_isActive = active;
 		return *this;
@@ -198,9 +195,21 @@ namespace lrh
 
 
 	template<typename T> requires isComponent<T>
+	Entity &Entity::addComponent( T &&component )
+	{
+		throwIfHasComponent<T>();
+
+		this->m_vComponents.push_back( new T( std::forward<T>( component ) ) );
+
+		return *this;
+	}
+
+
+	template<typename T> requires isComponent<T>
 	Entity &Entity::removeComponent()
 	{
 		const auto index{ getComponentIndex<T>() };
+
 		if( index  != NOT_FOUND_INDEX )
 		{
 			delete this->m_vComponents[index];

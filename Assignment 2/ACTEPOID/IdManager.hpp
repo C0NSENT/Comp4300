@@ -23,7 +23,8 @@ namespace lrh
 
 	public:
 
-		constexpr Id();
+		Id();
+		constexpr Id( int16_t temporaryId );
 		~Id();
 
 		int16_t id() const;
@@ -37,7 +38,8 @@ namespace lrh
 
 	private:
 
-		int16_t m_id{};
+		bool m_isTemp;
+		int16_t m_id;
 	};
 
 	class Id::IdManager

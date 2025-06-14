@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
 #include <functional> ///<- Нужно для хэширования
+#include <vector>
 
 namespace lrh
 {
@@ -23,19 +23,24 @@ namespace lrh
 
 	public:
 
+		static constexpr int16_t SIZE{ 16384 };
+		static constexpr int16_t INVALID{ -1 };
+
 		Id();
-		constexpr Id(int16_t id );
-		constexpr Id(Id &&rhs) = default;
+		explicit Id(int16_t id ) noexcept;
+		Id( Id &id) noexcept;
+		Id(Id &&rhs) noexcept = default;
 		~Id();
 
-		int16_t id() const;
-		static constexpr int16_t maxId();
-		static constexpr int16_t invalidId();
-		static const auto &usedIds();
 
-		auto operator<=>(const Id &) const = default;
+		[[nodiscard]] int16_t id() const noexcept;
+		[[nodiscard]] bool isTemporary() const noexcept;
+		static auto usedIdFlags() noexcept -> const std::vector<bool> &;
 
-		Id &operator=(const Id &) = delete;
+		auto operator<=>(const Id &) const noexcept = default;
+
+		Id &operator=(Id &rhs);
+		Id &operator=(Id &&) noexcept = default;
 
 	private:
 
@@ -43,37 +48,27 @@ namespace lrh
 		int16_t m_id;
 	};
 
+
 	class Id::IdManager
 	{
 	public:
 
-		static constexpr int16_t SIZE{ 16384 };
-		static constexpr int16_t INVALID{ -1 };
-
-	private:
-
-		using UsedIdArray = std::array<bool, SIZE>;
-	public:
 		[[nodiscard]] static IdManager &instance();
 
 		[[nodiscard]] int16_t id();
 		void freeId(int16_t id);
 
-		const UsedIdArray &usedIds() const;
-
-
-
-	private:
-
-		IdManager() = default;
+		[[nodiscard]] auto usedIdFlags() const noexcept -> const std::vector<bool>&;
 
 		IdManager(const IdManager &) = delete;
 		IdManager &operator=(const IdManager &) = delete;
 
-		//TODO: Когда будет время сделать указатель на массив для оптимизации
-		//bool *currentId { &m_ids[0] };
+	private:
 
-		UsedIdArray m_usedIds{}; //Блядь почему он сука бул в байтах хранит долбоеб
+		IdManager();
+
+		int16_t m_lastUsedId{};
+		std::vector<bool> m_usedIdFlags{};
 	};
 }
 

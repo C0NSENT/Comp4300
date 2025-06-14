@@ -22,14 +22,14 @@ namespace lrh
 		using sl = std::source_location;
 
 		///Выбрасывает ошибки если деление на ноль
-		constexpr static void throwIfDivisionByZero(T num, const sl& location = sl::current());
-		constexpr static void throwIfDivisionByZero(const Vector2& v, const sl& location = sl::current());
+		static void throwIfDivisionByZero(T num, const sl& location = sl::current());
+		static void throwIfDivisionByZero(const Vector2& v, const sl& location = sl::current());
 
 	public:
 		constexpr Vector2() noexcept = default;
 		constexpr Vector2(const T& x, const T& y) noexcept : x{x}, y{y} {}
 		constexpr Vector2(const Vector2& rhs) noexcept = default;
-		constexpr Vector2(Vector2 &&rhs) noexcept : x{rhs.x}, y{rhs.y} {}
+		constexpr Vector2(Vector2 &&rhs) noexcept : x{ std::move( rhs.x ) }, y{ std::move( rhs.y ) } {}
 
 		/**
 		 * @brief Вычисляет расстояние между двумя вектора
@@ -90,8 +90,8 @@ namespace lrh
 		constexpr auto operator*=(T num) noexcept -> Vector2&;
 		constexpr auto operator/=(T num) -> Vector2&;
 
-		[[nodiscard]] constexpr bool operator==(T num) const;
-		[[nodiscard]] constexpr bool operator!=(T num) const;
+		[[nodiscard]] constexpr bool operator==(T num) const noexcept;
+		[[nodiscard]] constexpr bool operator!=(T num) const noexcept;
 
 		T x{};
 		T y{};
@@ -105,7 +105,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr void Vector2<T>::throwIfDivisionByZero(const T num, const sl &location)
+	void Vector2<T>::throwIfDivisionByZero(const T num, const sl &location)
 	{
 		if (num == 0)
 		{
@@ -117,7 +117,7 @@ namespace lrh
 	}
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr void Vector2<T>::throwIfDivisionByZero(const Vector2 &v, const sl &location)
+	void Vector2<T>::throwIfDivisionByZero(const Vector2 &v, const sl &location)
 	{
 		throwIfDivisionByZero(v.x, location);
 		throwIfDivisionByZero(v.y, location);
@@ -192,7 +192,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator=(const Vector2& rhs) -> Vector2&
+	constexpr auto Vector2<T>::operator=(const Vector2& rhs) noexcept -> Vector2&
 	{
 		if (this != &rhs)
 		{
@@ -208,8 +208,8 @@ namespace lrh
 	{
 		if (this != &rhs)
 		{
-			x = rhs.x;
-			y = rhs.y;
+			x = std::move( rhs.x );
+			y = std::move( rhs.y );
 		}
 		return *this;
 	}

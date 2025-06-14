@@ -8,92 +8,91 @@
 #pragma once
 
 #include "Components.hpp"
-#include "Logger.hpp"
 
-#include <cstdint>
 #include <type_traits>
 #include <vector>
 
+#include "Logger.hpp"
+
 namespace lrh
 {
-	template<typename T>
-	concept isComponent = std::is_base_of_v<cmp::BaseComponent, T>
-												and not std::is_same_v<T, cmp::BaseComponent>;
+	template<typename C>
+	concept isComponent = std::is_base_of_v<cmp::BaseComponent, C>
+												and not std::is_same_v<C, cmp::BaseComponent>;
 
 
 	class Entity
 	{
-		template<typename T> requires isComponent<T>
+
+		template<typename C> requires isComponent<C>
 		int16_t getComponentIndex() const;
 
-		template<typename T> requires isComponent<T>
+		template<typename C> requires isComponent<C>
 		void throwIfHasComponent() const;
 
 	public:
 
-		Entity(bool isActive = true, int16_t size = 4 );
+		explicit Entity(bool isActive = true, int16_t size = 4 );
 		Entity( const Entity& rhs );
-		Entity( Entity&& rhs);
+		Entity( Entity&& rhs) noexcept ;
 		~Entity();
 
-		[[nodiscard]] bool getIsActive() const;
+		template<typename C> requires isComponent<C>
+		[[nodiscard]] const C *get() const;
 
-		template<typename T> requires isComponent<T>
-		[[nodiscard]] const T *getComponent() const;
+		template<typename C> requires isComponent<C>
+		[[nodiscard]] C *getMutable();
 
-		template<typename T> requires isComponent<T>
-		[[nodiscard]] T *getComponentMutable();
+		template<typename C> requires isComponent<C>
+		[[nodiscard]] bool has() const;
 
-		template<typename T> requires isComponent<T>
-		[[nodiscard]] bool hasComponent() const;
+		template<typename C> requires isComponent<C>
+		Entity &add();
 
-		Entity &setIsActive( bool active );
+		template<typename C> requires isComponent<C>
+		Entity &add( const C &component );
 
-		template<typename T> requires isComponent<T>
-		Entity &addComponent();
+		template<typename C> requires isComponent<C>
+		Entity &add( C &&component );
 
-		template<typename T> requires isComponent<T>
-		Entity &addComponent( const T &component );
-
-		template<typename T> requires isComponent<T>
-		Entity &addComponent( T &&component );
-
-		template<typename T> requires isComponent<T>
+		template<typename C> requires isComponent<C>
 		Entity &removeComponent();
 
+		bool isActive{};
+
 	private:
+
 		static constexpr int16_t MAX_SIZE{ 256 };
 		static constexpr int16_t NOT_FOUND_INDEX{ -1 };
 
-		bool m_isActive{};
 		std::vector<cmp::BaseComponent *> m_vComponents{};
 	};
 
 
-	template<typename T> requires isComponent<T>
+	template<typename C> requires isComponent<C>
 	int16_t Entity::getComponentIndex() const
 	{
-		for( auto i = 0u; i < this->m_vComponents.size(); ++i )
+		for( int16_t i = 0; i < this->m_vComponents.size(); ++i )
 		{
-			if (dynamic_cast<T *>(this->m_vComponents[i])) return i;
+			if (dynamic_cast<C *>(this->m_vComponents[i])) return i;
 		}
 		return NOT_FOUND_INDEX;
 	}
 
 
-	template<typename T> requires isComponent<T>
+	template<typename C> requires isComponent<C>
 	void Entity::throwIfHasComponent() const
 	{
-		if( this->hasComponent<T>() )
+		if( this->has<C>() )
 		{
 			Logger::fatal( "Entity already exists!" );
-			throw std::logic_error( "Entity::addComponent<T>() : Component  already exists" );
+			throw std::logic_error( "Entity::addComponent<C>() : Component  already exists" );
 		}
 	}
 
 
 	inline Entity::Entity(const bool isActive, const int16_t size )
-		: m_isActive{ isActive }
+		: isActive{ isActive }
 	{
 		if ( size < 0 )
 			throw std::logic_error( "Entity::Entity() : size < 0" );
@@ -106,7 +105,7 @@ namespace lrh
 
 
 	inline Entity::Entity( const Entity &rhs )
-		: m_isActive{ rhs.m_isActive }
+		: isActive{ rhs.isActive }
 	{
 		m_vComponents.reserve( rhs.m_vComponents.size() );
 
@@ -116,108 +115,93 @@ namespace lrh
 	}
 
 
-	inline Entity::Entity( Entity &&rhs )
-		: m_isActive{ rhs.m_isActive}
+	inline Entity::Entity( Entity &&rhs ) noexcept
+		: isActive{ rhs.isActive}
 		,m_vComponents{ std::move( rhs.m_vComponents ) }
 	{
-		rhs.m_isActive = false;
+		rhs.isActive = false;
 	}
 
 
 	inline Entity::~Entity()
 	{
 		for( const cmp::BaseComponent *component : m_vComponents )
-		{
 			delete component;
-		}
 	}
 
 
-	inline bool Entity::getIsActive() const
+	template<typename C> requires isComponent<C>
+	const C *Entity::get() const
 	{
-		return m_isActive;
-	}
-
-
-	template<typename T> requires isComponent<T>
-	const T *Entity::getComponent() const
-	{
-		const auto index{ this->getComponentIndex<T>() };
+		const auto index{ this->getComponentIndex<C>() };
 
 		if( index != NOT_FOUND_INDEX )
 		{
-			const T *component{ static_cast<const T *>(m_vComponents[index]) };
+			const C *component{ static_cast<const C *>(m_vComponents[index]) };
 			return component;
 		}
 		return nullptr;
 	}
 
 
-	template<typename T> requires isComponent<T>
-	T *Entity::getComponentMutable()
+	template<typename C> requires isComponent<C>
+	C *Entity::getMutable()
 	{
-		const auto index{ this->getComponentIndex<T>() };
+		const auto index{ this->getComponentIndex<C>() };
 
 		if( index != NOT_FOUND_INDEX )
 		{
-			T *component{ static_cast<T *>(m_vComponents[index]) };
+			C *component{ static_cast<C *>(m_vComponents[index]) };
 			return component;
 		}
 		return nullptr;
 	}
 
 
-	template<typename T> requires isComponent<T>
-	bool Entity::hasComponent() const
+	template<typename C> requires isComponent<C>
+	bool Entity::has() const
 	{
-		return this->getComponentIndex<T>() != NOT_FOUND_INDEX;
+		return this->getComponentIndex<C>() != NOT_FOUND_INDEX;
 	}
 
 
-	inline Entity &Entity::setIsActive( const bool active )
+	template<typename C> requires isComponent<C>
+	Entity &Entity::add()
 	{
-		this->m_isActive = active;
-		return *this;
-	}
+		throwIfHasComponent<C>();
 
-
-	template<typename T> requires isComponent<T>
-	Entity &Entity::addComponent()
-	{
-		throwIfHasComponent<T>();
-
-		this->m_vComponents.push_back( new T );
+		this->m_vComponents.push_back( new C );
 
 		return *this;
 	}
 
 
-	template<typename T> requires isComponent<T>
-	Entity &Entity::addComponent( const T &component )
+	template<typename C> requires isComponent<C>
+	Entity &Entity::add( const C &component )
 	{
-		throwIfHasComponent<T>();
+		throwIfHasComponent<C>();
 
-		this->m_vComponents.push_back( new T( component ) );
+		this->m_vComponents.push_back( new C( component ) );
 
 		return *this;
 	}
 
 
-	template<typename T> requires isComponent<T>
-	Entity &Entity::addComponent( T &&component )
+	template<typename C> requires isComponent<C>
+	Entity &Entity::add( C &&component )
 	{
-		throwIfHasComponent<T>();
+		throwIfHasComponent<C>();
 
-		this->m_vComponents.push_back( new T( std::forward<T>( component ) ) );
+		this->m_vComponents.push_back( new C( std::forward<C>( component ) ) );
 
 		return *this;
 	}
 
 
-	template<typename T> requires isComponent<T>
+	template<typename C> requires isComponent<C>
 	Entity &Entity::removeComponent()
 	{
-		const auto index{ getComponentIndex<T>() };
+		const auto index{ getComponentIndex<C>() };
 
 		if( index  != NOT_FOUND_INDEX )
 		{

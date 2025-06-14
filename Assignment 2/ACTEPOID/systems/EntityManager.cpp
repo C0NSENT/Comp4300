@@ -5,111 +5,104 @@
 #include "EntityManager.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 namespace lrh
 {
-	Entity &EntityManager::findEverywhere( const int16_t id )
+	Entity EntityManager::findEverywhere( const int16_t id ) const
 	{
-		if (m_entities.contains(id))
-			return m_entities.at(id);
+		const Id temp{ id };
 
-		if (m_updateBuffer.contains(id))
-			return m_updateBuffer.at(id);
+		if (m_entities.contains(temp))
+			return m_entities.at(temp);
+
+		if (m_entitiesToAdd.contains(temp))
+			return m_entitiesToAdd.at(temp);
+
+		throw std::out_of_range("There is no such entity");
+	}
+
+	Entity & EntityManager::findEveryWhereMutable( const int16_t id )
+	{
+		const Id temp{ id };
+
+		if (m_entities.contains(temp))
+			return m_entities.at(temp);
+
+		if (m_entitiesToAdd.contains(temp))
+			return m_entitiesToAdd.at(temp);
 
 		throw std::out_of_range("There is no such entity");
 	}
 
 
-	EntityManager & EntityManager::update()
-	{
 
+	EntityManager &EntityManager::update()
+	{
+		eraseAllInactiveEntities();
+
+		m_entities.merge( m_entitiesToAdd );
+
+		m_entitiesToAdd.clear();
+
+		return *this;
 	}
 
 
-	EntityManager &EntityManager::emplace( Entity &entity )
+	EntityManager &EntityManager::emplace( Entity &&entity )
 	{
-
-		///Не забыть про перемещение таких сущностей иначе id потеряется
-		m_updateBuffer.emplace( Id{}, entity );
+		m_entitiesToAdd.emplace( Id{}, std::move( entity ) );
 		return (*this);
 	}
 
 
-	EntityManager & EntityManager::removeDeadEntities()
+	EntityManager & EntityManager::eraseAllInactiveEntities()
 	{
+		auto eraseInactiveEntitiesInMap = []( EntityMap& entities)
+		{
+			for (auto it = entities.begin(); it != entities.end();)
+			{
+				if (not it->second.isActive) entities.erase(it);
+
+				else ++it;
+			}
+		};
+
+		eraseInactiveEntitiesInMap( m_entities );
+		eraseInactiveEntitiesInMap( m_entitiesToAdd );
+
+		return (*this);
 	}
+
+
+	EntityManager &EntityManager::addEntity( Entity &&entity )
+	{
+		m_entitiesToAdd.emplace( Id{}, std::move( entity ) );
+
+		return *this;
+	};
 
 
 	EntityManager & EntityManager::removeEntity( const int16_t id )
 	{
+		const Id temp{ id };
 
-	}
-
-
-	Entity EntityManager::getEntity( int16_t id ) const
-	{
-
-	}
-
-
-	Entity & EntityManager::getEntityMutable( int16_t id )
-	{
-	}
-
-
-	/*EntityManager::UpdateBuffer &EntityManager::UpdateBuffer::instance()
-	{
-		static EntityManager self{}; //SELF, тутуту тутуту
-
-		return *this;
-	}*/
-
-
-	/*void EntityManager::UpdateBuffer::clear()
-	{
-		m_updateBuffer.clear();
-	}
-
-
-	EntityManager::UpdateBuffer::EntityMap &EntityManager::UpdateBuffer::getData()
-	{
-		return m_updateBuffer;
-	}
-
-
-	bool EntityManager::UpdateBuffer::hasEntity( const Id &id ) const
-	{
-		return m_updateBuffer.contains( id.id() );
-	}
-
-
-	EntityManager::UpdateBuffer &EntityManager::UpdateBuffer::addEntity(const Id &id, const Entity &entity )
-	{
-		const bool wasInserted{ m_updateBuffer.try_emplace( id.id(), entity ).second };
-
-		if (not wasInserted)
-			throw std::out_of_range("There is no such entity");
+		findEveryWhereMutable( id ).isActive = false;
 
 		return *this;
 	}
 
 
-	EntityManager::UpdateBuffer &EntityManager::UpdateBuffer::removeEntity( const Id &id )
+	Entity EntityManager::getEntity( const int16_t id ) const
 	{
-		m_updateBuffer.erase( id.id() );
-
-		return *this;
+		return findEverywhere( id );
 	}
 
 
-	Entity EntityManager::UpdateBuffer::getEntity( const Id &id ) const
+	Entity &EntityManager::getEntityMutable( const int16_t id )
 	{
+		return findEveryWhereMutable( id );
 	}
 
-
-	Entity &EntityManager::UpdateBuffer::getEntityMutable( const Id &id )
-	{
-		return m_updateBuffer[id.id()];
-	}*/
 }
 

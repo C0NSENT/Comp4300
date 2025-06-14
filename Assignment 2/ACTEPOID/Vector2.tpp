@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <type_traits>
 #include <cmath>
-
-#include <stdexcept>
 #include <source_location>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
 
 ///The Land Of Rape And Honey
 namespace lrh
@@ -27,15 +26,16 @@ namespace lrh
 		constexpr static void throwIfDivisionByZero(const Vector2& v, const sl& location = sl::current());
 
 	public:
-		constexpr Vector2() = default;
-		constexpr Vector2(const T& x, const T& y) : x(x), y(y) {}
-		constexpr Vector2(const Vector2& other) : x(other.x), y(other.y) {}
+		constexpr Vector2() noexcept = default;
+		constexpr Vector2(const T& x, const T& y) noexcept : x{x}, y{y} {}
+		constexpr Vector2(const Vector2& rhs) noexcept = default;
+		constexpr Vector2(Vector2 &&rhs) noexcept : x{rhs.x}, y{rhs.y} {}
 
 		/**
 		 * @brief Вычисляет расстояние между двумя вектора
 		 * по обеим осям
 		 */
-		[[nodiscard]] constexpr auto distance(const Vector2& other) const -> Vector2;
+		[[nodiscard]] constexpr auto distance(const Vector2& rhs) const noexcept -> Vector2;
 
 
 		/**
@@ -45,7 +45,7 @@ namespace lrh
 		 * @details Вычисляет гипотенузу по теореме Пифагора,
 		 * но без квадратного корня
 		*/
-		[[nodiscard]] constexpr T lengthSquared() const;
+		[[nodiscard]] constexpr T lengthSquared() const noexcept;
 
 
 		/**
@@ -63,37 +63,38 @@ namespace lrh
 		[[nodiscard]] constexpr Vector2 normalized() const requires std::is_floating_point_v<T>;
 
 		///@brief Инвертирует знак
-		constexpr auto operator-() const  -> Vector2;
+		constexpr auto operator-() const noexcept -> Vector2;
 
-		[[nodiscard]] constexpr auto operator+(const Vector2& rhs) const -> Vector2;
-		[[nodiscard]] constexpr auto operator-(const Vector2& rhs) const -> Vector2;
-		[[nodiscard]] constexpr auto operator*(const Vector2& rhs) const -> Vector2;
+		[[nodiscard]] constexpr auto operator+(const Vector2& rhs) const noexcept -> Vector2;
+		[[nodiscard]] constexpr auto operator-(const Vector2& rhs) const noexcept -> Vector2;
+		[[nodiscard]] constexpr auto operator*(const Vector2& rhs) const noexcept -> Vector2;
 		[[nodiscard]] constexpr auto operator/(const Vector2& rhs) const -> Vector2;
-		constexpr auto operator=(const Vector2& rhs) -> Vector2&;
+		constexpr auto operator=(const Vector2& rhs) noexcept -> Vector2&;
+		constexpr auto operator=(Vector2 &&rhs) noexcept -> Vector2&;
 
-		constexpr auto operator+=(const Vector2& rhs) -> Vector2&;
-		constexpr auto operator-=(const Vector2& rhs) -> Vector2&;
-		constexpr auto operator*=(const Vector2& rhs) -> Vector2&;
+		constexpr auto operator+=(const Vector2& rhs) noexcept -> Vector2&;
+		constexpr auto operator-=(const Vector2& rhs) noexcept -> Vector2&;
+		constexpr auto operator*=(const Vector2& rhs) noexcept -> Vector2&;
 		constexpr auto operator/=(const Vector2& rhs) -> Vector2&;
 
-		[[nodiscard]] constexpr bool operator==(const Vector2& rhs) const;
-		[[nodiscard]] constexpr bool operator!=(const Vector2& rhs) const;
+		[[nodiscard]] constexpr bool operator==(const Vector2& rhs) const noexcept;
+		[[nodiscard]] constexpr bool operator!=(const Vector2& rhs) const noexcept;
 
-		[[nodiscard]] constexpr auto operator+(T num) const -> Vector2;
-		[[nodiscard]] constexpr auto operator-(T num) const -> Vector2;
-		[[nodiscard]] constexpr auto operator*(T num) const -> Vector2;
+		[[nodiscard]] constexpr auto operator+(T num) const noexcept -> Vector2;
+		[[nodiscard]] constexpr auto operator-(T num) const noexcept -> Vector2;
+		[[nodiscard]] constexpr auto operator*(T num) const noexcept -> Vector2;
 		[[nodiscard]] constexpr auto operator/(T num) const -> Vector2;
 
-		constexpr auto operator+=(T num) -> Vector2&;
-		constexpr auto operator-=(T num) -> Vector2&;
-		constexpr auto operator*=(T num) -> Vector2&;
+		constexpr auto operator+=(T num) noexcept -> Vector2&;
+		constexpr auto operator-=(T num) noexcept -> Vector2&;
+		constexpr auto operator*=(T num) noexcept -> Vector2&;
 		constexpr auto operator/=(T num) -> Vector2&;
 
 		[[nodiscard]] constexpr bool operator==(T num) const;
 		[[nodiscard]] constexpr bool operator!=(T num) const;
 
-		T x{0};
-		T y{0};
+		T x{};
+		T y{};
 	};
 
 
@@ -116,22 +117,22 @@ namespace lrh
 	}
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr void Vector2<T>::throwIfDivisionByZero(const Vector2& v, const sl& location)
+	constexpr void Vector2<T>::throwIfDivisionByZero(const Vector2 &v, const sl &location)
 	{
 		throwIfDivisionByZero(v.x, location);
 		throwIfDivisionByZero(v.y, location);
 	}
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::distance(const Vector2& other) const -> Vector2
+	constexpr auto Vector2<T>::distance(const Vector2& rhs) const noexcept -> Vector2
 	{
-		return {x - other.x, y - other.y};
+		return {x - rhs.x, y - rhs.y};
 	}
 
 
 	template<typename T>
 	requires std::is_arithmetic_v<T>
-	constexpr T Vector2<T>::lengthSquared() const
+	constexpr T Vector2<T>::lengthSquared() const noexcept
 	{
 		return {x * x + y * y};
 	}
@@ -155,28 +156,28 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-() const -> Vector2
+	constexpr auto Vector2<T>::operator-() const noexcept -> Vector2
 	{
 		return {-x, -y};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+(const Vector2& rhs) const -> Vector2
+	constexpr auto Vector2<T>::operator+(const Vector2& rhs) const noexcept -> Vector2
 	{
 		return {x + rhs.x, y + rhs.y};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-(const Vector2& rhs) const -> Vector2
+	constexpr auto Vector2<T>::operator-(const Vector2& rhs) const noexcept -> Vector2
 	{
 		return {x - rhs.x, y - rhs.y};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*(const Vector2& rhs) const -> Vector2
+	constexpr auto Vector2<T>::operator*(const Vector2& rhs) const noexcept -> Vector2
 	{
 		return {x * rhs.x, y * rhs.y};
 	}
@@ -203,7 +204,19 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+=(const Vector2& rhs) -> Vector2&
+	constexpr auto Vector2<T>::operator=( Vector2 &&rhs ) noexcept -> Vector2 &
+	{
+		if (this != &rhs)
+		{
+			x = rhs.x;
+			y = rhs.y;
+		}
+		return *this;
+	}
+
+
+	template<typename T> requires std::is_arithmetic_v<T>
+	constexpr auto Vector2<T>::operator+=(const Vector2& rhs) noexcept -> Vector2&
 	{
 		*this = *this + rhs;
 		return *this;
@@ -211,7 +224,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-=(const Vector2& rhs) -> Vector2&
+	constexpr auto Vector2<T>::operator-=(const Vector2& rhs) noexcept -> Vector2&
 	{
 		*this = *this - rhs;
 		return *this;
@@ -219,7 +232,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*=(const Vector2& rhs) -> Vector2&
+	constexpr auto Vector2<T>::operator*=(const Vector2& rhs) noexcept -> Vector2&
 	{
 		*this = *this * rhs;
 		return *this;
@@ -236,35 +249,35 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr bool Vector2<T>::operator==(const Vector2& rhs) const
+	constexpr bool Vector2<T>::operator==(const Vector2& rhs) const noexcept
 	{
 		return x == rhs.x and y == rhs.y;
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr bool Vector2<T>::operator!=(const Vector2& rhs) const
+	constexpr bool Vector2<T>::operator!=(const Vector2& rhs) const noexcept
 	{
 		return not (*this == rhs);
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+(const T num) const -> Vector2
+	constexpr auto Vector2<T>::operator+(const T num) const noexcept -> Vector2
 	{
 		return {x + num, y + num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-(const T num) const -> Vector2
+	constexpr auto Vector2<T>::operator-(const T num) const noexcept -> Vector2
 	{
 		return {x - num, y - num};
 	}
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*(const T num) const -> Vector2
+	constexpr auto Vector2<T>::operator*(const T num) const noexcept -> Vector2
 	{
 		return {x * num, y * num};
 	}
@@ -279,7 +292,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator+=(const T num) -> Vector2&
+	constexpr auto Vector2<T>::operator+=(const T num) noexcept -> Vector2&
 	{
 		*this = *this + num;
 		return *this;
@@ -287,7 +300,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator-=(const T num) -> Vector2&
+	constexpr auto Vector2<T>::operator-=(const T num) noexcept -> Vector2&
 	{
 		*this = *this - num;
 		return *this;
@@ -295,7 +308,7 @@ namespace lrh
 
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr auto Vector2<T>::operator*=(const T num) -> Vector2&
+	constexpr auto Vector2<T>::operator*=(const T num) noexcept -> Vector2&
 	{
 		*this = *this * num;
 		return *this;
@@ -311,13 +324,13 @@ namespace lrh
 	}
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr bool Vector2<T>::operator==(const T num) const
+	constexpr bool Vector2<T>::operator==(const T num) const noexcept
 	{
 		return this->x == num and this->y == num;
 	}
 
 	template<typename T> requires std::is_arithmetic_v<T>
-	constexpr bool Vector2<T>::operator!=(const T num) const
+	constexpr bool Vector2<T>::operator!=(const T num) const noexcept
 	{
 		return not (*this == num);
 	}

@@ -9,51 +9,48 @@
 
 namespace lrh
 {
-	Entity EntityManager::findEverywhere( const int16_t id ) const
+	const Entity &EntityManager::findEntity( const int16_t id ) const
 	{
-		const Id temp{ id };
+		const Id key{ id };
 
-		if (m_entities.contains(temp))
-			return m_entities.at(temp);
+		if (m_entities.contains(key))
+			return m_entities.at(key);
 
-		if (m_entitiesToAdd.contains(temp))
-			return m_entitiesToAdd.at(temp);
+		if (m_entitiesToAdd.contains(key))
+			return m_entitiesToAdd.at(key);
 
 		throw std::out_of_range("There is no such entity");
 	}
 
-	Entity & EntityManager::findEveryWhereMutable( const int16_t id )
+	Entity & EntityManager::findEntityMutable( const int16_t id )
 	{
-		const Id temp{ id };
+		const Id key{ id };
 
-		if (m_entities.contains(temp))
-			return m_entities.at(temp);
+		if (m_entities.contains(key))
+			return m_entities.at(key);
 
-		if (m_entitiesToAdd.contains(temp))
-			return m_entitiesToAdd.at(temp);
+		if (m_entitiesToAdd.contains(key))
+			return m_entitiesToAdd.at(key);
 
 		throw std::out_of_range("There is no such entity");
 	}
 
+
+	size_t EntityManager::size() const
+	{
+		return m_entities.size() + m_entitiesToAdd.size();
+	}
 
 
 	EntityManager &EntityManager::update()
 	{
 		eraseAllInactiveEntities();
 
-		m_entities.merge( m_entitiesToAdd );
-
-		m_entitiesToAdd.clear();
+		m_entities.insert(m_entitiesToAdd.begin(), m_entitiesToAdd.end());
 
 		return *this;
 	}
 
-
-	EntityManager &EntityManager::emplace( Entity &&entity )
-	{
-		m_entitiesToAdd.emplace( Id{}, std::move( entity ) );
-		return (*this);
-	}
 
 
 	EntityManager & EntityManager::eraseAllInactiveEntities()
@@ -83,25 +80,32 @@ namespace lrh
 	};
 
 
-	EntityManager & EntityManager::removeEntity( const int16_t id )
+	bool EntityManager::hasEntity( const int16_t id ) const
 	{
-		const Id temp{ id };
+		const Id key{ id };
 
-		findEveryWhereMutable( id ).isActive = false;
+		return m_entities.contains( key ) or m_entitiesToAdd.contains( key );
+	}
 
-		return *this;
+
+	auto EntityManager::getAllEntities() const -> std::pair<const EntityMap &, const EntityMap &>
+	{
+		const EntityMap& refEntities{ m_entities };
+		const EntityMap& refEntitiesToAdd{ m_entitiesToAdd };
+
+		return std::pair{ refEntities, refEntitiesToAdd };
 	}
 
 
 	Entity EntityManager::getEntity( const int16_t id ) const
 	{
-		return findEverywhere( id );
+		return findEntity( id );
 	}
 
 
 	Entity &EntityManager::getEntityMutable( const int16_t id )
 	{
-		return findEveryWhereMutable( id );
+		return findEntityMutable( id );
 	}
 
 }

@@ -4,9 +4,8 @@
 
 #pragma once
 
-
-#include "IdManager.hpp"
 #include "Entity.tpp"
+#include "IdManager.hpp"
 
 #include <unordered_map>
 
@@ -16,18 +15,23 @@ namespace lrh
 	{
 		using EntityMap = std::unordered_map<Id, Entity>;
 
-		Entity findEverywhere( int16_t id ) const;
-		Entity &findEveryWhereMutable( int16_t id );
+		const Entity &findEntity( int16_t id ) const;
+		Entity &findEntityMutable( int16_t id );
 
 	public:
 
 		EntityManager() = default;
 
+		size_t size() const;
+
 		EntityManager &update();
-		EntityManager &emplace( Entity &&entity );
 		EntityManager &eraseAllInactiveEntities();
 		EntityManager &addEntity( Entity &&entity );
-		EntityManager &removeEntity(int16_t id);
+
+		bool hasEntity( int16_t id ) const;
+
+		///Используй structured binding чтобы взаимодействовать с данными
+		auto getAllEntities() const -> std::pair<const EntityMap&, const EntityMap&>;
 
 		[[nodiscard]] Entity getEntity(int16_t id) const;
 		[[nodiscard]] Entity &getEntityMutable(int16_t id);

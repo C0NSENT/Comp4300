@@ -119,6 +119,7 @@ namespace lrh
 		: isActive{ rhs.isActive}
 		,m_vComponents{ std::move( rhs.m_vComponents ) }
 	{
+		rhs.m_vComponents.clear();
 		rhs.isActive = false;
 	}
 

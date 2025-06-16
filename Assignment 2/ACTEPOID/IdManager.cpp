@@ -10,16 +10,29 @@
 
 namespace lrh
 {
-	Id::Id() : m_isTemp{ false }, m_id{ IdManager::instance().id() }
+	Id::Id() : m_id{ IdManager::instance().getNewId() }
 	{
 		if (this->m_id == INVALID)
 			throw std::logic_error("IdManager::Id() cannot be created, all IDs is in use");
 	}
 
 
+	Id::Id( const int16_t id ) noexcept
+		: m_id{ id }
+	{
+		IdManager::instance().addCopy( id );
+	}
+
+
+	Id::Id( const Id &id ) noexcept
+		: m_id{ id.m_id }
+	{
+		IdManager::instance().addCopy( id.m_id );
+	}
+
+
 	Id::~Id()
 	{
-		if (not m_isTemp)
 			IdManager::instance().freeId(this->m_id);
 	}
 
@@ -30,41 +43,17 @@ namespace lrh
 	}
 
 
-	bool Id::isTemporary() const noexcept
-	{
-		return this->m_isTemp;
-	}
-
-
-	auto Id::usedIdFlags() noexcept -> const std::vector<bool> &
-	{
-		return IdManager::instance().usedIdFlags();
-	}
-
-
-	Id &Id::operator=( Id &rhs )
+	Id &Id::operator=( const Id &rhs )
 	{
 		if (this->m_id != rhs.m_id)
 		{
 			this->m_id = rhs.m_id;
-			this->m_isTemp = rhs.m_isTemp;
-
-			rhs.m_isTemp = true;
+			IdManager::instance().addCopy( m_id );
 		}
 
 		return *this;
 	}
 
-
-	Id::Id( const int16_t id ) noexcept
-		: m_isTemp{ true }, m_id{ id } {}
-
-
-	Id::Id( Id &id ) noexcept
-		: m_isTemp{ id.m_isTemp }, m_id{ id.m_id }
-	{
-		id.m_isTemp = true;
-	}
 
 	Id::IdManager &Id::IdManager::instance()
 	{
@@ -73,55 +62,47 @@ namespace lrh
 	}
 
 
-	int16_t Id::IdManager::id()
+	int16_t Id::IdManager::getNewId()
 	{
-		auto findVacantId  = [&] (const int16_t begin, const int16_t end) -> int16_t
+		for ( auto id {0}; id != m_idCopyCount.size(); ++id )
 		{
-			for (auto id = begin; id != end; ++id)
+			if ( m_idCopyCount[id] == 0 )
 			{
-				auto isInUse{ m_usedIdFlags[id] };
-
-				if (not isInUse )
-				{
-					isInUse.flip();
-					m_lastUsedId = id;
-					return id;
-				}
+				m_idCopyCount[id] = 1;
+				return id;
 			}
-			return INVALID;
-		};
-
-
-		if (++m_lastUsedId != SIZE)
-		{
-			const auto id{ findVacantId(m_lastUsedId, SIZE) };
-
-			if ( id != INVALID ) return id;
 		}
 
-		return findVacantId( 0,m_lastUsedId );
-	}
+		if (m_idCopyCount.size() != SIZE)
+		{
+			m_idCopyCount.push_back(1);
+			return m_idCopyCount.size()-1;
+		}
 
-	void Id::IdManager::freeId( const int16_t id )
-	{
-		m_usedIdFlags[id] = false;
-	}
-
-
-	auto Id::IdManager::usedIdFlags() const noexcept -> const std::vector<bool> &
-	{
-		return m_usedIdFlags;
+		return INVALID;
 	}
 
 
-	Id::IdManager::IdManager()
-		: m_lastUsedId{ INVALID } , m_usedIdFlags(SIZE, false)
+	void Id::IdManager::addCopy(const int16_t id) noexcept
 	{
+		m_idCopyCount[id]++;
+	}
+
+
+	void Id::IdManager::freeId( const int16_t id ) noexcept
+	{
+		m_idCopyCount[id]--;
+	}
+
+
+	auto Id::IdManager::usedIdFlags() const noexcept -> const std::deque<uint8_t> &
+	{
+		return m_idCopyCount;
 	}
 }
 
 
-std::size_t std::hash<lrh::Id>::operator()( const lrh::Id&id ) const noexcept
+size_t std::hash<lrh::Id>::operator()( const lrh::Id &id ) const noexcept
 {
 	return std::hash<int16_t>{}( id.id() );
 }

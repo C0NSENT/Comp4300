@@ -12,8 +12,9 @@
 #pragma once
 
 #include <cstdint>
-#include <functional> ///<- Нужно для хэширования
+#include <utility> ///<- Нужно для хэширования
 #include <vector>
+#include <deque>
 
 namespace lrh
 {
@@ -28,23 +29,20 @@ namespace lrh
 
 		Id();
 		explicit Id(int16_t id ) noexcept;
-		Id( Id &id) noexcept;
+		Id( const Id &id) noexcept;
 		Id(Id &&rhs) noexcept = default;
 		~Id();
 
 
 		[[nodiscard]] int16_t id() const noexcept;
-		[[nodiscard]] bool isTemporary() const noexcept;
-		static auto usedIdFlags() noexcept -> const std::vector<bool> &;
 
 		auto operator<=>(const Id &) const noexcept = default;
 
-		Id &operator=(Id &rhs);
+		Id &operator=(const Id &rhs);
 		Id &operator=(Id &&) noexcept = default;
 
 	private:
 
-		bool m_isTemp;
 		int16_t m_id;
 	};
 
@@ -55,20 +53,23 @@ namespace lrh
 
 		[[nodiscard]] static IdManager &instance();
 
-		[[nodiscard]] int16_t id();
-		void freeId(int16_t id);
+		//[[nodiscard]] int16_t id();
+		[[nodiscard]] int16_t getNewId();
+		void addCopy( int16_t id ) noexcept;
+		void freeId(int16_t id) noexcept;
 
-		[[nodiscard]] auto usedIdFlags() const noexcept -> const std::vector<bool>&;
+		[[nodiscard]] auto usedIdFlags() const noexcept -> const std::deque<uint8_t>&;
 
 		IdManager(const IdManager &) = delete;
 		IdManager &operator=(const IdManager &) = delete;
 
 	private:
 
-		IdManager();
+		IdManager() noexcept = default;
 
-		int16_t m_lastUsedId{};
-		std::vector<bool> m_usedIdFlags{};
+		//int16_t m_lastUsedId{};
+		//std::vector<bool> m_usedIdFlags{};
+		std::deque<uint8_t> m_idCopyCount;
 	};
 }
 
